@@ -1,0 +1,837 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{66C01B7F-BC66-4664-9784-A48BC2205FD1}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>WorkflowEventLogFixer</RootNamespace>
+    <AssemblyName>WorkflowEventLogFixer</AssemblyName>
+    <TargetFrameworkVersion>v4.7</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="AC.ExtendedRenderer.Toolkit, Version=1.6.4.1, Culture=neutral, PublicKeyToken=2f7c2ef04fde3964, processorArchitecture=MSIL">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\AC.ExtendedRenderer.Toolkit.dll</HintPath>
+    </Reference>
+    <Reference Include="Atalasoft.dotImage, Version=10.3.0.57797, Culture=neutral, PublicKeyToken=2b02b46f7326f73b, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Atalasoft.dotImage.dll</HintPath>
+    </Reference>
+    <Reference Include="Atalasoft.dotImage.AdvancedDocClean, Version=10.3.0.57797, Culture=neutral, PublicKeyToken=2b02b46f7326f73b, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Atalasoft.dotImage.AdvancedDocClean.dll</HintPath>
+    </Reference>
+    <Reference Include="Atalasoft.dotImage.Barcoding.Reading, Version=10.3.0.57797, Culture=neutral, PublicKeyToken=2b02b46f7326f73b, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Atalasoft.dotImage.Barcoding.Reading.dll</HintPath>
+    </Reference>
+    <Reference Include="Atalasoft.dotImage.Barcoding.Writing, Version=10.3.0.57797, Culture=neutral, PublicKeyToken=2b02b46f7326f73b, processorArchitecture=MSIL">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Atalasoft.dotImage.Barcoding.Writing.dll</HintPath>
+    </Reference>
+    <Reference Include="Atalasoft.dotImage.Lib, Version=10.3.0.57797, Culture=neutral, PublicKeyToken=2b02b46f7326f73b, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Atalasoft.dotImage.Lib.dll</HintPath>
+    </Reference>
+    <Reference Include="Atalasoft.dotImage.Ocr, Version=10.3.0.57797, Culture=neutral, PublicKeyToken=2b02b46f7326f73b, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Atalasoft.dotImage.Ocr.dll</HintPath>
+    </Reference>
+    <Reference Include="Atalasoft.dotImage.Ocr.Tesseract, Version=10.3.0.57797, Culture=neutral, PublicKeyToken=2b02b46f7326f73b, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Atalasoft.dotImage.Ocr.Tesseract.dll</HintPath>
+    </Reference>
+    <Reference Include="Atalasoft.dotImage.Pdf, Version=10.3.0.57797, Culture=neutral, PublicKeyToken=2b02b46f7326f73b, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Atalasoft.dotImage.Pdf.dll</HintPath>
+    </Reference>
+    <Reference Include="Atalasoft.dotImage.PdfDoc.Bridge, Version=10.3.0.57797, Culture=neutral, PublicKeyToken=2b02b46f7326f73b, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Atalasoft.dotImage.PdfDoc.Bridge.dll</HintPath>
+    </Reference>
+    <Reference Include="Atalasoft.dotImage.PdfReader, Version=10.3.0.57797, Culture=neutral, PublicKeyToken=2b02b46f7326f73b, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Atalasoft.dotImage.PdfReader.dll</HintPath>
+    </Reference>
+    <Reference Include="Atalasoft.dotImage.WebControls, Version=10.3.0.57797, Culture=neutral, PublicKeyToken=2b02b46f7326f73b, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Atalasoft.dotImage.WebControls.dll</HintPath>
+    </Reference>
+    <Reference Include="Atalasoft.dotImage.WinControls, Version=10.3.0.57797, Culture=neutral, PublicKeyToken=2b02b46f7326f73b, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Atalasoft.dotImage.WinControls.dll</HintPath>
+    </Reference>
+    <Reference Include="Atalasoft.dotImage.Wpf, Version=10.3.0.57797, Culture=neutral, PublicKeyToken=2b02b46f7326f73b, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Atalasoft.dotImage.Wpf.dll</HintPath>
+    </Reference>
+    <Reference Include="Atalasoft.DotTwain, Version=10.3.0.57797, Culture=neutral, PublicKeyToken=2b02b46f7326f73b, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Atalasoft.DotTwain.dll</HintPath>
+    </Reference>
+    <Reference Include="Atalasoft.PdfDoc, Version=10.3.0.57797, Culture=neutral, PublicKeyToken=2b02b46f7326f73b, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Atalasoft.PdfDoc.dll</HintPath>
+    </Reference>
+    <Reference Include="Atalasoft.Shared, Version=10.3.0.57797, Culture=neutral, PublicKeyToken=2b02b46f7326f73b, processorArchitecture=MSIL">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Atalasoft.Shared.dll</HintPath>
+    </Reference>
+    <Reference Include="AxFormsLaserPrint, Version=5.2.37.0, Culture=neutral, PublicKeyToken=4495254afeb8e356, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\AxFormsLaserPrint.dll</HintPath>
+    </Reference>
+    <Reference Include="AxInterop.C2SBarCodeOCX, Version=1.0.0.0, Culture=neutral, PublicKeyToken=4495254afeb8e356, processorArchitecture=MSIL">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\AxInterop.C2SBarCodeOCX.dll</HintPath>
+    </Reference>
+    <Reference Include="AxInterop.SHDocVw, Version=1.1.0.0, Culture=neutral, PublicKeyToken=4495254afeb8e356, processorArchitecture=MSIL">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\AxInterop.SHDocVw.dll</HintPath>
+    </Reference>
+    <Reference Include="AxLaserLabelPrint, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\AxLaserLabelPrint.dll</HintPath>
+    </Reference>
+    <Reference Include="AxLaserPrint, Version=4.9.36.0, Culture=neutral, PublicKeyToken=4495254afeb8e356, processorArchitecture=MSIL">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\AxLaserPrint.dll</HintPath>
+    </Reference>
+    <Reference Include="AxNoticesLaserPrint, Version=1.0.5424.38563, Culture=neutral">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\AxNoticesLaserPrint.dll</HintPath>
+    </Reference>
+    <Reference Include="BatchCore, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\BatchCore.dll</HintPath>
+    </Reference>
+    <Reference Include="ComponentFactory.Krypton.Toolkit, Version=4.1.1.0, Culture=neutral, PublicKeyToken=a87e673e9ecb6e8e, processorArchitecture=MSIL">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\ComponentFactory.Krypton.Toolkit.dll</HintPath>
+    </Reference>
+    <Reference Include="DundasWinChart, Version=7.1.0.1812, Culture=neutral, PublicKeyToken=a4c03dce5db22406, processorArchitecture=MSIL">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\DundasWinChart.dll</HintPath>
+    </Reference>
+    <Reference Include="ephtmltopdf, Version=2.5.6.29341, Culture=neutral, PublicKeyToken=5b5f377bc08a4d32, processorArchitecture=MSIL">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\ephtmltopdf.dll</HintPath>
+    </Reference>
+    <Reference Include="EPPlus, Version=4.1.0.0, Culture=neutral, PublicKeyToken=ea159fdaa78159a1, processorArchitecture=MSIL">
+      <HintPath>..\packages\EPPlus.4.1.0\lib\net40\EPPlus.dll</HintPath>
+    </Reference>
+    <Reference Include="FormsCore, Version=1.0.0.0, Culture=neutral, PublicKeyToken=4495254afeb8e356, processorArchitecture=MSIL">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\FormsCore.dll</HintPath>
+    </Reference>
+    <Reference Include="GemBox.Spreadsheet, Version=41.3.30.1018, Culture=neutral, PublicKeyToken=b1b72c69714d4847, processorArchitecture=MSIL">
+      <HintPath>..\packages\GemBox.Spreadsheet.41.3.30.1018\lib\net30\GemBox.Spreadsheet.dll</HintPath>
+    </Reference>
+    <Reference Include="Guifreaks.Common, Version=0.1.0.0, Culture=neutral, PublicKeyToken=c3c25e41a6abca42, processorArchitecture=MSIL">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Guifreaks.Common.dll</HintPath>
+    </Reference>
+    <Reference Include="Guifreaks.NavigationBar, Version=0.1.0.0, Culture=neutral, PublicKeyToken=bf0afd6b35ed9434, processorArchitecture=MSIL">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Guifreaks.NavigationBar.dll</HintPath>
+    </Reference>
+    <Reference Include="Guifreaks.NavigationBar.XmlSerializers, Version=0.1.0.0, Culture=neutral, PublicKeyToken=bf0afd6b35ed9434, processorArchitecture=MSIL">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Guifreaks.NavigationBar.XmlSerializers.dll</HintPath>
+    </Reference>
+    <Reference Include="Interop.C2SBarCodeOCX, Version=1.0.0.0, Culture=neutral, PublicKeyToken=4495254afeb8e356, processorArchitecture=MSIL">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Interop.C2SBarCodeOCX.dll</HintPath>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </Reference>
+    <Reference Include="Interop.IWshRuntimeLibrary, Version=1.0.0.0, Culture=neutral, PublicKeyToken=4495254afeb8e356">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Interop.IWshRuntimeLibrary.dll</HintPath>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </Reference>
+    <Reference Include="Interop.NetFwTypeLib, Version=1.0.0.0, Culture=neutral, PublicKeyToken=4495254afeb8e356">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Interop.NetFwTypeLib.dll</HintPath>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </Reference>
+    <Reference Include="Interop.SHDocVw, Version=1.1.0.0, Culture=neutral, PublicKeyToken=4495254afeb8e356, processorArchitecture=MSIL">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Interop.SHDocVw.dll</HintPath>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </Reference>
+    <Reference Include="itextsharp, Version=5.3.5.0, Culture=neutral, PublicKeyToken=8354ae6d2174ddca, processorArchitecture=MSIL">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\itextsharp.dll</HintPath>
+    </Reference>
+    <Reference Include="Jscape.Ssh, Version=2.1.2.0, Culture=neutral, PublicKeyToken=504a4aa00214df6f">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Jscape.Ssh.dll</HintPath>
+    </Reference>
+    <Reference Include="LogHelper, Version=1.0.0.0, Culture=neutral, PublicKeyToken=40bf32e907dd397c, processorArchitecture=MSIL">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\LogHelper.dll</HintPath>
+    </Reference>
+    <Reference Include="MdiTabControl, Version=1.0.2785.31416, Culture=neutral, PublicKeyToken=4495254afeb8e356, processorArchitecture=MSIL">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\MdiTabControl.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.ExceptionMessageBox, Version=9.0.242.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91, processorArchitecture=MSIL">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Microsoft.ExceptionMessageBox.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.IdentityModel, Version=3.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Microsoft.IdentityModel.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Office.Interop.Excel, Version=15.0.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c, processorArchitecture=MSIL">
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+      <HintPath>..\packages\Microsoft.Office.Interop.Excel.15.0.4795.1000\lib\net20\Microsoft.Office.Interop.Excel.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.Office.Interop.Outlook, Version=11.0.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Microsoft.Office.Interop.Outlook.dll</HintPath>
+      <Private>True</Private>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </Reference>
+    <Reference Include="Microsoft.PointOfService, Version=1.12.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Microsoft.PointOfService.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Practices.EnterpriseLibrary.Caching, Version=5.0.505.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Microsoft.Practices.EnterpriseLibrary.Caching.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Practices.EnterpriseLibrary.Common, Version=5.0.505.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Microsoft.Practices.EnterpriseLibrary.Common.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Practices.ServiceLocation, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Microsoft.Practices.ServiceLocation.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Practices.Unity, Version=2.1.505.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Microsoft.Practices.Unity.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Practices.Unity.Configuration, Version=2.1.505.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Microsoft.Practices.Unity.Configuration.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Practices.Unity.Interception, Version=2.1.505.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Microsoft.Practices.Unity.Interception.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.ReportViewer.Common, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Microsoft.ReportViewer.Common.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.ReportViewer.ProcessingObjectModel, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Microsoft.ReportViewer.ProcessingObjectModel.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.ReportViewer.WebForms, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Microsoft.ReportViewer.WebForms.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.ReportViewer.WinForms, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Microsoft.ReportViewer.WinForms.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Win32.Security, Version=0.3.1880.16779, Culture=neutral, PublicKeyToken=4495254afeb8e356">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Microsoft.Win32.Security.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=4.5.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="NLog, Version=2.1.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c, processorArchitecture=MSIL">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\NLog.dll</HintPath>
+    </Reference>
+    <Reference Include="office, Version=7.0.3300.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\office.dll</HintPath>
+      <Private>True</Private>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </Reference>
+    <Reference Include="OnlineForms, Version=1.0.0.0, Culture=neutral, PublicKeyToken=4495254afeb8e356, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\OnlineForms.dll</HintPath>
+    </Reference>
+    <Reference Include="OnlineForms.XmlSerializers, Version=1.0.0.0, Culture=neutral, PublicKeyToken=4495254afeb8e356, processorArchitecture=MSIL">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\OnlineForms.XmlSerializers.dll</HintPath>
+    </Reference>
+    <Reference Include="PDFBill_Client_Interface, Version=1.0.0.0, Culture=neutral, PublicKeyToken=4495254afeb8e356, processorArchitecture=MSIL">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\PDFBill_Client_Interface.dll</HintPath>
+    </Reference>
+    <Reference Include="PostingCore, Version=1.0.5613.28540, Culture=neutral, PublicKeyToken=4495254afeb8e356, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\PostingCore.dll</HintPath>
+    </Reference>
+    <Reference Include="PostingCore.XmlSerializers, Version=1.0.5613.23802, Culture=neutral, PublicKeyToken=4495254afeb8e356, processorArchitecture=MSIL">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\PostingCore.XmlSerializers.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Deployment, Version=1.0.5613.28519, Culture=neutral, PublicKeyToken=4495254afeb8e356, processorArchitecture=MSIL">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Deployment.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Pos.Framework, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Pos.Framework.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.RulesEngine.Models, Version=1.0.5442.33819, Culture=neutral, PublicKeyToken=4495254afeb8e356, processorArchitecture=MSIL">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.RulesEngine.Models.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.RulesEngine.Rulesdk, Version=1.0.5442.33819, Culture=neutral, PublicKeyToken=4495254afeb8e356, processorArchitecture=MSIL">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.RulesEngine.Rulesdk.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.CA.AcctHistory, Version=1.0.5613.28601, Culture=neutral, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.CA.AcctHistory.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.CA.AcctLedger, Version=1.0.5613.28610, Culture=neutral, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.CA.AcctLedger.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.CA.Adjustments, Version=1.0.5613.28574, Culture=neutral, PublicKeyToken=4495254afeb8e356, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.CA.Adjustments.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.CA.AutoProcess, Version=0.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.CA.AutoProcess.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.CA.CAControlFiles, Version=1.0.5613.28608, Culture=neutral, PublicKeyToken=4495254afeb8e356, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.CA.CAControlFiles.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.CA.CashRegister, Version=0.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.CA.CashRegister.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.CA.Collections, Version=1.0.5613.28578, Culture=neutral, PublicKeyToken=4495254afeb8e356, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.CA.Collections.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.CA.DatabaseLinks, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.CA.DatabaseLinks.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.CA.Equipment, Version=1.0.5613.28574, Culture=neutral, PublicKeyToken=4495254afeb8e356, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.CA.Equipment.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.CA.FileManager, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.CA.FileManager.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.CA.HolidayCalendar, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.CA.HolidayCalendar.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.CA.ImagingSettings, Version=1.0.0.0, Culture=neutral, PublicKeyToken=4495254afeb8e356, processorArchitecture=MSIL">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.CA.ImagingSettings.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.CA.Inquiry, Version=1.0.5613.28613, Culture=neutral, PublicKeyToken=4495254afeb8e356, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.CA.Inquiry.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.CA.LettersReport, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.CA.LettersReport.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.CA.LicenseMaintenance, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.CA.LicenseMaintenance.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.CA.LicenseMaintenance.XmlSerializers, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.CA.LicenseMaintenance.XmlSerializers.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.CA.LoadManagement, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.CA.LoadManagement.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.CA.Location, Version=1.0.5613.28598, Culture=neutral, PublicKeyToken=4495254afeb8e356, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.CA.Location.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.CA.LocationHistory, Version=1.0.5613.28578, Culture=neutral, PublicKeyToken=4495254afeb8e356, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.CA.LocationHistory.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.CA.MassNotifications, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.CA.MassNotifications.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.CA.MeterInq, Version=1.0.5613.28601, Culture=neutral, PublicKeyToken=4495254afeb8e356, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.CA.MeterInq.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.CA.NoteSystem, Version=1.0.5613.28526, Culture=neutral, PublicKeyToken=4495254afeb8e356, processorArchitecture=MSIL">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.CA.NoteSystem.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.CA.NoteSystem.XmlSerializers, Version=1.0.5613.22802, Culture=neutral, PublicKeyToken=4495254afeb8e356, processorArchitecture=MSIL">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.CA.NoteSystem.XmlSerializers.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.CA.NotificationGroup, Version=1.0.5613.28566, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.CA.NotificationGroup.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.CA.OLConnect, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.CA.OLConnect.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.CA.OLDisconnect, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.CA.OLDisconnect.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.CA.OLInstall, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.CA.OLInstall.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.CA.OLItemOptions, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.CA.OLItemOptions.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.CA.OLReconnect, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.CA.OLReconnect.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.CA.OLRemove, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.CA.OLRemove.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.CA.OLReplace, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.CA.OLReplace.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.CA.OLTransfer, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.CA.OLTransfer.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.CA.OutdoorLightInquiry, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.CA.OutdoorLightInquiry.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.CA.Payments, Version=1.0.5613.28576, Culture=neutral, PublicKeyToken=4495254afeb8e356, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.CA.Payments.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.CA.PPMAcctHistory, Version=0.0.0.0, Culture=neutral, PublicKeyToken=4495254afeb8e356, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.CA.PPMAcctHistory.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.CA.RulesEngine, Version=1.0.5613.28545, Culture=neutral, PublicKeyToken=4495254afeb8e356, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.CA.RulesEngine.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.CA.Search, Version=1.0.5613.28595, Culture=neutral, PublicKeyToken=4495254afeb8e356, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.CA.Search.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.CA.SecurityLights, Version=0.0.0.0, Culture=neutral, PublicKeyToken=4495254afeb8e356, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.CA.SecurityLights.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.CA.SedcImaging, Version=1.0.5613.28529, Culture=neutral, PublicKeyToken=4495254afeb8e356, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.CA.SedcImaging.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.CA.ServiceOrders, Version=1.0.5613.28587, Culture=neutral, PublicKeyToken=4495254afeb8e356, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.CA.ServiceOrders.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.CA.ServiceOrders.XmlSerializers, Version=1.0.5613.23831, Culture=neutral, PublicKeyToken=4495254afeb8e356, processorArchitecture=MSIL">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.CA.ServiceOrders.XmlSerializers.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.CA.SLFileMaintenance, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.CA.SLFileMaintenance.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.CA.SmartAppsConfig, Version=1.0.5613.28567, Culture=neutral, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.CA.SmartAppsConfig.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.CA.SOInquiry, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.CA.SOInquiry.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.CA.SpecialEquipment, Version=1.0.5613.28584, Culture=neutral, PublicKeyToken=4495254afeb8e356, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.CA.SpecialEquipment.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.CA.UserMaintenance, Version=1.0.5613.28568, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.CA.UserMaintenance.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.CA.WorkManagement, Version=1.0.5613.28546, Culture=neutral, PublicKeyToken=4495254afeb8e356, processorArchitecture=MSIL">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.CA.WorkManagement.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.CC.CCCheckReconciliation, Version=1.0.5613.28776, Culture=neutral, PublicKeyToken=4495254afeb8e356, processorArchitecture=MSIL">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.CC.CCCheckReconciliation.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.CC.CCInquiry, Version=1.0.5613.28778, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.CC.CCInquiry.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.GA.Adjustments1099, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.GA.Adjustments1099.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.GA.AlternateApproval, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.GA.AlternateApproval.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.GA.APCheckAnalysis, Version=1.0.0.0, Culture=neutral, PublicKeyToken=745e332fce85abe9, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.GA.APCheckAnalysis.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.GA.APInquiry, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.GA.APInquiry.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.GA.APPOTolerance, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.GA.APPOTolerance.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.GA.ApprovalRequests, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.GA.ApprovalRequests.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.GA.ApprovalRouting, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.GA.ApprovalRouting.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.GA.ApprovedLeavePosting, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.GA.ApprovedLeavePosting.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.GA.BenefitTypes, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.GA.BenefitTypes.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.GA.CancelApprovalLeave, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.GA.CancelApprovalLeave.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.GA.CFCExportRUS, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.GA.CFCExportRUS.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.GA.DiskFile, Version=1.0.5613.28640, Culture=neutral, PublicKeyToken=4495254afeb8e356, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.GA.DiskFile.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.GA.DownTimeAnalysis, Version=1.0.0.0, Culture=neutral, PublicKeyToken=8a7c7f34f2f2a9b8, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.GA.DownTimeAnalysis.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.GA.EmployeeRecords, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.GA.EmployeeRecords.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.GA.EmployerBenefits, Version=1.0.0.0, Culture=neutral, PublicKeyToken=4495254afeb8e356, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.GA.EmployerBenefits.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.GA.EMPSelfService, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.GA.EMPSelfService.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.GA.EMPSelfServiceApproval, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.GA.EMPSelfServiceApproval.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.GA.EMPSelfServiceConfig, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.GA.EMPSelfServiceConfig.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.GA.ETimePayGroup, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.GA.ETimePayGroup.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.GA.ETimeSheet, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.GA.ETimeSheet.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.GA.FinStmtFormats, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.GA.FinStmtFormats.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.GA.FixedAssetAdjust, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.GA.FixedAssetAdjust.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.GA.FixedAssetMaintenance, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.GA.FixedAssetMaintenance.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.GA.FixedAssetRetireSale, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.GA.FixedAssetRetireSale.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.GA.FixedAssetSeparation, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.GA.FixedAssetSeparation.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.GA.FleetAttachmentInquiry, Version=0.0.0.0, Culture=neutral, PublicKeyToken=4495254afeb8e356, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.GA.FleetAttachmentInquiry.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.GA.FleetManagement, Version=0.0.0.0, Culture=neutral, PublicKeyToken=4495254afeb8e356, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.GA.FleetManagement.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.GA.GAAccountInquiry, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.GA.GAAccountInquiry.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.GA.GAAPInvoiceItemAnalysis, Version=1.0.5613.28628, Culture=neutral, PublicKeyToken=8a7c7f34f2f2a9b8, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.GA.GAAPInvoiceItemAnalysis.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.GA.GAApprovalPath, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.GA.GAApprovalPath.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.GA.GAAuditReports, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.GA.GAAuditReports.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.GA.GABudgetItemIDInquiry, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.GA.GABudgetItemIDInquiry.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.GA.GABudgetMasterInquiry, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.GA.GABudgetMasterInquiry.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.GA.GACFAccountsPayable, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.GA.GACFAccountsPayable.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.GA.GACFActivityCodes, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.GA.GACFActivityCodes.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.GA.GACFApprovalConfig, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.GA.GACFApprovalConfig.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.GA.GACFBankReconAdj, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.GA.GACFBankReconAdj.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.GA.GACFCDocumentLocation, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.GA.GACFCDocumentLocation.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.GA.GACFCForms, Version=1.0.0.0, Culture=neutral, PublicKeyToken=4495254afeb8e356, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.GA.GACFCForms.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.GA.GACFCLoanTracking, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.GA.GACFCLoanTracking.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.GA.GACFCUpdateForm, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.GA.GACFCUpdateForm.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.GA.GACFGeneral, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.GA.GACFGeneral.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.GA.GACFGroupTermLifeInsurance, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.GA.GACFGroupTermLifeInsurance.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.GA.GACFJobMaterialsMultiCoCtrls, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.GA.GACFJobMaterialsMultiCoCtrls.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.GA.GACFLoanTracking, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.GA.GACFLoanTracking.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.GA.GACFPayroll, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.GA.GACFPayroll.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.GA.GACFPayRollHR, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.GA.GACFPayRollHR.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.GA.GAChecksInquiry, Version=1.0.5613.28687, Culture=neutral, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.GA.GAChecksInquiry.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.GA.GACommissionReports, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.GA.GACommissionReports.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.GA.GAConstructionUnitInquiry, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.GA.GAConstructionUnitInquiry.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.GA.GAControlFilePayRates, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.GA.GAControlFilePayRates.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.GA.GAControlFilePerameters, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.GA.GAControlFilePerameters.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.GA.GACustomerInquiry, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.GA.GACustomerInquiry.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.GA.GADeductionsInquiry, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.GA.GADeductionsInquiry.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.GA.GADescriptionFile, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.GA.GADescriptionFile.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.GA.GAFederalForms, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.GA.GAFederalForms.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.GA.GAGeneralPlantInquiry, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.GA.GAGeneralPlantInquiry.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.GA.GAHRBenefits, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.GA.GAHRBenefits.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.GA.GAInquiryWorkOrderType, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.GA.GAInquiryWorkOrderType.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.GA.GAInvoiceInquiry, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.GA.GAInvoiceInquiry.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.GA.GAMaterialInquiry, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.GA.GAMaterialInquiry.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.GA.GAPayRate, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.GA.GAPayRate.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.GA.GAPayrollAdjustmentsInquiry, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.GA.GAPayrollAdjustmentsInquiry.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.GA.GAProjectInquiry, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.GA.GAProjectInquiry.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.GA.GARecordUnitInquiry, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.GA.GARecordUnitInquiry.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.GA.GAReOpenAJob, Version=1.0.5613.28714, Culture=neutral, PublicKeyToken=4495254afeb8e356, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.GA.GAReOpenAJob.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.GA.GAReorderInquiry, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.GA.GAReorderInquiry.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.GA.GAReqAlternateSupFM, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.GA.GAReqAlternateSupFM.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.GA.GARequestDept, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.GA.GARequestDept.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.GA.GARequisitionItemIdFM, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.GA.GARequisitionItemIdFM.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.GA.GASendMatTicket, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.GA.GASendMatTicket.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.GA.GAShipToCodeInquiry, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.GA.GAShipToCodeInquiry.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.GA.GAStateTaxTables, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.GA.GAStateTaxTables.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.GA.GATaskInquiry, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.GA.GATaskInquiry.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.GA.GATimeDistributionInquiry, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.GA.GATimeDistributionInquiry.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.GA.GAVariableMaintenance, Version=1.0.5613.28726, Culture=neutral, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.GA.GAVariableMaintenance.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.GA.GAVariables, Version=1.0.5613.28731, Culture=neutral, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.GA.GAVariables.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.GA.GAVoidInvoice, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.GA.GAVoidInvoice.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.GA.GAW2Inquiry, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.GA.GAW2Inquiry.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.GA.GAWorkPlanInquiry, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.GA.GAWorkPlanInquiry.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.GA.GLBenefits, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.GA.GLBenefits.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.GA.HRDepartment, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.GA.HRDepartment.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.GA.HRDeptPassword, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.GA.HRDeptPassword.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.GA.HREventCode, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.GA.HREventCode.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.GA.HRJobCode, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.GA.HRJobCode.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.GA.HRTrainingCourses, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.GA.HRTrainingCourses.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.GA.Job, Version=1.0.5613.28738, Culture=neutral, PublicKeyToken=4495254afeb8e356, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.GA.Job.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.GA.JobToStaking, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.GA.JobToStaking.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.GA.OARAdjustments, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.GA.OARAdjustments.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.GA.OARAREntry, Version=2.0.5613.28744, Culture=neutral, PublicKeyToken=4495254afeb8e356, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.GA.OARAREntry.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.GA.OARInquiry, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.GA.OARInquiry.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.GA.OARInvandCMPrint, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.GA.OARInvandCMPrint.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.GA.OARInvLineDef, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.GA.OARInvLineDef.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.GA.OARPaymentProcessing, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.GA.OARPaymentProcessing.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.GA.OARReprintStatement, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.GA.OARReprintStatement.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.GA.OARReverseCMorInvoice, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.GA.OARReverseCMorInvoice.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.GA.OARReversePayment, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.GA.OARReversePayment.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.GA.OARSalesTaxSetup, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.GA.OARSalesTaxSetup.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.GA.PayrollAnalysis, Version=1.0.0.0, Culture=neutral, PublicKeyToken=245a76b5dccaf70f, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.GA.PayrollAnalysis.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.GA.PayStub, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.GA.PayStub.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.GA.POInquiry, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.GA.POInquiry.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.GA.POItemAnalysis, Version=1.0.0.0, Culture=neutral, PublicKeyToken=e6e11062a71e017d, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.GA.POItemAnalysis.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.GA.POPrintReceiving, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.GA.POPrintReceiving.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.GA.PostChecks, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.GA.PostChecks.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.GA.PrintMaterialTicket, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.GA.PrintMaterialTicket.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.GA.PrintPO, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.GA.PrintPO.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.GA.Procurement, Version=1.0.5613.28762, Culture=neutral, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.GA.Procurement.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.GA.RequisitionGroup, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.GA.RequisitionGroup.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.GA.Vehicle, Version=1.0.5613.28659, Culture=neutral, PublicKeyToken=4495254afeb8e356, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.GA.Vehicle.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.GA.VehicleParts, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.GA.VehicleParts.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.GA.Vendor, Version=1.0.5613.28654, Culture=neutral, PublicKeyToken=4495254afeb8e356, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.GA.Vendor.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.GA.VoidChecks, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.GA.VoidChecks.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.GA.VoidPayrollCheck, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.GA.VoidPayrollCheck.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.GA.WMLinkFee, Version=1.0.0.0, Culture=neutral, PublicKeyToken=4495254afeb8e356, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.GA.WMLinkFee.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.MessageCenter, Version=1.0.0.0, Culture=neutral, PublicKeyToken=d7ef636ee40c414c, processorArchitecture=MSIL">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.MessageCenter.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.PostingFunctions, Version=1.0.0.0, Culture=neutral, PublicKeyToken=4495254afeb8e356, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.PostingFunctions.dll</HintPath>
+    </Reference>
+    <Reference Include="Sedc.Upn.StandardMessage, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Sedc.Upn.StandardMessage.dll</HintPath>
+    </Reference>
+    <Reference Include="SedcCore, Version=1.0.5613.28517, Culture=neutral, PublicKeyToken=4495254afeb8e356, processorArchitecture=MSIL">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\SedcCore.dll</HintPath>
+    </Reference>
+    <Reference Include="SedcUpnCore, Version=1.0.5613.28522, Culture=neutral, PublicKeyToken=4495254afeb8e356, processorArchitecture=MSIL">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\SedcUpnCore.dll</HintPath>
+    </Reference>
+    <Reference Include="SEDC_CS_ATP_Client, Version=1.0.4703.18753, Culture=neutral, PublicKeyToken=4495254afeb8e356, processorArchitecture=MSIL">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\SEDC_CS_ATP_Client.dll</HintPath>
+    </Reference>
+    <Reference Include="SEDC_CS_ATP_Interface, Version=1.0.4703.18752, Culture=neutral, PublicKeyToken=4495254afeb8e356, processorArchitecture=MSIL">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\SEDC_CS_ATP_Interface.dll</HintPath>
+    </Reference>
+    <Reference Include="SEDC_CS_Service_Library, Version=1.1.1.1, Culture=neutral, PublicKeyToken=4495254afeb8e356, processorArchitecture=MSIL">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\SEDC_CS_Service_Library.dll</HintPath>
+    </Reference>
+    <Reference Include="SEDC_FTP_Wrap, Version=1.1.1.1, Culture=neutral, PublicKeyToken=4495254afeb8e356">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\SEDC_FTP_Wrap.dll</HintPath>
+    </Reference>
+    <Reference Include="SEDC_SSL_Library, Version=1.1.1.1, Culture=neutral, PublicKeyToken=4495254afeb8e356">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\SEDC_SSL_Library.dll</HintPath>
+    </Reference>
+    <Reference Include="Softdocs.Sdk.Core, Version=1.0.5289.28753, Culture=neutral, PublicKeyToken=725223db64890aa2, processorArchitecture=MSIL">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Softdocs.Sdk.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="Softdocs.Security.Client.Sdk, Version=1.0.5289.28754, Culture=neutral, PublicKeyToken=725223db64890aa2, processorArchitecture=MSIL">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Softdocs.Security.Client.Sdk.dll</HintPath>
+    </Reference>
+    <Reference Include="Softdocs.Security.Public.Interfaces, Version=1.0.5289.28481, Culture=neutral, PublicKeyToken=725223db64890aa2, processorArchitecture=MSIL">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Softdocs.Security.Public.Interfaces.dll</HintPath>
+    </Reference>
+    <Reference Include="Softdocs.Sumo.Core, Version=1.0.5437.28711, Culture=neutral, PublicKeyToken=725223db64890aa2, processorArchitecture=MSIL">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Softdocs.Sumo.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="Softdocs.Sumo.Sdk, Version=1.0.5437.28714, Culture=neutral, PublicKeyToken=725223db64890aa2, processorArchitecture=MSIL">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Softdocs.Sumo.Sdk.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.IO.Compression.FileSystem" />
+    <Reference Include="System.IO.Compression.ZipFile, Version=4.0.2.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.IO.Compression.ZipFile.4.3.0\lib\net46\System.IO.Compression.ZipFile.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Net.Http">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\System.Net.Http.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Net.Http.Formatting, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\System.Net.Http.Formatting.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+    <Reference Include="Upn.XmlSerializers, Version=1.0.5612.30393, Culture=neutral, PublicKeyToken=4495254afeb8e356, processorArchitecture=MSIL">
+      <HintPath>..\packages\UpnComponents_Dependencies.1.0.0\lib\Upn.XmlSerializers.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Event.cs" />
+    <Compile Include="Node.cs" />
+    <Compile Include="ProcessTree.cs" />
+    <Compile Include="ProcessTreeLoader.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="CsvObject.cs" />
+    <Compile Include="SubTreeFinder.cs" />
+    <Compile Include="XesObject.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+    <None Include="packages.config" />
+    <None Include="TextFiles\testPattern.ptml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="DundasWinChart.xml" />
+    <Content Include="Scripts\word2vec.py">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="System.Net.Http.Formatting.xml" />
+    <Content Include="System.Net.Http.xml" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>
