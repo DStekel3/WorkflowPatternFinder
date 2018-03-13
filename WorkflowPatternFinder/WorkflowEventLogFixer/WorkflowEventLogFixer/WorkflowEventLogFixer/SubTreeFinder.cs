@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -8,6 +10,10 @@ namespace WorkflowEventLogFixer
 {
     public static class SubTreeFinder
     {
+        public static string _pythonExe;
+        public static string _word2VecQueryFile = Path.Combine(Directory.GetCurrentDirectory(), "Scripts", "query.py");
+        public static string _word2VecTrainedModelPath;
+
         public static bool IsValidSubTree(ProcessTree tree, ProcessTree pattern, bool induced)
         {
             var tNode = tree.GetRoot();
@@ -18,7 +24,8 @@ namespace WorkflowEventLogFixer
         private static bool DoesBranchContainPattern(Node tNode, Node pNode, bool induced)
         {
             // if current node in tree = current node in pattern
-            if(tNode.GetEvent() == pNode.GetEvent())
+            if(AreSimilar(tNode, pNode))
+            //if(tNode.GetEvent() == pNode.GetEvent())
             {
                 var pChildren = pNode.GetChildren();
                 var tChildren = tNode.GetChildren();
@@ -79,6 +86,44 @@ namespace WorkflowEventLogFixer
             return false;
         }
 
+        private static bool AreSimilar(Node tNode, Node pNode)
+        {
+            if(pNode.GetType() == tNode.GetType())
+            {
+                if(pNode.GetType() == ProcessTreeLoader.NodeType.manualTask)
+                {
+                    return AreSimilarAccordingToDoc2Vec(tNode, pNode);
+                }
+                return string.Equals(tNode.GetEvent(), tNode.GetEvent(), StringComparison.CurrentCultureIgnoreCase);
+            }
+            return false;
+        }
+
+        private static bool AreSimilarAccordingToDoc2Vec(Node tNode, Node pNode)
+        {
+            var treeSentence = tNode.GetEvent();
+            var patternSentence = pNode.GetEvent();
+            ProcessStartInfo start = new ProcessStartInfo
+            {
+                FileName = _pythonExe,
+                Arguments = $"{_word2VecQueryFile} \"{_word2VecTrainedModelPath}\" \"{treeSentence}\" \"{patternSentence}\"",
+                UseShellExecute = false,
+                RedirectStandardOutput = true,
+                CreateNoWindow = true
+            };
+            //cmd is full path to python.exe
+            //args is path to .py file and any cmd line args
+            using(Process process = Process.Start(start))
+            {
+                using(StreamReader reader = process?.StandardOutput)
+                {
+                    string result = reader?.ReadToEnd();
+                    Console.Write(result);
+                }
+            }
+            return false;
+        }
+
         private static bool ContainsSiblings(Node tNode, Node pNode)
         {
             if(tNode.GetSiblings().Intersect(pNode.GetSiblings()).ToList().Count == pNode.GetSiblings().Count)
@@ -86,6 +131,16 @@ namespace WorkflowEventLogFixer
                 return true;
             }
             return false;
+        }
+
+        public static void SetPythonExe(string pythonExe)
+        {
+            _pythonExe = pythonExe;
+        }
+
+        public static void SetTrainedModelPath(string modelPath)
+        {
+            _word2VecTrainedModelPath = modelPath;
         }
     }
 }

@@ -117,6 +117,18 @@ namespace WorkflowPatternFinder
 
       var induced = _treatAsInducedSubTree;
 
+      // update the python .exe path
+      if(string.IsNullOrEmpty(SubTreeFinder._pythonExe))
+      {
+        if(Program.CheckIfPythonAndJavaAreInstalled())
+        {
+          SubTreeFinder.SetPythonExe(Program.GetPythonExe());
+        }
+      }
+
+      var modelPath = Path.Combine(Directory.GetParent(ImportTreeLabel.Content.ToString()).FullName, "trained.gz");
+      SubTreeFinder.SetTrainedModelPath(modelPath);
+
       for(int t = 0; t < trees.Count; t++)
       {
         var tree = trees[t];
@@ -349,5 +361,9 @@ namespace WorkflowPatternFinder
       }
     }
 
+    private void PythonButton_Click(object sender, RoutedEventArgs e)
+    {
+      Program.TryIronPython();
+    }
   }
 }

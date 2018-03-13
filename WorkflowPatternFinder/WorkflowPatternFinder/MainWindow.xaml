@@ -18,6 +18,7 @@
           <Button x:Name="PromScriptButton" Content="Select Inductive Miner script" HorizontalAlignment="Left" Margin="10,87,0,0" VerticalAlignment="Top" Width="172" Click="PromScriptButton_Click" RenderTransformOrigin="0.615,0.6"/>
           <Label x:Name="ConsoleLabel" Content="Click start..." HorizontalAlignment="Left" Margin="73,290,0,0" VerticalAlignment="Top" Width="253"/>
           <ProgressBar x:Name="PreProgress" HorizontalAlignment="Left" Height="45" Margin="502,271,0,0" VerticalAlignment="Top" Width="410" IsIndeterminate="False"/>
+          <Button x:Name="PythonButton" Content="Start Iron Python" HorizontalAlignment="Left" Margin="558,61,0,0" VerticalAlignment="Top" Width="105" Height="59" Click="PythonButton_Click"/>
         </Grid>
       </TabItem>
       <TabItem Header="Tree Finder" Margin="20,0,-24,-2">

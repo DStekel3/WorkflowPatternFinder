@@ -4,9 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Diagnostics;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-using Microsoft.Office.Interop.Excel;
 using OfficeOpenXml;
 
 namespace WorkflowEventLogFixer
@@ -20,7 +18,7 @@ namespace WorkflowEventLogFixer
     private static string _basePtmlFileDirectory = Path.Combine(_baseDirectory, "ptml");
     private static string _pythonExe = "";
     private static string _javaExe = "";
-    private static string _word2vecScriptFile = "";
+    private static string _word2VecScriptFile = Path.Combine(Directory.GetCurrentDirectory(), "Scripts/word2vec.py");
     private static string _processTreeScriptFile = @"C:\Users\dst\eclipse-workspace\ProM\ProcessTreeMiner.txt";
 
 
@@ -28,6 +26,12 @@ namespace WorkflowEventLogFixer
     // 1. A csv-file, which is filtered on workflow instances.
     // 2. A xes-file, which is needed for further workflow analysis.
 
+    public static void TryIronPython()
+    {
+      var ironPyton = new IronPython(
+        @"C:\Users\dst\Source\Repos\WorkflowPatternFinder\WorkflowPatternFinder\WorkflowEventLogFixer\WorkflowEventLogFixer\WorkflowEventLogFixer\Scripts\query.py");
+
+    }
 
     public static void Main(string[] args)
     {
@@ -79,25 +83,25 @@ namespace WorkflowEventLogFixer
 
         var files = Directory.EnumerateFiles(_baseDirectory).ToList();
 
-        for(int t = 0; t < files.Count; t++)
-        {
-          var file = files[t];
-          Console.WriteLine($"Busy with {Path.GetFileNameWithoutExtension(file)}...({t + 1}/{files.Count})");
-          SplitExcelFileIntoSeparateWorkflowLogs(file);
-        }
+        //for(int t = 0; t < files.Count; t++)
+        //{
+        //  var file = files[t];
+        //  Console.WriteLine($"Busy with {Path.GetFileNameWithoutExtension(file)}...({t + 1}/{files.Count})");
+        //  SplitExcelFileIntoSeparateWorkflowLogs(file);
+        //}
 
         // Apply word2vec throughout the workflow logs and give similar events similar names.
-        // ApplyWord2VecThroughGensimScript(_baseCsvFileDirectory);
+        ApplyWord2VecThroughGensimScript(_baseCsvFileDirectory);
 
-        Console.WriteLine("Creating XES files...");
-        ConvertCsvToXesFiles(_baseCsvFileDirectory, _baseXesFileDirectory);
+        //Console.WriteLine("Creating XES files...");
+        //ConvertCsvToXesFiles(_baseCsvFileDirectory, _baseXesFileDirectory);
 
-        UpdatePathsInProcessTreeScript(_processTreeScriptFile, _baseXesFileDirectory, _basePtmlFileDirectory);
-        CreatePtmlFiles(_processTreeScriptFile);
+        //UpdatePathsInProcessTreeScript(_processTreeScriptFile, _baseXesFileDirectory, _basePtmlFileDirectory);
+        //CreatePtmlFiles(_processTreeScriptFile);
       }
     }
 
-    private static bool CheckIfPythonAndJavaAreInstalled()
+    public static bool CheckIfPythonAndJavaAreInstalled()
     {
       ProcessStartInfo info = new ProcessStartInfo
       {
@@ -149,14 +153,7 @@ namespace WorkflowEventLogFixer
 
     public static List<ProcessTree> LoadProcessTrees(string basePtmlFileDirectory)
     {
-      var trees = new List<ProcessTree>();
-      foreach(string file in Directory.EnumerateFiles(basePtmlFileDirectory))
-      {
-        var tree = ProcessTreeLoader.LoadTree(file);
-        trees.Add(tree);
-      }
-
-      return trees;
+      return Directory.EnumerateFiles(basePtmlFileDirectory).Select(file => ProcessTreeLoader.LoadTree(file)).ToList();
     }
 
     private static ProcessTree LoadSingleTree(string filePath)
@@ -167,13 +164,13 @@ namespace WorkflowEventLogFixer
 
     private static void CheckExistanceOfScriptFiles()
     {
-      _word2vecScriptFile = Path.Combine(Directory.GetCurrentDirectory(), "Scripts", "word2vec.py");
+      _word2VecScriptFile = Path.Combine(Directory.GetCurrentDirectory(), "Scripts", "word2vec.py");
 
       if(!File.Exists(_pythonExe))
       {
         throw new Exception("Python executable not found.");
       }
-      if(!File.Exists(_word2vecScriptFile))
+      if(!File.Exists(_word2VecScriptFile))
       {
         throw new Exception("Word2Vec script not found.");
       }
@@ -456,9 +453,11 @@ namespace WorkflowEventLogFixer
       ProcessStartInfo start = new ProcessStartInfo
       {
         FileName = _pythonExe,
-        Arguments = $"-f {_word2vecScriptFile} '{csvDirectory}'",
+        Arguments = $"{_word2VecScriptFile} {csvDirectory}",
         UseShellExecute = false,
-        RedirectStandardOutput = true
+        RedirectStandardOutput = true,
+        CreateNoWindow = false,
+        WindowStyle = ProcessWindowStyle.Maximized
       };
       //cmd is full path to python.exe
       //args is path to .py file and any cmd line args
@@ -470,6 +469,11 @@ namespace WorkflowEventLogFixer
           Console.Write(result);
         }
       }
+    }
+
+    public static string GetPythonExe()
+    {
+      return _pythonExe;
     }
   }
 }
