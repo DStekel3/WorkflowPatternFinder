@@ -1,17 +1,23 @@
-﻿using IronPython.Hosting;
+﻿using System.Collections.Generic;
+using IronPython.Hosting;
 using Microsoft.Scripting;
 
 namespace WorkflowEventLogFixer
 {
-  public class IronPython
+  public static class IronPython
   {
-    public IronPython(string script)
+    public static void RunScript(string script, List<ProcessTree> trees)
     {
       var engine = Python.CreateEngine();
       var scope = engine.CreateScope();
-      var source = engine.CreateScriptSourceFromString(script, SourceCodeKind.Statements);
-      var compiled = source.Compile();
-      var result = compiled.Execute(scope);
+      List<string> argv = new List<string>
+      {
+        @"C:\Thesis\Profit analyses\testmap\ptml",
+        "goedkeuren",
+        "afkeuren"
+      };
+      engine.GetSysModule().SetVariable("argv", argv);
+      dynamic py = engine.ExecuteFile(script);
     }
   }
 }

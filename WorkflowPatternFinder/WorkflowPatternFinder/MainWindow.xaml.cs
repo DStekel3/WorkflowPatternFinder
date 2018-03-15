@@ -3,11 +3,13 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Security.Policy;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Media;
+using IronPython.Hosting;
 using WorkflowEventLogFixer;
 using OpenFileDialog = System.Windows.Forms.OpenFileDialog;
 using Button = System.Windows.Controls.Button;
@@ -110,8 +112,8 @@ namespace WorkflowPatternFinder
       ChangeEnabledTreeButtons(false);
       TreeProgress.IsIndeterminate = true;
 
-      var trees = Program.LoadProcessTrees(ImportTreeLabel.Content.ToString());
-      var pattern = ProcessTreeLoader.LoadTree(ImportPatternLabel.Content.ToString());
+      //var trees = Program.LoadProcessTrees(ImportTreeLabel.Content.ToString());
+      //var pattern = ProcessTreeLoader.LoadTree(ImportPatternLabel.Content.ToString());
 
       List<string> validOccurrences = new List<string>();
 
@@ -126,28 +128,35 @@ namespace WorkflowPatternFinder
         }
       }
 
+      var result = CallGensim();
+
       var modelPath = Path.Combine(Directory.GetParent(ImportTreeLabel.Content.ToString()).FullName, "trained.gz");
+      if(!File.Exists(modelPath))
+      {
+        throw new Exception($"{modelPath} does not exist. Be sure to start the pre-processing task first!");
+        return;
+      }
       SubTreeFinder.SetTrainedModelPath(modelPath);
 
-      for(int t = 0; t < trees.Count; t++)
-      {
-        var tree = trees[t];
-        if(SubTreeFinder.IsValidSubTree(tree, pattern, induced))
-        {
-          validOccurrences.Add(tree.GetFilePath());
-          ValidOccurencesList.Items.Add(tree.GetFilePath());
-          if(induced)
-          {
-            Debug.Write($"Given pattern is an induced subtree in {tree.GetFilePath()}");
-          }
-          else
-          {
-            Debug.Write($"Given pattern is an embedded subtree in {tree.GetFilePath()}");
-          }
-        }
+      //for(int t = 0; t < trees.Count; t++)
+      //{
+      //  var tree = trees[t];
+      //  if(SubTreeFinder.IsValidSubTree(tree, pattern, induced))
+      //  {
+      //    validOccurrences.Add(tree.GetFilePath());
+      //    ValidOccurencesList.Items.Add(tree.GetFilePath());
+      //    if(induced)
+      //    {
+      //      Debug.Write($"Given pattern is an induced subtree in {tree.GetFilePath()}");
+      //    }
+      //    else
+      //    {
+      //      Debug.Write($"Given pattern is an embedded subtree in {tree.GetFilePath()}");
+      //    }
+      //  }
 
-        DebugLabel.Content = $"Searched in {t + 1} of {trees.Count} trees.";
-      }
+      //  DebugLabel.Content = $"Searched in {t + 1} of {trees.Count} trees.";
+      //}
 
       ResultDebug.Content = $"Found {validOccurrences.Count} model(s) that contain the given pattern.";
 
@@ -156,6 +165,56 @@ namespace WorkflowPatternFinder
       ClearDebugLabel();
       ChangeEnabledTreeButtons(true);
       TreeProgress.IsIndeterminate = false;
+    }
+
+    private bool CallGensim()
+    {
+      var treePath = Directory.EnumerateFiles(ImportTreeLabel.Content.ToString()).First();
+      var patternPath = ImportPatternLabel.Content.ToString();
+      var modelPath = Path.Combine(Directory.GetParent(ImportTreeLabel.Content.ToString()).FullName, "trained.gz");
+      var scriptPath = @"C:\Users\dst\Source\Repos\WorkflowPatternFinder\WorkflowPatternFinder\Gensim\Gensim.py";
+
+      //RunScript(scriptPath, modelPath, treePath, patternPath);
+
+      ProcessStartInfo start = new ProcessStartInfo
+      {
+        FileName = Program.GetPythonExe(),
+        Arguments = $"\"{scriptPath}\" \"{modelPath}\" \"{treePath}\" \"{patternPath}\"",
+        UseShellExecute = false,
+        RedirectStandardOutput = true
+      };
+      //cmd is full path to python.exe
+      //args is path to .py file and any cmd line args
+      using(Process process = Process.Start(start))
+      {
+        using(StreamReader reader = process?.StandardOutput)
+        {
+          string result = reader?.ReadToEnd();
+          var lines = result.Replace("\r\n", "|").Split('|').ToList();
+          Console.Write(result);
+        }
+      }
+      return false;
+    }
+
+    public static void RunScript(string scriptPath, string modelPath, string treePath, string patternPath)
+    {
+      var pythonPath = Program.GetPythonExe();
+      var options = new Dictionary<string, object> { ["Debug"] = true };
+      var engine = Python.CreateEngine(options);
+      var script = engine.CreateScriptSourceFromFile(Path.Combine(pythonPath, "movement.py"));
+      var scope = engine.CreateScope();
+
+      List<string> argv = new List<string>
+      {
+        $"\"{@"C:\Users\dst\Source\Repos\WorkflowPatternFinder\WorkflowPatternFinder\Gensim\Gensim.py"}\"",
+        $"\"{modelPath}\"",
+        $"\"{treePath}\"," +
+        $"\"{patternPath}\""
+      };
+      engine.GetSysModule().SetVariable("argv", argv);
+      var py = engine.ExecuteFile(scriptPath).GetVariable("result");
+
     }
 
     private void InducedCheckBox_Click(object sender, RoutedEventArgs e)
@@ -204,7 +263,7 @@ namespace WorkflowPatternFinder
       }
       StartTask(DoWork);
     }
-    
+
 
     void StartPreprocessing()
     {
@@ -309,7 +368,7 @@ namespace WorkflowPatternFinder
 
     private void ClearDebugLabel(int interval = 5000)
     {
-      var timer = new Timer { Interval = interval};
+      var timer = new Timer { Interval = interval };
       timer.Tick += (s, f) =>
       {
         DebugLabel.Content = "";
@@ -333,7 +392,7 @@ namespace WorkflowPatternFinder
     private void UpdateButtonText(Button button, string message, int interval = 5000)
     {
       var normal = button.Content.ToString();
-      var timer = new Timer { Interval = interval};
+      var timer = new Timer { Interval = interval };
       timer.Tick += (s, f) =>
       {
         button.Content = normal;
@@ -363,6 +422,7 @@ namespace WorkflowPatternFinder
 
     private void PythonButton_Click(object sender, RoutedEventArgs e)
     {
+
       Program.TryIronPython();
     }
   }

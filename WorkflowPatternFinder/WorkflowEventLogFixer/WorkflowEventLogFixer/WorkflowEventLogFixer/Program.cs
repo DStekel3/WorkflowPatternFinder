@@ -28,9 +28,12 @@ namespace WorkflowEventLogFixer
 
     public static void TryIronPython()
     {
-      var ironPyton = new IronPython(
-        @"C:\Users\dst\Source\Repos\WorkflowPatternFinder\WorkflowPatternFinder\WorkflowEventLogFixer\WorkflowEventLogFixer\WorkflowEventLogFixer\Scripts\query.py");
-
+      for(int t = 0; t < 10000; t++)
+      {
+        IronPython.RunScript(
+          @"C:\Users\dst\Source\Repos\WorkflowPatternFinder\WorkflowPatternFinder\WorkflowEventLogFixer\WorkflowEventLogFixer\WorkflowEventLogFixer\Scripts\query.py",
+          new List<ProcessTree>());
+      }
     }
 
     public static void Main(string[] args)
@@ -74,7 +77,7 @@ namespace WorkflowEventLogFixer
       _baseCsvFileDirectory = Path.Combine(_baseDirectory, "csv");
       _baseXesFileDirectory = Path.Combine(_baseDirectory, "xes");
       _basePtmlFileDirectory = Path.Combine(_baseDirectory, "ptml");
-      
+
       CreateDirectoriesIfNeeded();
 
       if(CheckIfPythonAndJavaAreInstalled())

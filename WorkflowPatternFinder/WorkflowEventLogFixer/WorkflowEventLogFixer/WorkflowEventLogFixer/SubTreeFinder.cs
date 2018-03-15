@@ -101,8 +101,8 @@ namespace WorkflowEventLogFixer
 
         private static bool AreSimilarAccordingToDoc2Vec(Node tNode, Node pNode)
         {
-            var treeSentence = tNode.GetEvent();
-            var patternSentence = pNode.GetEvent();
+            var treeSentence = tNode.GetEvent().Replace('|', ' ').ToLower();
+            var patternSentence = pNode.GetEvent().Replace('|', ' ').ToLower();
             ProcessStartInfo start = new ProcessStartInfo
             {
                 FileName = _pythonExe,
@@ -119,6 +119,18 @@ namespace WorkflowEventLogFixer
                 {
                     string result = reader?.ReadToEnd();
                     Console.Write(result);
+                    if(!string.IsNullOrEmpty(result) && double.TryParse(result.Substring(0, 3).Replace('.', ','), out double number))
+                    {
+                        if(number > 0.8)
+                        {
+                            return true;
+                        }
+                    }
+                    else if(string.IsNullOrEmpty(result))
+                    {
+                        return false;
+                    }
+
                 }
             }
             return false;

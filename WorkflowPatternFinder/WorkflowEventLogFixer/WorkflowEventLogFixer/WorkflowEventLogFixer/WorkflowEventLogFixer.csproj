@@ -900,6 +900,7 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="CsvObject.cs" />
+    <Content Include="Scripts\QueryScript.py" />
     <Compile Include="SubTreeFinder.cs" />
     <Compile Include="XesObject.cs" />
   </ItemGroup>
