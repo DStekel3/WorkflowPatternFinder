@@ -4,21 +4,40 @@ from Node import *
 from ProcessTree import *
 from ProcessTreeLoader import *
 from SubTreeFinder import *
+import os
+from os import listdir
+from os.path import isfile, join
 
-
-if len(sys.argv)==4:
+for arg in sys.argv:
+    print(arg)
+if len(sys.argv)==5:
     modelPath = sys.argv[1]
-    treePath = sys.argv[2]
+    treeBasePath = sys.argv[2]
     patternPath = sys.argv[3]
+    induced = False
+    if sys.argv[4] == 'True':
+        induced = True
+    print("induced = "+str(induced))
+    validTrees = []
+    allFilePaths = [join(treeBasePath, f) for f in listdir(treeBasePath) if isfile(join(treeBasePath, f))]
+    allTreePaths = [f for f in allFilePaths if str(f).endswith('ptml')]
+    for treePath in allTreePaths:
+        print('tree path:', treePath)
+        print('loading tree...')
+        tree = ProcessTreeLoader.LoadTree(treePath)
+        print('loading pattern...')
+        pattern = ProcessTreeLoader.LoadTree(patternPath)
+        finder = SubTreeFinder()
+        finder.SetTrainedModelPath(modelPath)
+        result = finder.IsValidSubTree(tree, pattern, induced)
+        if result:
+            validTrees.append(treePath)
+        print("Final result:"+str(result))
     
-    print('loading tree...')
-    tree = ProcessTreeLoader.LoadTree(treePath)
-    print('loading pattern...')
-    pattern = ProcessTreeLoader.LoadTree(patternPath)
-    finder = SubTreeFinder()
-    finder.SetTrainedModelPath(modelPath)
-    result = finder.IsValidSubTree(tree, pattern, False)
-    print(result)
+    if len(validTrees) > 0:
+        print("Valid trees:")
+        for validTree in validTrees:
+            print(validTree)
 else:
   print("False number of arguments")
 

@@ -13,6 +13,7 @@ using IronPython.Hosting;
 using WorkflowEventLogFixer;
 using OpenFileDialog = System.Windows.Forms.OpenFileDialog;
 using Button = System.Windows.Controls.Button;
+using DataFormats = System.Windows.Forms.DataFormats;
 using Timer = System.Windows.Forms.Timer;
 
 namespace WorkflowPatternFinder
@@ -110,13 +111,8 @@ namespace WorkflowPatternFinder
       TreeStartButton.Content = "Busy...";
 
       ChangeEnabledTreeButtons(false);
-      TreeProgress.IsIndeterminate = true;
-
-      //var trees = Program.LoadProcessTrees(ImportTreeLabel.Content.ToString());
-      //var pattern = ProcessTreeLoader.LoadTree(ImportPatternLabel.Content.ToString());
-
-      List<string> validOccurrences = new List<string>();
-
+      TreeProgressBar.IsIndeterminate = true;
+      
       var induced = _treatAsInducedSubTree;
 
       // update the python .exe path
@@ -128,58 +124,28 @@ namespace WorkflowPatternFinder
         }
       }
 
-      var result = CallGensim();
-
-      var modelPath = Path.Combine(Directory.GetParent(ImportTreeLabel.Content.ToString()).FullName, "trained.gz");
-      if(!File.Exists(modelPath))
-      {
-        throw new Exception($"{modelPath} does not exist. Be sure to start the pre-processing task first!");
-        return;
-      }
-      SubTreeFinder.SetTrainedModelPath(modelPath);
-
-      //for(int t = 0; t < trees.Count; t++)
-      //{
-      //  var tree = trees[t];
-      //  if(SubTreeFinder.IsValidSubTree(tree, pattern, induced))
-      //  {
-      //    validOccurrences.Add(tree.GetFilePath());
-      //    ValidOccurencesList.Items.Add(tree.GetFilePath());
-      //    if(induced)
-      //    {
-      //      Debug.Write($"Given pattern is an induced subtree in {tree.GetFilePath()}");
-      //    }
-      //    else
-      //    {
-      //      Debug.Write($"Given pattern is an embedded subtree in {tree.GetFilePath()}");
-      //    }
-      //  }
-
-      //  DebugLabel.Content = $"Searched in {t + 1} of {trees.Count} trees.";
-      //}
-
-      ResultDebug.Content = $"Found {validOccurrences.Count} model(s) that contain the given pattern.";
+      var validSubTrees = CallGensim(induced);
+      ResultDebug.Content = $"Found {validSubTrees.Count} model(s) that contain the given pattern.";
 
       TreeStartButton.Content = "Start mining...";
       UpdateButtonText(TreeStartButton, "Done!");
       ClearDebugLabel();
       ChangeEnabledTreeButtons(true);
-      TreeProgress.IsIndeterminate = false;
+      TreeProgressBar.IsIndeterminate = false;
     }
 
-    private bool CallGensim()
+    private List<string> CallGensim(bool induced)
     {
-      var treePath = Directory.EnumerateFiles(ImportTreeLabel.Content.ToString()).First();
+      List<string> properSubTrees = new List<string>();
+      var treeBasePath = ImportTreeLabel.Content.ToString();
       var patternPath = ImportPatternLabel.Content.ToString();
       var modelPath = Path.Combine(Directory.GetParent(ImportTreeLabel.Content.ToString()).FullName, "trained.gz");
       var scriptPath = @"C:\Users\dst\Source\Repos\WorkflowPatternFinder\WorkflowPatternFinder\Gensim\Gensim.py";
 
-      //RunScript(scriptPath, modelPath, treePath, patternPath);
-
       ProcessStartInfo start = new ProcessStartInfo
       {
         FileName = Program.GetPythonExe(),
-        Arguments = $"\"{scriptPath}\" \"{modelPath}\" \"{treePath}\" \"{patternPath}\"",
+        Arguments = $"\"{scriptPath}\" \"{modelPath}\" \"{treeBasePath}\" \"{patternPath}\" \"{induced}\"",
         UseShellExecute = false,
         RedirectStandardOutput = true
       };
@@ -191,10 +157,21 @@ namespace WorkflowPatternFinder
         {
           string result = reader?.ReadToEnd();
           var lines = result.Replace("\r\n", "|").Split('|').ToList();
-          Console.Write(result);
+          foreach(var line in lines)
+            Debug.WriteLine(line);
+          var validSubTrees = lines.SkipWhile(c => !c.StartsWith("Valid trees:")).Skip(1);
+          foreach(string treePath in validSubTrees)
+          {
+            if(File.Exists(treePath))
+            {
+              properSubTrees.Add(treePath);
+              ValidOccurencesList.Items.Add(treePath);
+              Debug.WriteLine($"{treePath} is a subtree!");
+            }
+          }
         }
       }
-      return false;
+      return properSubTrees;
     }
 
     public static void RunScript(string scriptPath, string modelPath, string treePath, string patternPath)
@@ -309,14 +286,19 @@ namespace WorkflowPatternFinder
       DialogResult result = fbd.ShowDialog();
       if(result == System.Windows.Forms.DialogResult.OK)
       {
-        if(Directory.EnumerateFiles(fbd.SelectedPath).Any(s => s.EndsWith(".xlsx")))
-        {
-          ImportExcelDirectoryLabel.Content = fbd.SelectedPath;
-        }
-        else
-        {
-          UpdateButtonText(ImportExcelDirectoryButton, _incorrectDir, 3000);
-        }
+        UpdateExcelDirectoryUI(fbd.SelectedPath);
+      }
+    }
+
+    private void UpdateExcelDirectoryUI(string path)
+    {
+      if(Directory.EnumerateFiles(path).Any(s => s.EndsWith(".xlsx")))
+      {
+        ImportExcelDirectoryLabel.Content = path;
+      }
+      else
+      {
+        UpdateButtonText(ImportExcelDirectoryButton, _incorrectDir, 3000);
       }
     }
 
@@ -420,10 +402,19 @@ namespace WorkflowPatternFinder
       }
     }
 
-    private void PythonButton_Click(object sender, RoutedEventArgs e)
+    private void ExcelDrop(object sender, System.Windows.DragEventArgs e)
+    {
+      if(e.Data.GetDataPresent(DataFormats.FileDrop))
+      {
+        // Note that you can have more than one file.
+        var file = ((string[])e.Data.GetData(DataFormats.FileDrop)).Where(Directory.Exists).First();
+        UpdateExcelDirectoryUI(file);
+      }
+    }
+
+    private void ShowModel_Click(object sender, RoutedEventArgs e)
     {
 
-      Program.TryIronPython();
     }
   }
 }

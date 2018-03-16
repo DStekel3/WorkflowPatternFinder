@@ -3,16 +3,13 @@ from Node import *
 
 class ProcessTree(object):
     """A Process Tree object."""
-    _filePath = None
-    _id = None
-    _rootId = None
-    _root = None
-    _nodes = []
 
     def __init__(self, filePath, id, rootId):
         self._filePath = filePath
         self._id = id
         self._rootId = rootId
+        self._root = None
+        self._nodes = []
 
     def AddNode(self, node):
         self._nodes.append(node)
@@ -39,13 +36,4 @@ class ProcessTree(object):
         child.SetParent(parent)
 
     def GetTreeSize(self):
-        total = 0
-        nodelist = []
-        root = self.GetRoot()
-        nodelist.append(root)
-        while any(nodelist):
-            node = nodelist.pop()
-            total = total +1
-            for child in node.GetChildren():
-                nodelist.append(child)
-        return total
+        return len(self._nodes)

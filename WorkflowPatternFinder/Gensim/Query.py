@@ -7,10 +7,14 @@ import gensim
 from gensim import models
 from gensim.models import Doc2Vec
 import nltk
+import warnings
+warnings.filterwarnings(action='ignore', category=UserWarning, module='gensim')
 
 
 class Query(object):
-    _model = None
+    
+    def __init__(self):
+        self._model = None
 
     def LoadModel(self, path_to_model):
         print('loading model')
@@ -18,8 +22,7 @@ class Query(object):
         print('loaded model')
 
     def GetSimilarity(self, fstEvent, sndEvent):
-        print('Get similarity reached!')
-        if _self.model is None:
+        if self._model is None:
             raise ValueError('The model is not loaded yet.')
         result = 0.000
         for first in fstEvent.lower().split():
@@ -28,4 +31,4 @@ class Query(object):
                     score = self._model.wv.similarity(first, second)
                     if score > result:
                         result = self._model.wv.similarity(first, second)
-                        return result
+        return result

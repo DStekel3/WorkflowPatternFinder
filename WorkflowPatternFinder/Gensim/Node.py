@@ -2,17 +2,17 @@ import sys
 
 class Node(object):
     """A Node object."""
-    _type = None
-    _id = ""
-    _parent = None
-    _children = []
-    _name = ""
-    _isRoot = False
 
     def __init__(self, type, id, name = None):
         self._type = type
         self._name = name
         self._id = id
+        self._parent = None
+        self._children = []
+        if(name != None):
+            name = name.replace('|', ' ')
+        self._name = name
+        self._isRoot = False
 
     def GetId(self):
         return self._id

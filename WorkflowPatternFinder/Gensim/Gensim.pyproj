@@ -4,13 +4,15 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>44ea4a09-4254-4601-acb2-be3e847d45c4</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>Gensim.py</StartupFile>
+    <StartupFile>PlotModel.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>
     <Name>Gensim</Name>
     <RootNamespace>Gensim</RootNamespace>
+    <IsWindowsApplication>False</IsWindowsApplication>
+    <InterpreterId>Global|PythonCore|3.4</InterpreterId>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <DebugSymbols>true</DebugSymbols>
@@ -25,6 +27,9 @@
     <Compile Include="Node.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="PlotModel.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="ProcessTree.py">
       <SubType>Code</SubType>
     </Compile>
@@ -37,6 +42,12 @@
     <Compile Include="SubTreeFinder.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="TreePlot.py">
+      <SubType>Code</SubType>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <InterpreterReference Include="Global|PythonCore|3.4" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
   <!-- Uncomment the CoreCompile target to enable the Build command in

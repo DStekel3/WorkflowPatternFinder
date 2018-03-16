@@ -33,7 +33,6 @@ class SubTreeFinder(object):
       if(any(pChildren)):
         for patternChild in pChildren:
           for treeChild in tChildren:
-            print('Looking for a pattern child further in the tree', len(pChildren), len(tChildren))
             patternChildFound = self.DoesBranchContainPattern(treeChild, patternChild, induced)
             if(patternChildFound):
               return True
@@ -44,15 +43,12 @@ class SubTreeFinder(object):
       return False
     if induced and pNode.IsRoot() or not induced:
       for treeChild in tNode.GetChildren():
-        print('Looking for the current node further in the tree')
         found = self.DoesBranchContainPattern(treeChild, pNode, induced)
         if(found):
           return True
     return False
  
   def AreSimilar(self, tNode, pNode):
-    print(pNode.GetType(), tNode.GetType())
-    print('is equal:', pNode.GetType() == tNode.GetType())
     if pNode.GetType() == tNode.GetType():
       if pNode.GetType() == 'ManualTask':
         return self.AreSimilarAccordingToDoc2Vec(tNode, pNode)
@@ -63,9 +59,9 @@ class SubTreeFinder(object):
     
   # AreSimilarAccordingToDoc2Vec needs to be implemented
   def AreSimilarAccordingToDoc2Vec(self, tNode, pNode):
-    score = Query.GetSimilarity(tNode.GetEvent(), pNode.GetEvent())
-    print('score of ', tNode.GetEvent(), pNode.GetEvent(), ':', score)
-    if score > 0.0:
+    score = self._query.GetSimilarity(tNode.GetEvent(), pNode.GetEvent())
+    print('score of '+tNode.GetEvent().rstrip()+";"+pNode.GetEvent().rstrip()+' is '+str(score))
+    if score > 0.8:
       return True
     return False
     

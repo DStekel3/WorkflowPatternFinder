@@ -11,14 +11,13 @@
     <TabControl x:Name="tabControl" HorizontalAlignment="Left" VerticalAlignment="Top" Height="387" Width="1032">
       <TabItem Header="Pre-processing" Margin="10,0,-14,-2" IsSelected ="True" UseLayoutRounding="False">
         <Grid Background="#FFE5E5E5">
-          <Label x:Name="ImportExcelDirectoryLabel" Content="Log directory..." HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="447" MouseDoubleClick="ImportExcelDirectoryLabel_DoubleClick"/>
+          <Label x:Name="ImportExcelDirectoryLabel" Content="Log directory..." HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="447" MouseDoubleClick="ImportExcelDirectoryLabel_DoubleClick" AllowDrop="True" DragDrop.Drop="ExcelDrop"/>
           <Button x:Name="ImportExcelDirectoryButton" Content="Import workflow logs" HorizontalAlignment="Left" Margin="10,36,0,0" VerticalAlignment="Top" Width="172" Click="ImportExcelDirectoryButton_Click" RenderTransformOrigin="0.615,0.6"/>
           <Button x:Name="PreProcessingButton" Content="Start Processing..." HorizontalAlignment="Left" Margin="73,218,0,0" VerticalAlignment="Top" Width="190" Height="48" Click="PreProcessingButton_Click" Foreground="Black"/>
           <Label x:Name="PromScriptLabel" Content="Script location..." HorizontalAlignment="Left" Margin="10,61,0,0" VerticalAlignment="Top" Width="447" MouseDoubleClick="PromScriptLabel_DoubleClick"/>
           <Button x:Name="PromScriptButton" Content="Select Inductive Miner script" HorizontalAlignment="Left" Margin="10,87,0,0" VerticalAlignment="Top" Width="172" Click="PromScriptButton_Click" RenderTransformOrigin="0.615,0.6"/>
           <Label x:Name="ConsoleLabel" Content="Click start..." HorizontalAlignment="Left" Margin="73,290,0,0" VerticalAlignment="Top" Width="253"/>
           <ProgressBar x:Name="PreProgress" HorizontalAlignment="Left" Height="45" Margin="502,271,0,0" VerticalAlignment="Top" Width="410" IsIndeterminate="False"/>
-          <Button x:Name="PythonButton" Content="Start Iron Python" HorizontalAlignment="Left" Margin="558,61,0,0" VerticalAlignment="Top" Width="105" Height="59" Click="PythonButton_Click"/>
         </Grid>
       </TabItem>
       <TabItem Header="Tree Finder" Margin="20,0,-24,-2">
@@ -32,7 +31,8 @@
           <ListBox x:Name="ValidOccurencesList" HorizontalAlignment="Left" Height="184" Margin="461,36,0,0" VerticalAlignment="Top" Width="492" MouseDoubleClick="ValidOccurencesList_DoubleClick"/>
           <Label x:Name="ResultDebug" Content="" HorizontalAlignment="Left" Margin="10,0,0,28" VerticalAlignment="Bottom" Height="28" Width="446"/>
           <Label x:Name="DebugLabel" Content="" HorizontalAlignment="Left" Margin="462,16,0,0" VerticalAlignment="Top" Height="28" Width="491"/>
-          <ProgressBar x:Name="TreeProgress" HorizontalAlignment="Left" Height="45" Margin="502,271,0,0" VerticalAlignment="Top" Width="410" LargeChange="0" UseLayoutRounding="True" SmallChange="1" Value="-1"/>
+          <ProgressBar x:Name="TreeProgressBar" HorizontalAlignment="Left" Height="45" Margin="502,271,0,0" VerticalAlignment="Top" Width="410" LargeChange="0" UseLayoutRounding="True" SmallChange="1" Value="-1"/>
+          <Button x:Name="ShowModelButton" Content="Plot model" HorizontalAlignment="Left" Margin="10,163,0,0" VerticalAlignment="Top" Width="75" Click="ShowModel_Click"/>
         </Grid>
       </TabItem>
     </TabControl>

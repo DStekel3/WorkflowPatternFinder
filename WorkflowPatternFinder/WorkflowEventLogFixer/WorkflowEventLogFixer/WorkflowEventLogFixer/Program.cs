@@ -12,7 +12,6 @@ namespace WorkflowEventLogFixer
   public static class Program
   {
     private static string _baseDirectory = "";
-    private static string _baseFilteredFileDirectory = Path.Combine(_baseDirectory, "filter");
     private static string _baseCsvFileDirectory = Path.Combine(_baseDirectory, "csv");
     private static string _baseXesFileDirectory = Path.Combine(_baseDirectory, "xes");
     private static string _basePtmlFileDirectory = Path.Combine(_baseDirectory, "ptml");
@@ -25,16 +24,7 @@ namespace WorkflowEventLogFixer
     //convert each event log to:
     // 1. A csv-file, which is filtered on workflow instances.
     // 2. A xes-file, which is needed for further workflow analysis.
-
-    public static void TryIronPython()
-    {
-      for(int t = 0; t < 10000; t++)
-      {
-        IronPython.RunScript(
-          @"C:\Users\dst\Source\Repos\WorkflowPatternFinder\WorkflowPatternFinder\WorkflowEventLogFixer\WorkflowEventLogFixer\WorkflowEventLogFixer\Scripts\query.py",
-          new List<ProcessTree>());
-      }
-    }
+    
 
     public static void Main(string[] args)
     {
@@ -73,7 +63,6 @@ namespace WorkflowEventLogFixer
       _processTreeScriptFile = promScript;
 
       // update all directory paths
-      _baseFilteredFileDirectory = Path.Combine(_baseDirectory, "filter");
       _baseCsvFileDirectory = Path.Combine(_baseDirectory, "csv");
       _baseXesFileDirectory = Path.Combine(_baseDirectory, "xes");
       _basePtmlFileDirectory = Path.Combine(_baseDirectory, "ptml");
@@ -84,23 +73,23 @@ namespace WorkflowEventLogFixer
       {
         CheckExistanceOfScriptFiles();
 
-        var files = Directory.EnumerateFiles(_baseDirectory).ToList();
+        var files = Directory.EnumerateFiles(_baseDirectory).Where(c => c.EndsWith(".xlsx")).ToList();
 
-        //for(int t = 0; t < files.Count; t++)
-        //{
-        //  var file = files[t];
-        //  Console.WriteLine($"Busy with {Path.GetFileNameWithoutExtension(file)}...({t + 1}/{files.Count})");
-        //  SplitExcelFileIntoSeparateWorkflowLogs(file);
-        //}
+        for(int t = 0; t < files.Count; t++)
+        {
+          var file = files[t];
+          Console.WriteLine($"Busy with {Path.GetFileNameWithoutExtension(file)}...({t + 1}/{files.Count})");
+          SplitExcelFileIntoSeparateWorkflowLogs(file);
+        }
 
         // Apply word2vec throughout the workflow logs and give similar events similar names.
         ApplyWord2VecThroughGensimScript(_baseCsvFileDirectory);
 
-        //Console.WriteLine("Creating XES files...");
-        //ConvertCsvToXesFiles(_baseCsvFileDirectory, _baseXesFileDirectory);
+        Console.WriteLine("Creating XES files...");
+        ConvertCsvToXesFiles(_baseCsvFileDirectory, _baseXesFileDirectory);
 
-        //UpdatePathsInProcessTreeScript(_processTreeScriptFile, _baseXesFileDirectory, _basePtmlFileDirectory);
-        //CreatePtmlFiles(_processTreeScriptFile);
+        UpdatePathsInProcessTreeScript(_processTreeScriptFile, _baseXesFileDirectory, _basePtmlFileDirectory);
+        CreatePtmlFiles(_processTreeScriptFile);
       }
     }
 
@@ -189,10 +178,6 @@ namespace WorkflowEventLogFixer
       {
         throw new Exception("This directory does not exist.");
       }
-      if(!Directory.Exists(_baseFilteredFileDirectory))
-      {
-        Directory.CreateDirectory(_baseFilteredFileDirectory);
-      }
       if(!Directory.Exists(_baseCsvFileDirectory))
       {
         Directory.CreateDirectory(_baseCsvFileDirectory);
@@ -217,7 +202,7 @@ namespace WorkflowEventLogFixer
       ProcessStartInfo startInfo = new ProcessStartInfo
       {
         CreateNoWindow = true,
-        WindowStyle = ProcessWindowStyle.Minimized,
+        WindowStyle = ProcessWindowStyle.Maximized,
         WorkingDirectory = Path.GetDirectoryName(processTreeScriptFile) ?? throw new InvalidOperationException(),
         FileName = "ProM_CLI.bat",
         Arguments = "-f ProcessTreeMiner.txt"
@@ -286,7 +271,7 @@ namespace WorkflowEventLogFixer
     {
       var startInfo = new ProcessStartInfo
       {
-        WindowStyle = ProcessWindowStyle.Normal,
+        WindowStyle = ProcessWindowStyle.Maximized,
         UseShellExecute = false,
         FileName = @"C:\Users\dst\Source\Repos\CSV-to-XES\CSVtoXES\CsvToXesDirectory.bat",
         Arguments = $"\"{_javaExe}\" \"{csvfileDirectory }\" \"{xesFileDirectory}\"",
@@ -459,7 +444,6 @@ namespace WorkflowEventLogFixer
         Arguments = $"{_word2VecScriptFile} {csvDirectory}",
         UseShellExecute = false,
         RedirectStandardOutput = true,
-        CreateNoWindow = false,
         WindowStyle = ProcessWindowStyle.Maximized
       };
       //cmd is full path to python.exe
