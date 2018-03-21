@@ -30,7 +30,7 @@
           <Button x:Name="TreeStartButton" Content="Start mining..." HorizontalAlignment="Left" Margin="73,218,0,0" VerticalAlignment="Top" Width="190" Height="48" Click="TreeStartButton_Click" Foreground="Black"/>
           <ListBox x:Name="ValidOccurencesList" HorizontalAlignment="Left" Height="184" Margin="461,36,0,0" VerticalAlignment="Top" Width="492" MouseDoubleClick="ValidOccurencesList_DoubleClick"/>
           <Label x:Name="ResultDebug" Content="" HorizontalAlignment="Left" Margin="10,0,0,28" VerticalAlignment="Bottom" Height="28" Width="446"/>
-          <Label x:Name="DebugLabel" Content="" HorizontalAlignment="Left" Margin="462,16,0,0" VerticalAlignment="Top" Height="28" Width="491"/>
+          <Label x:Name="ListSummaryLabel" Content="Patterns found (file path)&#x9;&#x9;&#x9;&#x9;&#x9;&#x9;   Similarity Score" HorizontalAlignment="Left" Margin="462,8,0,0" VerticalAlignment="Top" Height="28" Width="491"/>
           <ProgressBar x:Name="TreeProgressBar" HorizontalAlignment="Left" Height="45" Margin="502,271,0,0" VerticalAlignment="Top" Width="410" LargeChange="0" UseLayoutRounding="True" SmallChange="1" Value="-1"/>
           <TextBox x:Name="SimTresholdValue" HorizontalAlignment="Left" Height="29" Margin="384,84,0,0" TextWrapping="Wrap" Text="0.8" VerticalAlignment="Top" Width="58" FontSize="18" SpellCheck.IsEnabled="True" PreviewTextInput="CheckThresholdInput" RenderTransformOrigin="1.828,-0.713"/>
           <Label x:Name="SimThresholdLabel" Content="Word2Vec Similarity Threshold:" HorizontalAlignment="Left" Margin="205,84,0,0" VerticalAlignment="Top"/>

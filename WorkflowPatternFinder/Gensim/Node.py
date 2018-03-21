@@ -9,8 +9,6 @@ class Node(object):
         self._id = id
         self._parent = None
         self._children = []
-        if(name != None):
-            name = name.replace('|', ' ')
         self._name = name
         self._isRoot = False
 

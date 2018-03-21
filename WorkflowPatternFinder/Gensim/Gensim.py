@@ -10,7 +10,7 @@ from os.path import isfile, join
 
 for arg in sys.argv:
     print(arg)
-if len(sys.argv)==6:
+if len(sys.argv) == 6:
     modelPath = sys.argv[1]
     treeBasePath = sys.argv[2]
     patternPath = sys.argv[3]
@@ -32,14 +32,14 @@ if len(sys.argv)==6:
         finder.SetTrainedModelPath(modelPath)
         finder.SetSimilarityThreshold(simThreshold)
         result = finder.IsValidSubTree(tree, pattern, induced)
-        if result:
-            validTrees.append(treePath)
-        print("Final result:"+str(result))
+        if result[0]:
+            validTrees.append((treePath, result[1]))
+        print("Final result:" + str(result))
     
     if len(validTrees) > 0:
         print("Valid trees:")
-        for validTree in validTrees:
-            print(validTree, )
+        for path, score in validTrees:
+            print(path + "," + str(score))
 else:
   print("False number of arguments")
 

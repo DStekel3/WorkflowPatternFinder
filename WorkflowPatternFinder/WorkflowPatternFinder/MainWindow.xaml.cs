@@ -167,15 +167,28 @@ namespace WorkflowPatternFinder
           foreach(var line in lines)
             Debug.WriteLine(line);
           var validSubTrees = lines.SkipWhile(c => !c.StartsWith("Valid trees:")).Skip(1);
-          foreach(string treePath in validSubTrees)
+          var validOutput = new Dictionary<string, string>();
+          foreach(string validTree in validSubTrees)
           {
-            if(File.Exists(treePath))
+            if(!string.IsNullOrEmpty(validTree))
             {
-              properSubTrees.Add(treePath);
-              ValidOccurencesList.Items.Add(treePath);
-              Debug.WriteLine($"{treePath} is a subtree!");
+              var treePath = validTree.Split(',')[0];
+              var score = validTree.Split(',')[1];
+              if(File.Exists(treePath))
+              {
+                properSubTrees.Add(treePath);
+                validOutput.Add(treePath, score);
+                Debug.WriteLine($"{treePath} is a subtree!");
+              }
             }
           }
+          foreach(var kvp in validOutput.OrderByDescending(c => c.Value))
+          {
+            var path = kvp.Key;
+            var score = kvp.Value;
+            ValidOccurencesList.Items.Add($"{path}\t\t\t{score.Substring(0, 5)}");
+          }
+
         }
       }
       return properSubTrees;
@@ -195,7 +208,7 @@ namespace WorkflowPatternFinder
 
     private void ValidOccurencesList_DoubleClick(object sender, MouseButtonEventArgs e)
     {
-      var selectedFile = ValidOccurencesList.SelectedItem.ToString();
+      var selectedFile = ValidOccurencesList.SelectedItem.ToString().Split('\t').First();
       OpenFileInNotePad(selectedFile);
     }
 
@@ -340,7 +353,7 @@ namespace WorkflowPatternFinder
       var timer = new Timer { Interval = interval };
       timer.Tick += (s, f) =>
       {
-        DebugLabel.Content = "";
+        ResultDebug.Content = "";
         timer.Stop();
       };
       timer.Start();
