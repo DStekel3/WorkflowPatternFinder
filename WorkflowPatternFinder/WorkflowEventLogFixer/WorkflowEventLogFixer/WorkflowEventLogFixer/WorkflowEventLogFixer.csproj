@@ -899,7 +899,6 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="CsvObject.cs" />
-    <Content Include="Scripts\QueryScript.py" />
     <Compile Include="SubTreeFinder.cs" />
     <Compile Include="XesObject.cs" />
   </ItemGroup>
@@ -910,18 +909,9 @@
     <None Include="packages.config">
       <SubType>Designer</SubType>
     </None>
-    <None Include="TextFiles\testPattern.ptml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <Content Include="DundasWinChart.xml" />
-    <Content Include="Scripts\query.py">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Scripts\word2vec.py">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
     <Content Include="System.Net.Http.Formatting.xml" />
     <Content Include="System.Net.Http.xml" />
   </ItemGroup>

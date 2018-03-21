@@ -10,9 +10,13 @@ import nltk
 import warnings
 warnings.filterwarnings(action='ignore', category=UserWarning, module='gensim')
 import matplotlib
+import sklearn
+from sklearn.manifold import TSNE
+import pandas as pd
+import matplotlib.pyplot as plt
 
-
-model = Doc2Vec.load("C:\Thesis\Profit analyses\testmap\trained.gz", mmap=None)
+model_path = sys.argv[1]
+model = Doc2Vec.load(model_path, mmap=None);
 vocab = list(model.wv.vocab)
 X = model[vocab]
 tsne = TSNE(n_components=2)
@@ -22,3 +26,7 @@ fig = plt.figure()
 ax = fig.add_subplot(1, 1, 1)
 
 ax.scatter(df['x'], df['y'])
+for word, pos in df.iterrows():
+    ax.annotate(word, pos)
+
+plt.show()

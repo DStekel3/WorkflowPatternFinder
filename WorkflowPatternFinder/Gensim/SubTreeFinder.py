@@ -61,7 +61,7 @@ class SubTreeFinder(object):
   def AreSimilarAccordingToDoc2Vec(self, tNode, pNode):
     score = self._query.GetSimilarity(tNode.GetEvent(), pNode.GetEvent())
     print('score of '+tNode.GetEvent().rstrip()+";"+pNode.GetEvent().rstrip()+' is '+str(score))
-    if score > 0.8:
+    if score > self._simThreshold:
       return True
     return False
     
@@ -77,3 +77,6 @@ class SubTreeFinder(object):
     self._word2VecTrainedModelPath = modelPath
     self.LoadWord2VecModel()
     
+  def SetSimilarityThreshold(self, simThreshold):
+    self._simThreshold = float(simThreshold)
+    print('sim threshold: '+str(self._simThreshold))

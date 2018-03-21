@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Security.Policy;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Forms;
@@ -33,6 +34,7 @@ namespace WorkflowPatternFinder
     public MainWindow()
     {
       InitializeComponent();
+      Program.CheckIfPythonAndJavaAreInstalled();
       FindNotePadPath();
     }
 
@@ -72,6 +74,11 @@ namespace WorkflowPatternFinder
         if(Directory.EnumerateFiles(fbd.SelectedPath).Any(file => file.EndsWith(".ptml")))
         {
           ImportTreeLabel.Content = fbd.SelectedPath;
+          var possibleModelFile = Path.Combine(Path.GetDirectoryName(fbd.SelectedPath), "trained.gz");
+          if(File.Exists(possibleModelFile))
+          {
+            ModelPathLabel.Content = possibleModelFile;
+          }
         }
         else
         {
@@ -85,7 +92,7 @@ namespace WorkflowPatternFinder
       OpenFileDialog ofd = new OpenFileDialog();
       ofd.DefaultExt = ".ptml";
       ofd.Title = "Select a file containing your pattern (.ptml).";
-      ofd.FileName = @"C:\Thesis\Profit analyses\22-02-2018\testPattern.ptml";
+      ofd.FileName = @"C:\Users\dst\Source\Repos\WorkflowPatternFinder\WorkflowPatternFinder\WorkflowPatternFinder\Example Patterns\testPattern.ptml";
       DialogResult result = ofd.ShowDialog();
       if(result == System.Windows.Forms.DialogResult.OK)
       {
@@ -103,7 +110,7 @@ namespace WorkflowPatternFinder
     private void TreeStartButton_Click(object sender, RoutedEventArgs e)
     {
       ClearValidOccurencesList();
-      if(!PathsExists())
+      if(!PathsExists() || !double.TryParse(SimTresholdValue.Text.Replace('.', ','), out double threshold))
       {
         UpdateButtonText(TreeStartButton, "Incorrect inputs!");
         return;
@@ -112,7 +119,7 @@ namespace WorkflowPatternFinder
 
       ChangeEnabledTreeButtons(false);
       TreeProgressBar.IsIndeterminate = true;
-      
+
       var induced = _treatAsInducedSubTree;
 
       // update the python .exe path
@@ -124,7 +131,7 @@ namespace WorkflowPatternFinder
         }
       }
 
-      var validSubTrees = CallGensim(induced);
+      var validSubTrees = CallGensim(induced, threshold);
       ResultDebug.Content = $"Found {validSubTrees.Count} model(s) that contain the given pattern.";
 
       TreeStartButton.Content = "Start mining...";
@@ -134,7 +141,7 @@ namespace WorkflowPatternFinder
       TreeProgressBar.IsIndeterminate = false;
     }
 
-    private List<string> CallGensim(bool induced)
+    private List<string> CallGensim(bool induced, double simThreshold)
     {
       List<string> properSubTrees = new List<string>();
       var treeBasePath = ImportTreeLabel.Content.ToString();
@@ -145,7 +152,7 @@ namespace WorkflowPatternFinder
       ProcessStartInfo start = new ProcessStartInfo
       {
         FileName = Program.GetPythonExe(),
-        Arguments = $"\"{scriptPath}\" \"{modelPath}\" \"{treeBasePath}\" \"{patternPath}\" \"{induced}\"",
+        Arguments = $"\"{scriptPath}\" \"{modelPath}\" \"{treeBasePath}\" \"{patternPath}\" \"{induced}\" \"{simThreshold.ToString().Replace(",", ".")}\"",
         UseShellExecute = false,
         RedirectStandardOutput = true
       };
@@ -172,26 +179,6 @@ namespace WorkflowPatternFinder
         }
       }
       return properSubTrees;
-    }
-
-    public static void RunScript(string scriptPath, string modelPath, string treePath, string patternPath)
-    {
-      var pythonPath = Program.GetPythonExe();
-      var options = new Dictionary<string, object> { ["Debug"] = true };
-      var engine = Python.CreateEngine(options);
-      var script = engine.CreateScriptSourceFromFile(Path.Combine(pythonPath, "movement.py"));
-      var scope = engine.CreateScope();
-
-      List<string> argv = new List<string>
-      {
-        $"\"{@"C:\Users\dst\Source\Repos\WorkflowPatternFinder\WorkflowPatternFinder\Gensim\Gensim.py"}\"",
-        $"\"{modelPath}\"",
-        $"\"{treePath}\"," +
-        $"\"{patternPath}\""
-      };
-      engine.GetSysModule().SetVariable("argv", argv);
-      var py = engine.ExecuteFile(scriptPath).GetVariable("result");
-
     }
 
     private void InducedCheckBox_Click(object sender, RoutedEventArgs e)
@@ -238,7 +225,7 @@ namespace WorkflowPatternFinder
         };
         return Task.WhenAll(tasks);
       }
-      StartTask(DoWork);
+      StartPreprocessingTask(DoWork);
     }
 
 
@@ -247,7 +234,7 @@ namespace WorkflowPatternFinder
       Program.PreProcessingPhase(_importExcelDir, _promScriptPath);
     }
 
-    private void StartTask(Func<Task> task, Action completedTask = null)
+    private void StartPreprocessingTask(Func<Task> task, Action completedTask = null)
     {
       ConsoleLabel.Content = "Busy...";
       PreProgress.IsIndeterminate = true;
@@ -259,12 +246,12 @@ namespace WorkflowPatternFinder
           task()
             .ContinueWith(async t =>
             {
-              await FinishTask(t.Exception);
+              await FinishPreprocessingTask(t.Exception);
               completedTask?.Invoke();
             }, scheduler));
     }
 
-    private async Task FinishTask(Exception ex)
+    private async Task FinishPreprocessingTask(Exception ex)
     {
       UpdateButtonText(PreProcessingButton, "Done!");
       ConsoleLabel.Content = "Start...";
@@ -414,7 +401,74 @@ namespace WorkflowPatternFinder
 
     private void ShowModel_Click(object sender, RoutedEventArgs e)
     {
+      var modelPath = ModelPathLabel.Content.ToString();
+      if(!File.Exists(modelPath))
+      {
+        UpdateButtonText(TrainModelButton, "Incorrect inputs!");
+        return;
+      }
 
+      var scriptPath = @"C:\Users\dst\Source\Repos\WorkflowPatternFinder\WorkflowPatternFinder\Gensim\PlotModel.py";
+
+      ProcessStartInfo start = new ProcessStartInfo
+      {
+        FileName = Program.GetPythonExe(),
+        Arguments = $"\"{scriptPath}\" \"{modelPath}\"",
+        UseShellExecute = false,
+        RedirectStandardOutput = true
+      };
+
+      Process.Start(start);
+    }
+
+    private void CheckThresholdInput(object sender, TextCompositionEventArgs e)
+    {
+      e.Handled = !e.Text.Any(x => Char.IsDigit(x) || '.'.Equals(x));
+    }
+
+    private void CheckIfInputIsDigit(object sender, TextCompositionEventArgs e)
+    {
+      e.Handled = !e.Text.Any(x => Char.IsDigit(x));
+    }
+
+    private void ChangeModelButton_Click(object sender, RoutedEventArgs e)
+    {
+      OpenFileDialog ofd = new OpenFileDialog();
+      ofd.DefaultExt = ".gz";
+      ofd.Title = "Select a word2vec model.";
+      ofd.FileName = @"C:\Thesis\Profit analyses\testmap\trained.gz";
+      DialogResult result = ofd.ShowDialog();
+      if(result == System.Windows.Forms.DialogResult.OK)
+      {
+        if(ofd.FileName.EndsWith(".gz"))
+        {
+          ModelPathLabel.Content = ofd.FileName;
+        }
+        else
+        {
+          UpdateButtonText(TrainModelButton, _incorrectFile, 3000);
+        }
+      }
+    }
+
+    private void TrainModelButton_Click(object sender, RoutedEventArgs e)
+    {
+      if(Program.CheckIfPythonAndJavaAreInstalled())
+      {
+        var csvBaseDirectory = Path.Combine(Path.GetDirectoryName(ModelPathLabel.Content.ToString()), "csv");
+        if(Directory.Exists(csvBaseDirectory))
+        {
+          var windowSize = WindowSizeValue.Text;
+          var minCount = MinCountValue.Text;
+          var epochs = NumberOfEpochsValue.Text;
+          var scriptPath = @"C:\Users\dst\Source\Repos\WorkflowPatternFinder\WorkflowPatternFinder\Gensim\TrainWord2VecModel.py";
+          Program.TrainWord2VecModel(scriptPath, csvBaseDirectory, windowSize, minCount, epochs);
+        }
+        else
+        {
+          UpdateButtonText(TrainModelButton, _incorrectFile, 3000);
+        }
+      }
     }
   }
 }

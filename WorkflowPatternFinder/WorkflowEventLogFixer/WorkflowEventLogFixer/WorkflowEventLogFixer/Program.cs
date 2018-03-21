@@ -17,7 +17,7 @@ namespace WorkflowEventLogFixer
     private static string _basePtmlFileDirectory = Path.Combine(_baseDirectory, "ptml");
     private static string _pythonExe = "";
     private static string _javaExe = "";
-    private static string _word2VecScriptFile = Path.Combine(Directory.GetCurrentDirectory(), "Scripts/word2vec.py");
+    private static string _word2VecScriptFile = @"C:\Users\dst\Source\Repos\WorkflowPatternFinder\WorkflowPatternFinder\Gensim\TrainWord2VecModel.py";
     private static string _processTreeScriptFile = @"C:\Users\dst\eclipse-workspace\ProM\ProcessTreeMiner.txt";
 
 
@@ -139,8 +139,10 @@ namespace WorkflowEventLogFixer
 
     private static ProcessTree CreatePattern()
     {
-      var testFile = Path.Combine(Directory.GetCurrentDirectory(), "TextFiles", "testPattern.ptml");
-      return LoadSingleTree(testFile);
+      // Deprecated
+      // var testFile = Path.Combine(Directory.GetCurrentDirectory(), "TextFiles", "testPattern.ptml");
+      // return LoadSingleTree(testFile);
+      return null;
     }
 
     public static List<ProcessTree> LoadProcessTrees(string basePtmlFileDirectory)
@@ -156,8 +158,6 @@ namespace WorkflowEventLogFixer
 
     private static void CheckExistanceOfScriptFiles()
     {
-      _word2VecScriptFile = Path.Combine(Directory.GetCurrentDirectory(), "Scripts", "word2vec.py");
-
       if(!File.Exists(_pythonExe))
       {
         throw new Exception("Python executable not found.");
@@ -436,26 +436,32 @@ namespace WorkflowEventLogFixer
       }
     }
 
-    private static void ApplyWord2VecThroughGensimScript(string csvDirectory)
+    public static void ApplyWord2VecThroughGensimScript(string csvDirectory)
     {
       ProcessStartInfo start = new ProcessStartInfo
       {
         FileName = _pythonExe,
-        Arguments = $"{_word2VecScriptFile} {csvDirectory}",
+        Arguments = $"\"{_word2VecScriptFile}\" \"{csvDirectory}\"",
         UseShellExecute = false,
-        RedirectStandardOutput = true,
         WindowStyle = ProcessWindowStyle.Maximized
       };
       //cmd is full path to python.exe
       //args is path to .py file and any cmd line args
-      using(Process process = Process.Start(start))
+      Process.Start(start);
+    }
+
+    public static void TrainWord2VecModel(string scriptFile, string csvDirectory, string windowSize, string minCount, string epochs)
+    {
+      ProcessStartInfo start = new ProcessStartInfo
       {
-        using(StreamReader reader = process?.StandardOutput)
-        {
-          string result = reader?.ReadToEnd();
-          Console.Write(result);
-        }
-      }
+        FileName = _pythonExe,
+        Arguments = $"\"{scriptFile}\" \"{csvDirectory}\" \"{windowSize}\" \"{minCount}\" \"{epochs}\"",
+        UseShellExecute = false,
+        WindowStyle = ProcessWindowStyle.Maximized
+      };
+      //cmd is full path to python.exe
+      //args is path to .py file and any cmd line args
+      Process.Start(start);
     }
 
     public static string GetPythonExe()
