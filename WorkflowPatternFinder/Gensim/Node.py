@@ -9,8 +9,31 @@ class Node(object):
         self._id = id
         self._parent = None
         self._children = []
-        self._name = name
+        if name != None:
+          self._name = self.EscapeCharacters(name)
+        else:
+          typeOfNode = str(type).split('.')[1]
+          if "Xor" in typeOfNode:
+            self._name = "X"
+          elif "And" in typeOfNode:
+            self._name = "&plus;"
+          elif "Sequence" in typeOfNode:
+            self._name = "&rarr;"
+          elif typeOfNode == "Tau":
+            self._name = "&tau;"
+          if "Loop" in typeOfNode:
+            self._name = self._name + " Loop"
         self._isRoot = False
+
+    def EscapeCharacters(self, name):
+      result = name.replace('|', '\n')
+      result = result.replace('&', '\amp;')
+      result = result.replace('<', '&lt;')
+      result = result.replace('>', '&gt;')
+      result = result.replace('"', '&quot;')
+      result = result.replace('`', '&apos;')
+      result = result.replace('ë', '&euml;')
+      return result
 
     def GetId(self):
         return self._id

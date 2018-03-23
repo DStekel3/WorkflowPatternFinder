@@ -186,7 +186,11 @@ namespace WorkflowPatternFinder
           {
             var path = kvp.Key;
             var score = kvp.Value;
-            ValidOccurencesList.Items.Add($"{path}\t\t\t{score.Substring(0, 5)}");
+            if(score.Length > 1)
+            {
+              score = score.Substring(0, 5);
+            }
+            ValidOccurencesList.Items.Add($"{path}\t\t\t{score}");
           }
 
         }
@@ -208,8 +212,18 @@ namespace WorkflowPatternFinder
 
     private void ValidOccurencesList_DoubleClick(object sender, MouseButtonEventArgs e)
     {
-      var selectedFile = ValidOccurencesList.SelectedItem.ToString().Split('\t').First();
-      OpenFileInNotePad(selectedFile);
+      var selectedFile = ValidOccurencesList.SelectedItem?.ToString().Split('\t').First();
+      if(File.Exists(selectedFile))
+      {
+        if(e.ChangedButton == MouseButton.Right)
+        {
+          RenderTreeInPython(selectedFile);
+        }
+        else
+        {
+          OpenFileInNotePad(selectedFile);
+        }
+      }
     }
 
     private void ImportTreeLabel_DoubleClick(object sender, MouseButtonEventArgs e)
@@ -221,7 +235,17 @@ namespace WorkflowPatternFinder
     private void ImportPatternLabel_DoubleClick(object sender, MouseButtonEventArgs e)
     {
       var selectedFile = ImportPatternLabel.Content.ToString();
-      OpenFileInNotePad(selectedFile);
+      if(File.Exists(selectedFile))
+      {
+        if(e.ChangedButton == MouseButton.Right)
+        {
+          RenderTreeInPython(selectedFile);
+        }
+        else if(e.ChangedButton == MouseButton.Left)
+        {
+          OpenFileInNotePad(selectedFile);
+        }
+      }
     }
 
     private void PreProcessingButton_Click(object sender, RoutedEventArgs e)
@@ -388,10 +412,7 @@ namespace WorkflowPatternFinder
 
     private void OpenFileInNotePad(string filePath)
     {
-      if(File.Exists(filePath))
-      {
-        Process.Start(_notePadPath, filePath);
-      }
+      Process.Start(_notePadPath, filePath);
     }
 
     private void OpenDirectoryInExplorer(string directoryPath)
@@ -482,6 +503,21 @@ namespace WorkflowPatternFinder
           UpdateButtonText(TrainModelButton, _incorrectFile, 3000);
         }
       }
+    }
+
+    private void RenderTreeInPython(string filePath)
+    {
+      var scriptPath = @"C:\Users\dst\Source\Repos\WorkflowPatternFinder\WorkflowPatternFinder\Gensim\RenderTree.py";
+
+      ProcessStartInfo start = new ProcessStartInfo
+      {
+        FileName = Program.GetPythonExe(),
+        Arguments = $"\"{scriptPath}\" \"{filePath}\"",
+        UseShellExecute = false,
+        RedirectStandardOutput = true
+      };
+
+      Process.Start(start);
     }
   }
 }

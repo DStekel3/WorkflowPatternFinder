@@ -22,6 +22,9 @@ class ProcessTree(object):
             if node.GetId() == id:
                 return node
         raise ValueError('This node cannot be found!')
+  
+    def GetNodes(self):
+        return self._nodes
 
     def GetId(self):
         return self._id

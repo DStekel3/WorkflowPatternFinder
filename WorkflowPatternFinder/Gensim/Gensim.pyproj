@@ -42,6 +42,10 @@
     <Compile Include="Query.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="RenderPetriNet.py" />
+    <Compile Include="RenderTree.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="SubTreeFinder.py">
       <SubType>Code</SubType>
     </Compile>

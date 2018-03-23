@@ -15,16 +15,17 @@ namespace WorkflowEventLogFixer
     private static string _baseCsvFileDirectory = Path.Combine(_baseDirectory, "csv");
     private static string _baseXesFileDirectory = Path.Combine(_baseDirectory, "xes");
     private static string _basePtmlFileDirectory = Path.Combine(_baseDirectory, "ptml");
+    private static string _basePnmlFileDirectory = Path.Combine(_baseDirectory, "pnml");
     private static string _pythonExe = "";
     private static string _javaExe = "";
     private static string _word2VecScriptFile = @"C:\Users\dst\Source\Repos\WorkflowPatternFinder\WorkflowPatternFinder\Gensim\TrainWord2VecModel.py";
     private static string _processTreeScriptFile = @"C:\Users\dst\eclipse-workspace\ProM\ProcessTreeMiner.txt";
-
+    private static string _petriNetScriptFile = @"C:\Users\dst\eclipse-workspace\ProM\PetriNetMiner.txt";
 
     //convert each event log to:
     // 1. A csv-file, which is filtered on workflow instances.
     // 2. A xes-file, which is needed for further workflow analysis.
-    
+
 
     public static void Main(string[] args)
     {
@@ -66,6 +67,7 @@ namespace WorkflowEventLogFixer
       _baseCsvFileDirectory = Path.Combine(_baseDirectory, "csv");
       _baseXesFileDirectory = Path.Combine(_baseDirectory, "xes");
       _basePtmlFileDirectory = Path.Combine(_baseDirectory, "ptml");
+      _basePnmlFileDirectory = Path.Combine(_baseDirectory, "pnml");
 
       CreateDirectoriesIfNeeded();
 
@@ -75,21 +77,78 @@ namespace WorkflowEventLogFixer
 
         var files = Directory.EnumerateFiles(_baseDirectory).Where(c => c.EndsWith(".xlsx")).ToList();
 
-        for(int t = 0; t < files.Count; t++)
-        {
-          var file = files[t];
-          Console.WriteLine($"Busy with {Path.GetFileNameWithoutExtension(file)}...({t + 1}/{files.Count})");
-          SplitExcelFileIntoSeparateWorkflowLogs(file);
-        }
+        //for(int t = 0; t < files.Count; t++)
+        //{
+        //  var file = files[t];
+        //  Console.WriteLine($"Busy with {Path.GetFileNameWithoutExtension(file)}...({t + 1}/{files.Count})");
+        //  SplitExcelFileIntoSeparateWorkflowLogs(file);
+        //}
 
         // Apply word2vec throughout the workflow logs and give similar events similar names.
-        ApplyWord2VecThroughGensimScript(_baseCsvFileDirectory);
+        //ApplyWord2VecThroughGensimScript(_baseCsvFileDirectory);
 
-        Console.WriteLine("Creating XES files...");
-        ConvertCsvToXesFiles(_baseCsvFileDirectory, _baseXesFileDirectory);
+        //Console.WriteLine("Creating XES files...");
+        //ConvertCsvToXesFiles(_baseCsvFileDirectory, _baseXesFileDirectory);
 
         UpdatePathsInProcessTreeScript(_processTreeScriptFile, _baseXesFileDirectory, _basePtmlFileDirectory);
         CreatePtmlFiles(_processTreeScriptFile);
+
+        UpdatePathsInPetriNetScript(_petriNetScriptFile, _baseXesFileDirectory, _basePnmlFileDirectory);
+        CreatePnmlFiles(_petriNetScriptFile);
+      }
+    }
+
+    private static void CreatePnmlFiles(string petriNetScriptFile)
+    {
+      Process process = new Process();
+      ProcessStartInfo startInfo = new ProcessStartInfo
+      {
+        CreateNoWindow = true,
+        WorkingDirectory = Path.GetDirectoryName(petriNetScriptFile) ?? throw new InvalidOperationException(),
+        FileName = "ProM_CLI.bat",
+        Arguments = $"-f {Path.GetFileName(petriNetScriptFile)}"
+      };
+      process.StartInfo = startInfo;
+      process.Start();
+      process.WaitForExit();
+    }
+
+    private static void UpdatePathsInPetriNetScript(string scriptPath, string xesDirectoryPath, string basePnmlFileDirectory)
+    {
+      // new path lines in script
+      string xesLineToWrite = $"xesDirectoryPath = \"{xesDirectoryPath}\\\";".Replace("\\", "\\\\");
+      string ptmlLineToWrite = $"pnmlDirectoryPath = \"{basePnmlFileDirectory}\\\";".Replace("\\", "\\\\");
+
+      if(File.Exists(scriptPath))
+      {
+        string[] lines = File.ReadAllLines(scriptPath);
+
+        if(lines.Length > 0)
+        {
+          // Write the new file over the old file.
+          using(StreamWriter writer = new StreamWriter(scriptPath))
+          {
+            for(int currentLine = 0; currentLine < lines.Length; currentLine++)
+            {
+              if(currentLine == 2)
+              {
+                writer.WriteLine(xesLineToWrite);
+              }
+              else if(currentLine == 3)
+              {
+                writer.WriteLine(ptmlLineToWrite);
+              }
+              else
+              {
+                writer.WriteLine(lines[currentLine]);
+              }
+            }
+          }
+        }
+        else
+        {
+          throw new Exception("Script is empty.");
+        }
       }
     }
 
@@ -190,6 +249,10 @@ namespace WorkflowEventLogFixer
       {
         Directory.CreateDirectory(_basePtmlFileDirectory);
       }
+      if(!Directory.Exists(_basePnmlFileDirectory))
+      {
+        Directory.CreateDirectory(_basePnmlFileDirectory);
+      }
     }
 
     /// <summary>
@@ -202,17 +265,13 @@ namespace WorkflowEventLogFixer
       ProcessStartInfo startInfo = new ProcessStartInfo
       {
         CreateNoWindow = true,
-        WindowStyle = ProcessWindowStyle.Maximized,
         WorkingDirectory = Path.GetDirectoryName(processTreeScriptFile) ?? throw new InvalidOperationException(),
         FileName = "ProM_CLI.bat",
-        Arguments = "-f ProcessTreeMiner.txt"
+        Arguments = $"-f {Path.GetFileName(processTreeScriptFile)}"
       };
       process.StartInfo = startInfo;
       process.Start();
       process.WaitForExit();
-
-      process.CloseMainWindow();
-      process.Close();
     }
 
     private static void SplitExcelFileIntoSeparateWorkflowLogs(string file)
