@@ -12,21 +12,26 @@ from os.path import isfile, join
 
 if len(sys.argv) == 2:
   tree = ProcessTreeLoader.LoadTree(sys.argv[1])
-  nodelist = tree.GetNodes()
+  #nodelist = tree.GetNodes()
 
   dot = Digraph(comment='Workflow Model')
 
-  for node in nodelist:
-    dot.node(node.GetId(), node.GetEvent())
-  
-  for node in nodelist:
-    children = node.GetChildren()    
-    if any(children):
-      for child in children:
-        dot.edge(node.GetId(), child.GetId())
+  root = tree.GetRoot()
+  nodelist = [root]
+  while any(nodelist):
+    currentNode = nodelist.pop(0)
+    dot.node(currentNode.GetId(), currentNode.GetEvent())
+    parent = currentNode.GetParent()
+    if parent:
+      dot.edge(parent.GetId(), currentNode.GetId())
+    for child in currentNode.GetChildren():
+      nodelist.append(child)
+    
   print(dot.source)
   dot.render(tree.GetId()+".gv", view=True)
        
+
+### example graph:
 #dot = Digraph(comment='The Round Table')
 #dot.node('A', 'King Arthur')
 #dot.node('B', 'Sir Bedevere the Wise')

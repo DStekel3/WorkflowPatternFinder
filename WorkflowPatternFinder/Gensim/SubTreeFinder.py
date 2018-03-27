@@ -92,7 +92,7 @@ class SubTreeFinder(object):
     tSiblings = tNode.GetSiblings()
     for pSibling in pSiblings:
       for tSibling in tSiblings:
-        if self.IsTupleTrue(self.AreSimilar(pSiblings, tSiblings)):
+        if self.IsTupleTrue(self.AreSimilar(pSibling, tSibling)):
           similars.append(True)
     if len(similars) == len(pSiblings):
       return True
