@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Security.Policy;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Forms;
@@ -30,6 +28,7 @@ namespace WorkflowPatternFinder
     private string _promScriptPath;
     private string _incorrectDir = "Incorrect directory!";
     private string _incorrectFile = "Incorrect file!";
+    private List<PatternObject> _foundPatterns = new List<PatternObject>();
 
     public MainWindow()
     {
@@ -116,7 +115,6 @@ namespace WorkflowPatternFinder
         return;
       }
       TreeStartButton.Content = "Busy...";
-
       ChangeEnabledTreeButtons(false);
       TreeProgressBar.IsIndeterminate = true;
 
@@ -130,7 +128,6 @@ namespace WorkflowPatternFinder
           SubTreeFinder.SetPythonExe(Program.GetPythonExe());
         }
       }
-
       var validSubTrees = CallGensim(induced, threshold);
       ResultDebug.Content = $"Found {validSubTrees.Count} model(s) that contain the given pattern.";
 
@@ -141,9 +138,8 @@ namespace WorkflowPatternFinder
       TreeProgressBar.IsIndeterminate = false;
     }
 
-    private List<string> CallGensim(bool induced, double simThreshold)
+    private List<PatternObject> CallGensim(bool induced, double simThreshold)
     {
-      List<string> properSubTrees = new List<string>();
       var treeBasePath = ImportTreeLabel.Content.ToString();
       var patternPath = ImportPatternLabel.Content.ToString();
       var modelPath = Path.Combine(Directory.GetParent(ImportTreeLabel.Content.ToString()).FullName, "trained.gz");
@@ -172,11 +168,14 @@ namespace WorkflowPatternFinder
           {
             if(!string.IsNullOrEmpty(validTree))
             {
-              var treePath = validTree.Split(',')[0];
-              var score = validTree.Split(',')[1];
+              var splittedResult = validTree.Split(',');
+              var treePath = splittedResult[0];
+              var score = splittedResult[1];
+              var patternMembers = splittedResult.Skip(2).ToList();
+
               if(File.Exists(treePath))
               {
-                properSubTrees.Add(treePath);
+                _foundPatterns.Add(new PatternObject(treePath, score, patternMembers));
                 validOutput.Add(treePath, score);
                 Debug.WriteLine($"{treePath} is a subtree!");
               }
@@ -186,16 +185,15 @@ namespace WorkflowPatternFinder
           {
             var path = kvp.Key;
             var score = kvp.Value;
-            if(score.Length > 1)
+            if(score.Length > 3)
             {
               score = score.Substring(0, 5);
             }
             ValidOccurencesList.Items.Add($"{path}\t\t\t{score}");
           }
-
         }
       }
-      return properSubTrees;
+      return _foundPatterns;
     }
 
     private void InducedCheckBox_Click(object sender, RoutedEventArgs e)
@@ -215,11 +213,13 @@ namespace WorkflowPatternFinder
       var selectedFile = ValidOccurencesList.SelectedItem?.ToString().Split('\t').First();
       if(File.Exists(selectedFile))
       {
-        if(e.ChangedButton == MouseButton.Right)
+        var selectedPattern = _foundPatterns.Single(p => p.FilePath == selectedFile);
+        var patternMembers = string.Join(",", selectedPattern.Ids);
+        if(e.ChangedButton == MouseButton.Left)
         {
-          RenderTreeInPython(selectedFile);
+          RenderTreeInPython(selectedFile, patternMembers);
         }
-        else
+        else if(e.ChangedButton == MouseButton.Right)
         {
           OpenFileInNotePad(selectedFile);
         }
@@ -237,11 +237,11 @@ namespace WorkflowPatternFinder
       var selectedFile = ImportPatternLabel.Content.ToString();
       if(File.Exists(selectedFile))
       {
-        if(e.ChangedButton == MouseButton.Right)
+        if(e.ChangedButton == MouseButton.Left)
         {
           RenderTreeInPython(selectedFile);
         }
-        else if(e.ChangedButton == MouseButton.Left)
+        else if(e.ChangedButton == MouseButton.Right)
         {
           OpenFileInNotePad(selectedFile);
         }
@@ -369,6 +369,7 @@ namespace WorkflowPatternFinder
 
     private void ClearValidOccurencesList()
     {
+      _foundPatterns.Clear();
       ValidOccurencesList.Items.Clear();
     }
 
@@ -505,19 +506,34 @@ namespace WorkflowPatternFinder
       }
     }
 
-    private void RenderTreeInPython(string filePath)
+    private void RenderTreeInPython(string filePath, string patternMembers = "")
     {
       var scriptPath = @"C:\Users\dst\Source\Repos\WorkflowPatternFinder\WorkflowPatternFinder\Gensim\RenderTree.py";
 
       ProcessStartInfo start = new ProcessStartInfo
       {
         FileName = Program.GetPythonExe(),
-        Arguments = $"\"{scriptPath}\" \"{filePath}\"",
-        UseShellExecute = false,
-        RedirectStandardOutput = true
+        Arguments = $"\"{scriptPath}\" \"{filePath}\" \"{patternMembers}\"",
+        UseShellExecute = false
       };
 
-      Process.Start(start);
+      Process.Start(start)?.WaitForExit();
+      Activate();
+    }
+
+    private void ValidOccurencesList_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+    {
+      if(e.Key == Key.Enter)
+      {
+        var selectedItem = ValidOccurencesList.SelectedItem;
+        var selectedFile = selectedItem?.ToString().Split('\t').First();
+        if(File.Exists(selectedFile))
+        {
+          var selectedPattern = _foundPatterns.Single(p => p.FilePath == selectedFile);
+          var patternMembers = string.Join(",", selectedPattern.Ids);
+          RenderTreeInPython(selectedFile, patternMembers);
+        }
+      }
     }
   }
 }

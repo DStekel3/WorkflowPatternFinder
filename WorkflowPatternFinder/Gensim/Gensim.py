@@ -32,14 +32,15 @@ if len(sys.argv) == 6:
         finder.SetTrainedModelPath(modelPath)
         finder.SetSimilarityThreshold(simThreshold)
         result = finder.IsValidSubTree(tree, pattern, induced)
+        # find a way to return pattern members, such that you can track back which nodes are part of the pattern
         if result[0]:
-            validTrees.append((treePath, result[1]))
+            validTrees.append((treePath, result[1], result[2]))
         print("Final result:" + str(result))
     
     if len(validTrees) > 0:
         print("Valid trees:")
-        for path, score in validTrees:
-            print(path + "," + str(score))
+        for path, score, patternMembers in validTrees:
+            print(path + "," + str(score)+","+",".join(patternMembers))
 else:
   print("False number of arguments")
 
