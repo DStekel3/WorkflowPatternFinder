@@ -8,17 +8,21 @@ import os
 from os import listdir
 from os.path import isfile, join
 
+flatten = lambda x: [item for sublist in x for item in sublist]
+
 for arg in sys.argv:
     print(arg)
-if len(sys.argv) == 6:
+if len(sys.argv) == 7:
     modelPath = sys.argv[1]
     treeBasePath = sys.argv[2]
     patternPath = sys.argv[3]
     induced = False
+    countPatterns = False
     if sys.argv[4] == 'True':
         induced = True
     simThreshold = float(sys.argv[5])
-
+    if sys.argv[6] == 'True':
+      countPatterns = True
     validTrees = []
     allFilePaths = [join(treeBasePath, f) for f in listdir(treeBasePath) if isfile(join(treeBasePath, f))]
     allTreePaths = [f for f in allFilePaths if str(f).endswith('ptml')]
@@ -31,12 +35,16 @@ if len(sys.argv) == 6:
         finder = SubTreeFinder()
         finder.SetTrainedModelPath(modelPath)
         finder.SetSimilarityThreshold(simThreshold)
-        result = finder.IsValidSubTree(tree, pattern, induced)
-        # find a way to return pattern members, such that you can track back which nodes are part of the pattern
-        if result[0]:
-            validTrees.append((treePath, result[1], result[2]))
-        print("Final result:" + str(result))
-    
+        if not countPatterns:
+          result = finder.IsValidSubTree(tree, pattern, induced)
+          if result[0]:
+              validTrees.append((treePath, result[1], result[2]))
+          print("Final result:" + str(result))
+        else:
+          result = finder.GetValidSubTrees(tree, pattern, induced)
+          if any(result):
+            validTrees.append((treePath, len(result), flatten(result)))
+          # Implement that script returns number of patterns instead of score of pattern
     if len(validTrees) > 0:
         print("Valid trees:")
         for path, score, patternMembers in validTrees:

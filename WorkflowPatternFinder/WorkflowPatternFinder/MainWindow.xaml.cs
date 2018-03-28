@@ -14,6 +14,7 @@ using OpenFileDialog = System.Windows.Forms.OpenFileDialog;
 using Button = System.Windows.Controls.Button;
 using DataFormats = System.Windows.Forms.DataFormats;
 using Timer = System.Windows.Forms.Timer;
+using IronPython.Runtime.Operations;
 
 namespace WorkflowPatternFinder
 {
@@ -23,6 +24,7 @@ namespace WorkflowPatternFinder
   public partial class MainWindow : Window
   {
     private bool _treatAsInducedSubTree = false;
+    private bool _countNumberOfPatternsWithinModel = false;
     private string _notePadPath;
     private string _importExcelDir;
     private string _promScriptPath;
@@ -90,7 +92,7 @@ namespace WorkflowPatternFinder
     {
       OpenFileDialog ofd = new OpenFileDialog();
       ofd.DefaultExt = ".ptml";
-      ofd.Title = "Select a file containing your pattern (.ptml).";
+      ofd.Title = "Select a file containing your process tree pattern (.ptml format).";
       ofd.FileName = @"C:\Users\dst\Source\Repos\WorkflowPatternFinder\WorkflowPatternFinder\WorkflowPatternFinder\Example Patterns\testPattern.ptml";
       DialogResult result = ofd.ShowDialog();
       if(result == System.Windows.Forms.DialogResult.OK)
@@ -109,6 +111,7 @@ namespace WorkflowPatternFinder
     private void TreeStartButton_Click(object sender, RoutedEventArgs e)
     {
       ClearValidOccurencesList();
+      UpdateListSummaryLabel();
       if(!PathsExists() || !double.TryParse(SimTresholdValue.Text.Replace('.', ','), out double threshold))
       {
         UpdateButtonText(TreeStartButton, "Incorrect inputs!");
@@ -133,7 +136,6 @@ namespace WorkflowPatternFinder
 
       TreeStartButton.Content = "Start mining...";
       UpdateButtonText(TreeStartButton, "Done!");
-      ClearDebugLabel();
       ChangeEnabledTreeButtons(true);
       TreeProgressBar.IsIndeterminate = false;
     }
@@ -148,7 +150,7 @@ namespace WorkflowPatternFinder
       ProcessStartInfo start = new ProcessStartInfo
       {
         FileName = Program.GetPythonExe(),
-        Arguments = $"\"{scriptPath}\" \"{modelPath}\" \"{treeBasePath}\" \"{patternPath}\" \"{induced}\" \"{simThreshold.ToString().Replace(",", ".")}\"",
+        Arguments = $"\"{scriptPath}\" \"{modelPath}\" \"{treeBasePath}\" \"{patternPath}\" \"{induced}\" \"{simThreshold.ToString().Replace(",", ".")}\" \"{_countNumberOfPatternsWithinModel}\"",
         UseShellExecute = false,
         RedirectStandardOutput = true
       };
@@ -163,7 +165,7 @@ namespace WorkflowPatternFinder
           foreach(var line in lines)
             Debug.WriteLine(line);
           var validSubTrees = lines.SkipWhile(c => !c.StartsWith("Valid trees:")).Skip(1);
-          var validOutput = new Dictionary<string, string>();
+          var validOutput = new Dictionary<string, double>();
           foreach(string validTree in validSubTrees)
           {
             if(!string.IsNullOrEmpty(validTree))
@@ -176,7 +178,7 @@ namespace WorkflowPatternFinder
               if(File.Exists(treePath))
               {
                 _foundPatterns.Add(new PatternObject(treePath, score, patternMembers));
-                validOutput.Add(treePath, score);
+                validOutput.Add(treePath, double.Parse(score.Replace(".", ",")));
                 Debug.WriteLine($"{treePath} is a subtree!");
               }
             }
@@ -184,11 +186,8 @@ namespace WorkflowPatternFinder
           foreach(var kvp in validOutput.OrderByDescending(c => c.Value))
           {
             var path = kvp.Key;
-            var score = kvp.Value;
-            if(score.Length > 3)
-            {
-              score = score.Substring(0, 5);
-            }
+            var score = Math.Round(kvp.Value, 2);
+            
             ValidOccurencesList.Items.Add($"{path}\t\t\t{score}");
           }
         }
@@ -217,7 +216,8 @@ namespace WorkflowPatternFinder
         var patternMembers = string.Join(",", selectedPattern.Ids);
         if(e.ChangedButton == MouseButton.Left)
         {
-          RenderTreeInPython(selectedFile, patternMembers);
+          var workflowName = GetWorkflowName(selectedFile);
+          RenderTreeInPython(selectedFile, patternMembers, workflowName);
         }
         else if(e.ChangedButton == MouseButton.Right)
         {
@@ -365,6 +365,7 @@ namespace WorkflowPatternFinder
       ImportPatternButton.IsEnabled = isEnabled;
       ImportTreeButton.IsEnabled = isEnabled;
       InducedCheckBox.IsEnabled = isEnabled;
+      CountCheckBox.IsEnabled = isEnabled;
     }
 
     private void ClearValidOccurencesList()
@@ -506,19 +507,28 @@ namespace WorkflowPatternFinder
       }
     }
 
-    private void RenderTreeInPython(string filePath, string patternMembers = "")
+    private void RenderTreeInPython(string filePath, string patternMembers = "", string workflowName = "")
     {
       var scriptPath = @"C:\Users\dst\Source\Repos\WorkflowPatternFinder\WorkflowPatternFinder\Gensim\RenderTree.py";
 
       ProcessStartInfo start = new ProcessStartInfo
       {
         FileName = Program.GetPythonExe(),
-        Arguments = $"\"{scriptPath}\" \"{filePath}\" \"{patternMembers}\"",
+        Arguments = $"\"{scriptPath}\" \"{filePath}\" \"{patternMembers}\" \"{workflowName}\"",
         UseShellExecute = false
       };
 
       Process.Start(start)?.WaitForExit();
       Activate();
+    }
+
+    private string GetWorkflowName(string filePath)
+    {
+      var workflowNameFile = Path.Combine(Path.GetDirectoryName(Path.GetDirectoryName(filePath)), "workflownames.csv");
+      var names = File.ReadAllLines(workflowNameFile);
+      var fileKey = Path.GetFileNameWithoutExtension(filePath);
+      var workflowName = names.First(r => r.Split(';')[0] == fileKey).Split(';')[1];
+      return workflowName;
     }
 
     private void ValidOccurencesList_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
@@ -533,6 +543,33 @@ namespace WorkflowPatternFinder
           var patternMembers = string.Join(",", selectedPattern.Ids);
           RenderTreeInPython(selectedFile, patternMembers);
         }
+      }
+    }
+
+    private void CountCheckBox_Click(object sender, RoutedEventArgs e)
+    {
+      if(CountCheckBox.IsChecked == true)
+      {
+        _countNumberOfPatternsWithinModel = true;
+      }
+      else
+      {
+        _countNumberOfPatternsWithinModel = false;
+      }
+    }
+
+    private void UpdateListSummaryLabel()
+    {
+      var sep = "\t\t\t\t\t\t";
+      if(CountCheckBox.IsChecked == true)
+      {
+        _countNumberOfPatternsWithinModel = true;
+        ListSummaryLabel.Content = $"Patterns found (file path){sep}# of occurrences";
+      }
+      else
+      {
+        _countNumberOfPatternsWithinModel = false;
+        ListSummaryLabel.Content = $"Patterns found (file path){sep}Similarity Score";
       }
     }
   }

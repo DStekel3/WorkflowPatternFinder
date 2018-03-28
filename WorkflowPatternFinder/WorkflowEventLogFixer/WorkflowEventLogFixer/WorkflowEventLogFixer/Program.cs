@@ -77,18 +77,28 @@ namespace WorkflowEventLogFixer
 
         var files = Directory.EnumerateFiles(_baseDirectory).Where(c => c.EndsWith(".xlsx")).ToList();
 
-        //for(int t = 0; t < files.Count; t++)
-        //{
-        //  var file = files[t];
-        //  Console.WriteLine($"Busy with {Path.GetFileNameWithoutExtension(file)}...({t + 1}/{files.Count})");
-        //  SplitExcelFileIntoSeparateWorkflowLogs(file);
-        //}
+        var workflowNames = new Dictionary<string, string>();
 
-        // Apply word2vec throughout the workflow logs and give similar events similar names.
-        //ApplyWord2VecThroughGensimScript(_baseCsvFileDirectory);
+        for(int t = 0; t < files.Count; t++)
+        {
+          var file = files[t];
+          Console.WriteLine($"Busy with {Path.GetFileNameWithoutExtension(file)}...({t + 1}/{files.Count})");
+          var workflowNamesFound = SplitExcelFileIntoSeparateWorkflowLogs(file);
+          foreach(var name in workflowNamesFound)
+          {
+            workflowNames.Add(name.Key, name.Value);
+          }
+        }
 
-        //Console.WriteLine("Creating XES files...");
-        //ConvertCsvToXesFiles(_baseCsvFileDirectory, _baseXesFileDirectory);
+        // Write workflow descriptions to a separate file. This way, we can find the name of a workflow model by reading within this file.
+        var workflowNameFile = Path.Combine(_baseDirectory, "workflownames.csv");
+        WriteWorkflowNamesToFile(workflowNames, workflowNameFile);
+
+        //Apply word2vec throughout the workflow logs and give similar events similar names.
+        ApplyWord2VecThroughGensimScript(_baseCsvFileDirectory);
+
+        Console.WriteLine("Creating XES files...");
+        ConvertCsvToXesFiles(_baseCsvFileDirectory, _baseXesFileDirectory);
 
         UpdatePathsInProcessTreeScript(_processTreeScriptFile, _baseXesFileDirectory, _basePtmlFileDirectory);
         CreatePtmlFiles(_processTreeScriptFile);
@@ -274,15 +284,30 @@ namespace WorkflowEventLogFixer
       process.WaitForExit();
     }
 
-    private static void SplitExcelFileIntoSeparateWorkflowLogs(string file)
+    private static Dictionary<string,string> SplitExcelFileIntoSeparateWorkflowLogs(string file)
     {
       var events = GetEvents(file);
       var groups = events.GroupBy(e => e.WorkflowID);
+      Dictionary<string, string> workflowNames = new Dictionary<string, string>();
       foreach(var group in groups)
       {
         string csvFile = $"{Path.Combine(_baseCsvFileDirectory, Path.GetFileNameWithoutExtension(file) ?? throw new InvalidOperationException())}-{group.Key}.csv";
+        workflowNames.Add(Path.GetFileNameWithoutExtension(csvFile), group.First().WorkflowOmschrijving);
         var filteredEvents = FilterEvents(group.ToList());
         WriteCsv(filteredEvents, csvFile);
+      }
+      return workflowNames;
+    }
+
+    private static void WriteWorkflowNamesToFile(Dictionary<string, string> workflowNames, string workflowNameFile)
+    {
+      using(var writer = new StreamWriter(workflowNameFile))
+      {
+        foreach(var name in workflowNames)
+        {
+          var row = $"{name.Key};{name.Value}";
+          writer.WriteLine(row);
+        }
       }
     }
 

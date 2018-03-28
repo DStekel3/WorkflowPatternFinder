@@ -23,7 +23,26 @@ class SubTreeFinder(object):
     tNode = tree.GetRoot()
     pNode = pattern.GetRoot()
     return self.DoesBranchContainPattern(tNode, pNode, induced)
-    
+
+  def GetValidSubTrees(self, tree, pattern, induced=False):
+    flatten = lambda x: [item for sublist in x for item in sublist]
+    pNode = pattern.GetRoot()
+    treeNodes = tree.GetNodes()
+    allPatterns = []
+    for tNode in treeNodes:
+      if tNode.GetId() not in allPatterns:
+        result = self.DoesBranchContainPattern(tNode, pNode, induced)
+        if result[0]:
+          if result[2]:
+            newPattern = True
+            for member in result[2]:
+              if member in flatten(allPatterns):
+                newPattern = False
+                break
+            if newPattern:
+              allPatterns.append(result[2])            
+    return allPatterns
+
   def DoesBranchContainPattern(self, tNode, pNode, induced=False):
     patternMembers = []
     simTuple = self.AreSimilar(tNode, pNode)    
@@ -35,12 +54,15 @@ class SubTreeFinder(object):
       if self.IsTupleTrue(siblings):
         if(any(pChildren)):
           pFound = []
+          treeIds = []
           for patternChild in pChildren:
             for treeChild in tChildren:
-              patternChildFound = self.DoesBranchContainPattern(treeChild, patternChild, induced)
-              if self.IsTupleTrue(patternChildFound):
-                  pFound.append((self.GetScore(patternChildFound), self.GetPatternMembers(patternChildFound)))
-                  break
+              if treeChild.GetId() not in treeIds:
+                patternChildFound = self.DoesBranchContainPattern(treeChild, patternChild, induced)
+                if self.IsTupleTrue(patternChildFound):
+                    pFound.append((self.GetScore(patternChildFound), self.GetPatternMembers(patternChildFound)))
+                    treeIds.append(treeChild.GetId())
+                    break
           if len(pFound) == len(pChildren):
               for node in pFound:
                 patternMembers.extend(node[1])

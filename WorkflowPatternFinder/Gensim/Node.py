@@ -16,7 +16,7 @@ class Node(object):
           if "Xor" in typeOfNode:
             self._name = "X"
           elif "And" in typeOfNode:
-            self._name = "&plus;"
+            self._name = "+"
           elif "Sequence" in typeOfNode:
             self._name = "&rarr;"
           elif typeOfNode == "Tau":

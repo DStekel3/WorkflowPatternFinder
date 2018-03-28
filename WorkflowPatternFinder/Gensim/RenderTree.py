@@ -11,9 +11,10 @@ from SubTreeFinder import *
 from os import listdir
 from os.path import isfile, join
 
-if len(sys.argv) == 3:
+if len(sys.argv) == 4:
   tree = ProcessTreeLoader.LoadTree(sys.argv[1])
   patternMembers = sys.argv[2].split(',')
+  workflowName = sys.argv[3]
 
   dot = Digraph(comment='Workflow Model')
 
@@ -32,7 +33,7 @@ if len(sys.argv) == 3:
       nodelist.append(child)
     
   print(dot.source)
-  dot.render(tree.GetId()+str(random.randint(1,100001))+".gv", view=True)
+  dot.render(workflowName+str(random.randint(1,100001))+".gv", view=True)
   
 exit
 ### example graph:
@@ -44,4 +45,3 @@ exit
 #dot.edge('B', 'L', constraint='false')
 #print(dot.source) 
 #dot.render("tree_output/tree.gv", view=True)
-
