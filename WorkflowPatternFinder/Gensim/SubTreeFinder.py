@@ -50,8 +50,7 @@ class SubTreeFinder(object):
       patternMembers = [tNode.GetId()]
       pChildren = pNode.GetChildren()
       tChildren = tNode.GetChildren()
-      siblings = self.ContainsSiblings(tNode, pNode)
-      if self.IsTupleTrue(siblings):
+      if True:
         if(any(pChildren)):
           pFound = []
           treeIds = []

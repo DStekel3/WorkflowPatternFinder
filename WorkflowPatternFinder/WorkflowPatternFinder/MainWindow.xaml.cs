@@ -28,6 +28,7 @@ namespace WorkflowPatternFinder
     private string _notePadPath;
     private string _importExcelDir;
     private string _promScriptPath;
+    private string _noiseThreshold;
     private string _incorrectDir = "Incorrect directory!";
     private string _incorrectFile = "Incorrect file!";
     private List<PatternObject> _foundPatterns = new List<PatternObject>();
@@ -187,7 +188,7 @@ namespace WorkflowPatternFinder
           {
             var path = kvp.Key;
             var score = Math.Round(kvp.Value, 2);
-            
+
             ValidOccurencesList.Items.Add($"{path}\t\t\t{score}");
           }
         }
@@ -253,6 +254,7 @@ namespace WorkflowPatternFinder
       ChangeEnabledPreProcessingButtons(false);
       _importExcelDir = ImportExcelDirectoryLabel.Content.ToString();
       _promScriptPath = PromScriptLabel.Content.ToString();
+      _noiseThreshold = InductiveMinerNoiseThresholdTextBox.Text;
 
       Task DoWork()
       {
@@ -268,7 +270,7 @@ namespace WorkflowPatternFinder
 
     void StartPreprocessing()
     {
-      Program.PreProcessingPhase(_importExcelDir, _promScriptPath);
+      Program.PreProcessingPhase(_importExcelDir, _promScriptPath, _noiseThreshold);
     }
 
     private void StartPreprocessingTask(Func<Task> task, Action completedTask = null)
@@ -571,6 +573,19 @@ namespace WorkflowPatternFinder
         _countNumberOfPatternsWithinModel = false;
         ListSummaryLabel.Content = $"Patterns found (file path){sep}Similarity Score";
       }
+    }
+
+    private void RemakeProcessTreesButton_Click(object sender, RoutedEventArgs e)
+    {
+      ChangeEnabledPreProcessingButtons(false);
+      _importExcelDir = ImportExcelDirectoryLabel.Content.ToString();
+      _promScriptPath = PromScriptLabel.Content.ToString();
+      var noiseThreshold = InductiveMinerNoiseThresholdTextBox.Text;
+      if(Directory.Exists(_importExcelDir) && File.Exists(_promScriptPath))
+      {
+        Program.RemakeProcessTrees(_importExcelDir, _promScriptPath, noiseThreshold);
+      }
+      ChangeEnabledPreProcessingButtons(true);
     }
   }
 }

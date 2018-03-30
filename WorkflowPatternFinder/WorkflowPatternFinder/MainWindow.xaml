@@ -13,11 +13,14 @@
         <Grid Background="#FFE5E5E5" UseLayoutRounding="False">
           <Label x:Name="ImportExcelDirectoryLabel" Content="Log directory..." HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="447" MouseDoubleClick="ImportExcelDirectoryLabel_DoubleClick" AllowDrop="True" DragDrop.Drop="ExcelDrop"/>
           <Button x:Name="ImportExcelDirectoryButton" Content="Import workflow logs" HorizontalAlignment="Left" Margin="10,36,0,0" VerticalAlignment="Top" Width="172" Click="ImportExcelDirectoryButton_Click" RenderTransformOrigin="0.615,0.6"/>
-          <Button x:Name="PreProcessingButton" Content="Start Processing..." HorizontalAlignment="Left" Margin="73,218,0,0" VerticalAlignment="Top" Width="190" Height="48" Click="PreProcessingButton_Click" Foreground="Black"/>
+          <Button x:Name="PreProcessingButton" Content="Start Pre-processing steps..." HorizontalAlignment="Left" Margin="73,218,0,0" VerticalAlignment="Top" Width="190" Height="48" Click="PreProcessingButton_Click" Foreground="Black" FontSize="14"/>
           <Label x:Name="PromScriptLabel" Content="Script location..." HorizontalAlignment="Left" Margin="10,61,0,0" VerticalAlignment="Top" Width="447" MouseDoubleClick="PromScriptLabel_DoubleClick"/>
           <Button x:Name="PromScriptButton" Content="Select Inductive Miner script" HorizontalAlignment="Left" Margin="10,87,0,0" VerticalAlignment="Top" Width="172" Click="PromScriptButton_Click" RenderTransformOrigin="0.615,0.6"/>
           <Label x:Name="ConsoleLabel" Content="Click start..." HorizontalAlignment="Left" Margin="73,290,0,0" VerticalAlignment="Top" Width="253"/>
           <ProgressBar x:Name="PreProgress" HorizontalAlignment="Left" Height="45" Margin="502,271,0,0" VerticalAlignment="Top" Width="410" IsIndeterminate="False"/>
+          <TextBox x:Name="InductiveMinerNoiseThresholdTextBox" HorizontalAlignment="Left" Height="29" Margin="224,122,0,0" TextWrapping="Wrap" Text="0.5" VerticalAlignment="Top" Width="58" FontSize="18" SpellCheck.IsEnabled="True" PreviewTextInput="CheckThresholdInput" RenderTransformOrigin="1.828,-0.713"/>
+          <Label x:Name="InductiveMinerThresholdLabel" Content="Inductive Miner Noise Threshold:" HorizontalAlignment="Left" Margin="10,124,0,0" VerticalAlignment="Top"/>
+          <Button x:Name="RemakeProcessTreesButton" Content="Remake process trees" HorizontalAlignment="Left" Margin="287,127,0,0" VerticalAlignment="Top" Width="150" Height="23" Click="RemakeProcessTreesButton_Click" Foreground="Black" FontSize="14"/>
         </Grid>
       </TabItem>
       <TabItem Header="Tree Finder" Margin="20,0,-24,-2">

@@ -58,16 +58,9 @@ namespace WorkflowEventLogFixer
       Console.WriteLine("Done.");
     }
 
-    public static void PreProcessingPhase(string importDir, string promScript)
+    public static void PreProcessingPhase(string importDir, string promScript, string noiseThreshold)
     {
-      _baseDirectory = importDir;
-      _processTreeScriptFile = promScript;
-
-      // update all directory paths
-      _baseCsvFileDirectory = Path.Combine(_baseDirectory, "csv");
-      _baseXesFileDirectory = Path.Combine(_baseDirectory, "xes");
-      _basePtmlFileDirectory = Path.Combine(_baseDirectory, "ptml");
-      _basePnmlFileDirectory = Path.Combine(_baseDirectory, "pnml");
+      InitializePaths(importDir, promScript);
 
       CreateDirectoriesIfNeeded();
 
@@ -100,12 +93,31 @@ namespace WorkflowEventLogFixer
         Console.WriteLine("Creating XES files...");
         ConvertCsvToXesFiles(_baseCsvFileDirectory, _baseXesFileDirectory);
 
-        UpdatePathsInProcessTreeScript(_processTreeScriptFile, _baseXesFileDirectory, _basePtmlFileDirectory);
+        UpdatePathsAndNoiseThresholdInProcessTreeScript(_processTreeScriptFile, _baseXesFileDirectory, _basePtmlFileDirectory, noiseThreshold);
         CreatePtmlFiles(_processTreeScriptFile);
 
         UpdatePathsInPetriNetScript(_petriNetScriptFile, _baseXesFileDirectory, _basePnmlFileDirectory);
         CreatePnmlFiles(_petriNetScriptFile);
       }
+    }
+
+    private static void InitializePaths(string importDir, string promScript)
+    {
+      _baseDirectory = importDir;
+      _processTreeScriptFile = promScript;
+
+      // update all directory paths
+      _baseCsvFileDirectory = Path.Combine(_baseDirectory, "csv");
+      _baseXesFileDirectory = Path.Combine(_baseDirectory, "xes");
+      _basePtmlFileDirectory = Path.Combine(_baseDirectory, "ptml");
+      _basePnmlFileDirectory = Path.Combine(_baseDirectory, "pnml");
+    }
+
+    public static void RemakeProcessTrees(string importDir, string promScript, string noiseThreshold)
+    {
+      InitializePaths(importDir, promScript);
+      UpdatePathsAndNoiseThresholdInProcessTreeScript(_processTreeScriptFile, _baseXesFileDirectory, _basePtmlFileDirectory, noiseThreshold);
+      CreatePtmlFiles(_processTreeScriptFile);
     }
 
     private static void CreatePnmlFiles(string petriNetScriptFile)
@@ -481,11 +493,12 @@ namespace WorkflowEventLogFixer
     /// <param name="scriptPath"></param>
     /// <param name="xesDirectoryPath">Directory which contains xes files. Used as input for the IM.</param>
     /// <param name="ptmlDirectoryPath">Directory where resulting ptml files are saved. Used as output for the IM.</param>
-    private static void UpdatePathsInProcessTreeScript(string scriptPath, string xesDirectoryPath, string ptmlDirectoryPath)
+    private static void UpdatePathsAndNoiseThresholdInProcessTreeScript(string scriptPath, string xesDirectoryPath, string ptmlDirectoryPath, string noiseThreshold = "0.5")
     {
       // new path lines in script
       string xesLineToWrite = $"xesDirectoryPath = \"{xesDirectoryPath}\\\";".Replace("\\", "\\\\");
       string ptmlLineToWrite = $"ptmlDirectoryPath = \"{ptmlDirectoryPath}\\\";".Replace("\\", "\\\\");
+      string noiseThresholdLine = $"parameters.setNoiseThreshold({noiseThreshold}f);";
 
       if(File.Exists(scriptPath))
       {
@@ -505,6 +518,10 @@ namespace WorkflowEventLogFixer
               else if(currentLine == 3)
               {
                 writer.WriteLine(ptmlLineToWrite);
+              }
+              else if(currentLine == 19)
+              {
+                writer.WriteLine(noiseThresholdLine);
               }
               else
               {
