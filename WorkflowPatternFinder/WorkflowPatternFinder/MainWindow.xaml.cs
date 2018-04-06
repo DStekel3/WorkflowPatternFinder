@@ -109,7 +109,7 @@ namespace WorkflowPatternFinder
       }
     }
 
-    private void TreeStartButton_Click(object sender, RoutedEventArgs e)
+    private void StartTreeButton_Click(object sender, RoutedEventArgs e)
     {
       ClearValidOccurencesList();
       UpdateListSummaryLabel();
@@ -148,6 +148,9 @@ namespace WorkflowPatternFinder
       var modelPath = Path.Combine(Directory.GetParent(ImportTreeLabel.Content.ToString()).FullName, "trained.gz");
       var scriptPath = @"C:\Users\dst\Source\Repos\WorkflowPatternFinder\WorkflowPatternFinder\Gensim\Gensim.py";
 
+      var timer = new Stopwatch();
+      timer.Start();
+
       ProcessStartInfo start = new ProcessStartInfo
       {
         FileName = Program.GetPythonExe(),
@@ -162,9 +165,11 @@ namespace WorkflowPatternFinder
         using(StreamReader reader = process?.StandardOutput)
         {
           string result = reader?.ReadToEnd();
+          timer.Stop();
           var lines = result.Replace("\r\n", "|").Split('|').ToList();
           foreach(var line in lines)
             Debug.WriteLine(line);
+          
           var validSubTrees = lines.SkipWhile(c => !c.StartsWith("Valid trees:")).Skip(1);
           var validOutput = new Dictionary<string, double>();
           foreach(string validTree in validSubTrees)
@@ -184,12 +189,19 @@ namespace WorkflowPatternFinder
               }
             }
           }
+          Debug.WriteLine($"The process took {timer.Elapsed.Seconds} seconds!");
           foreach(var kvp in validOutput.OrderByDescending(c => c.Value))
           {
             var path = kvp.Key;
             var score = Math.Round(kvp.Value, 2);
+            var tabs = "\t";
 
-            ValidOccurencesList.Items.Add($"{path}\t\t\t{score}");
+            // Shorter paths need more spacing in order for the score to line up nicely with the other results.
+            if(path.Length < 62)
+            {
+              tabs += "\t";
+            }
+            ValidOccurencesList.Items.Add($"{path}{tabs}{score}");
           }
         }
       }
@@ -208,13 +220,31 @@ namespace WorkflowPatternFinder
       }
     }
 
-    private void ValidOccurencesList_DoubleClick(object sender, MouseButtonEventArgs e)
+    private void ListBox_DoubleClick(object sender, MouseButtonEventArgs e)
     {
-      var selectedFile = ValidOccurencesList.SelectedItem?.ToString().Split('\t').First();
+      var listName = ((System.Windows.Controls.ListBox)sender).Name;
+      var selectedFile = "";
+      if(listName == "ProcessTreeList")
+      {
+        selectedFile = ProcessTreeList.SelectedItem?.ToString();
+      }
+      else if(listName == "ValidOccurencesList")
+      {
+        selectedFile = ValidOccurencesList.SelectedItem?.ToString().Split('\t').First();
+      }
+      else
+      {
+        return;
+      }
+
       if(File.Exists(selectedFile))
       {
-        var selectedPattern = _foundPatterns.Single(p => p.FilePath == selectedFile);
-        var patternMembers = string.Join(",", selectedPattern.Ids);
+        var patternMembers = "";
+        if(listName == "ValidOccurencesList")
+        {
+          var selectedPattern = _foundPatterns.Single(p => p.FilePath == selectedFile);
+          patternMembers = string.Join(",", selectedPattern.Ids);
+        }
         if(e.ChangedButton == MouseButton.Left)
         {
           var workflowName = GetWorkflowName(selectedFile);
@@ -293,6 +323,7 @@ namespace WorkflowPatternFinder
     private async Task FinishPreprocessingTask(Exception ex)
     {
       UpdateButtonText(PreProcessingButton, "Done!");
+      TryToUpdateProcessTreeList();
       ConsoleLabel.Content = "Start...";
       ChangeEnabledPreProcessingButtons(true);
       PreProgress.IsIndeterminate = false;
@@ -313,6 +344,24 @@ namespace WorkflowPatternFinder
       if(result == System.Windows.Forms.DialogResult.OK)
       {
         UpdateExcelDirectoryUI(fbd.SelectedPath);
+
+        TryToUpdateProcessTreeList();
+      }
+    }
+
+    private void TryToUpdateProcessTreeList()
+    {
+      ProcessTreeList.Items.Clear();
+      var processTreeDirectory = Path.Combine(ImportExcelDirectoryLabel.Content.ToString(), "ptml");
+      if(Directory.Exists(processTreeDirectory))
+      {
+        var allFiles = Directory.GetFiles(processTreeDirectory);
+        foreach(string path in allFiles)
+        {
+          ProcessTreeList.Items.Add(path);
+        }
+
+        ProcessTreeListLabel.Content = $"Process trees created (file path)\t{allFiles.Count()} models loaded";
       }
     }
 
@@ -517,10 +566,17 @@ namespace WorkflowPatternFinder
       {
         FileName = Program.GetPythonExe(),
         Arguments = $"\"{scriptPath}\" \"{filePath}\" \"{patternMembers}\" \"{workflowName}\"",
-        UseShellExecute = false
+        UseShellExecute = false,
+        RedirectStandardOutput = true
       };
-
-      Process.Start(start)?.WaitForExit();
+      using(var process = Process.Start(start))
+      {
+        using(StreamReader reader = process?.StandardOutput)
+        {
+          Console.Write(reader.ReadToEnd());
+        }
+      }
+      
       Activate();
     }
 
@@ -562,7 +618,7 @@ namespace WorkflowPatternFinder
 
     private void UpdateListSummaryLabel()
     {
-      var sep = "\t\t\t\t\t\t";
+      var sep = "\t\t\t\t";
       if(CountCheckBox.IsChecked == true)
       {
         _countNumberOfPatternsWithinModel = true;
@@ -577,6 +633,7 @@ namespace WorkflowPatternFinder
 
     private void RemakeProcessTreesButton_Click(object sender, RoutedEventArgs e)
     {
+      PreProgress.IsIndeterminate = true;
       ChangeEnabledPreProcessingButtons(false);
       _importExcelDir = ImportExcelDirectoryLabel.Content.ToString();
       _promScriptPath = PromScriptLabel.Content.ToString();
@@ -586,6 +643,7 @@ namespace WorkflowPatternFinder
         Program.RemakeProcessTrees(_importExcelDir, _promScriptPath, noiseThreshold);
       }
       ChangeEnabledPreProcessingButtons(true);
+      PreProgress.IsIndeterminate = false;
     }
   }
 }

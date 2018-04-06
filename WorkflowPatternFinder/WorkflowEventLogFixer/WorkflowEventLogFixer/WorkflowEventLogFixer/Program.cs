@@ -29,7 +29,7 @@ namespace WorkflowEventLogFixer
 
     public static void Main(string[] args)
     {
-      PreProcessingPhase(args[0], args[1]);
+      // PreProcessingPhase(args[0], args[1]);
 
       var trees = LoadProcessTrees(_basePtmlFileDirectory);
       var pattern = CreatePattern();
@@ -85,7 +85,7 @@ namespace WorkflowEventLogFixer
 
         // Write workflow descriptions to a separate file. This way, we can find the name of a workflow model by reading within this file.
         var workflowNameFile = Path.Combine(_baseDirectory, "workflownames.csv");
-        WriteWorkflowNamesToFile(workflowNames, workflowNameFile);
+        //WriteWorkflowNamesToFile(workflowNames, workflowNameFile);
 
         //Apply word2vec throughout the workflow logs and give similar events similar names.
         ApplyWord2VecThroughGensimScript(_baseCsvFileDirectory);
@@ -321,6 +321,7 @@ namespace WorkflowEventLogFixer
           writer.WriteLine(row);
         }
       }
+      File.SetAttributes(workflowNameFile, FileAttributes.ReadOnly);
     }
 
     static List<Event> GetEvents(string excelFile)
@@ -482,7 +483,7 @@ namespace WorkflowEventLogFixer
         foreach(var item in items)
         {
           string row = string.Join(";", props.Select(p => p.GetValue(item, null)));
-          await writer.WriteLineAsync(row);
+          await writer.WriteLineAsync(row.Replace("\"", ""));
         }
       }
     }
@@ -493,7 +494,7 @@ namespace WorkflowEventLogFixer
     /// <param name="scriptPath"></param>
     /// <param name="xesDirectoryPath">Directory which contains xes files. Used as input for the IM.</param>
     /// <param name="ptmlDirectoryPath">Directory where resulting ptml files are saved. Used as output for the IM.</param>
-    private static void UpdatePathsAndNoiseThresholdInProcessTreeScript(string scriptPath, string xesDirectoryPath, string ptmlDirectoryPath, string noiseThreshold = "0.5")
+    private static void UpdatePathsAndNoiseThresholdInProcessTreeScript(string scriptPath, string xesDirectoryPath, string ptmlDirectoryPath, string noiseThreshold = "0.2")
     {
       // new path lines in script
       string xesLineToWrite = $"xesDirectoryPath = \"{xesDirectoryPath}\\\";".Replace("\\", "\\\\");

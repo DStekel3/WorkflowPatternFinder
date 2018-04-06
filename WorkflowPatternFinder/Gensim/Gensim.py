@@ -26,20 +26,18 @@ if len(sys.argv) == 7:
     validTrees = []
     allFilePaths = [join(treeBasePath, f) for f in listdir(treeBasePath) if isfile(join(treeBasePath, f))]
     allTreePaths = [f for f in allFilePaths if str(f).endswith('ptml')]
+    pattern = ProcessTreeLoader.LoadTree(patternPath)
+    finder = SubTreeFinder()
+    finder.SetTrainedModelPath(modelPath)
+    finder.SetSimilarityThreshold(simThreshold)
+    
     for treePath in allTreePaths:
-        print('tree path:', treePath)
-        print('loading tree...')
+        print('Searching in tree '+str(allTreePaths.index(treePath))+' of ' + str(len(allTreePaths)))
         tree = ProcessTreeLoader.LoadTree(treePath)
-        print('loading pattern...')
-        pattern = ProcessTreeLoader.LoadTree(patternPath)
-        finder = SubTreeFinder()
-        finder.SetTrainedModelPath(modelPath)
-        finder.SetSimilarityThreshold(simThreshold)
         if not countPatterns:
           result = finder.IsValidSubTree(tree, pattern, induced)
           if result[0]:
               validTrees.append((treePath, result[1], result[2]))
-          print("Final result:" + str(result))
         else:
           result = finder.GetValidSubTrees(tree, pattern, induced)
           if any(result):

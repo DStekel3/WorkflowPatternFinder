@@ -19,10 +19,10 @@ class SubTreeFinder(object):
       raise ValueError('The path to model is not set yet.')
 
   def IsValidSubTree(self, tree, pattern, induced=False):
-    print('induced is ',induced)
+    # print('induced is ',induced)
     tNode = tree.GetRoot()
     pNode = pattern.GetRoot()
-    return self.DoesBranchContainPattern(tNode, pNode, induced)
+    return self.DoesBranchContainPattern(tNode, pNode, [], induced)
 
   def GetValidSubTrees(self, tree, pattern, induced=False):
     flatten = lambda x: [item for sublist in x for item in sublist]
@@ -31,7 +31,7 @@ class SubTreeFinder(object):
     allPatterns = []
     for tNode in treeNodes:
       if tNode.GetId() not in allPatterns:
-        result = self.DoesBranchContainPattern(tNode, pNode, induced)
+        result = self.DoesBranchContainPattern(tNode, pNode, allPatterns, induced)
         if result[0]:
           if result[2]:
             newPattern = True
@@ -43,21 +43,21 @@ class SubTreeFinder(object):
               allPatterns.append(result[2])            
     return allPatterns
 
-  def DoesBranchContainPattern(self, tNode, pNode, induced=False):
+  def DoesBranchContainPattern(self, tNode, pNode, allPatterns, induced=False):
     patternMembers = []
     simTuple = self.AreSimilar(tNode, pNode)    
     if self.IsTupleTrue(simTuple):
       patternMembers = [tNode.GetId()]
       pChildren = pNode.GetChildren()
       tChildren = tNode.GetChildren()
-      if True:
+      if self.ContainsSiblings(tNode, pNode):
         if(any(pChildren)):
           pFound = []
           treeIds = []
           for patternChild in pChildren:
             for treeChild in tChildren:
               if treeChild.GetId() not in treeIds:
-                patternChildFound = self.DoesBranchContainPattern(treeChild, patternChild, induced)
+                patternChildFound = self.DoesBranchContainPattern(treeChild, patternChild, allPatterns, induced)
                 if self.IsTupleTrue(patternChildFound):
                     pFound.append((self.GetScore(patternChildFound), self.GetPatternMembers(patternChildFound)))
                     treeIds.append(treeChild.GetId())
@@ -80,7 +80,7 @@ class SubTreeFinder(object):
           return (True, self.GetScore(simTuple), patternMembers)
     if induced and pNode.IsRoot() or not induced:
       for treeChild in tNode.GetChildren():
-        found = self.DoesBranchContainPattern(treeChild, pNode, induced)
+        found = self.DoesBranchContainPattern(treeChild, pNode, allPatterns, induced)
         if(self.IsTupleTrue(found)):
           return (True, self.GetScore(found), self.GetPatternMembers(found))
     return (False, 0)
@@ -115,8 +115,8 @@ class SubTreeFinder(object):
     
   def AreSimilarAccordingToDoc2Vec(self, tNode, pNode):
     score = self._query.GetSimilarity(tNode.GetEvent(), pNode.GetEvent())
-    if score > self._simThreshold:
-      return (True, score, tNode.GetId())
+    if score[0] > self._simThreshold:
+      return (True, score[0], tNode.GetId(), score[1])
     return (False, score)
     
   def ContainsSiblings(self, tNode, pNode):
@@ -137,4 +137,4 @@ class SubTreeFinder(object):
     
   def SetSimilarityThreshold(self, simThreshold):
     self._simThreshold = float(simThreshold)
-    print('sim threshold: ' + str(self._simThreshold))
+    # print('sim threshold: ' + str(self._simThreshold))

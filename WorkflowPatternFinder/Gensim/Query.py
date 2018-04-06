@@ -17,18 +17,19 @@ class Query(object):
         self._model = None
 
     def LoadModel(self, path_to_model):
-        print('loading model')
+        # print('loading model')
         self._model = Doc2Vec.load(path_to_model, mmap=None)
-        print('loaded model')
+        # print('loaded model')
 
     def GetSimilarity(self, fstEvent, sndEvent):
         if self._model is None:
             raise ValueError('The model is not loaded yet.')
-        result = 0.000
+        result = (0.0, '')
         for first in fstEvent.lower().split():
             for second in sndEvent.lower().split():
                 if first in self._model.wv.vocab and second in self._model.wv.vocab:
                     score = self._model.wv.similarity(first, second)
-                    if score > result:
-                        result = self._model.wv.similarity(first, second)
+                    if score > result[0]:
+                        result = (self._model.wv.similarity(first, second), second)
+        print('returning: ' +str(result))
         return result

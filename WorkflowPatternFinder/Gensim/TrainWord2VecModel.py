@@ -11,7 +11,7 @@ import os
 directory = r"C:\Thesis\Profit analyses\testmap\csv"
 _window = 2
 _min_count = 5
-_epochs = 10
+_epochs = 5
 
 args = sys.argv
 print("# of args: "+str(len(args)))
@@ -100,7 +100,7 @@ for idx, doc in enumerate(texts):
 
 from gensim.models import Doc2Vec
 
-model = gensim.models.Doc2Vec(taggedDocs, window=_window, min_count=_min_count, epochs=_epochs, corpus_count = len(taggedDocs), workers = 4)
+model = gensim.models.Doc2Vec(taggedDocs, window=_window, min_count=_min_count, epochs=_epochs, corpus_count = len(taggedDocs), workers = 8)
 print(model)
 
 model.train(taggedDocs, total_examples=model.corpus_count, epochs=model.epochs)
