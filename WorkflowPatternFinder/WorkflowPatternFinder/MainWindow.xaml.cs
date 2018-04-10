@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -112,8 +113,7 @@ namespace WorkflowPatternFinder
 
     private void StartTreeButton_Click(object sender, RoutedEventArgs e)
     {
-      ClearValidOccurencesList();
-      UpdateListSummaryLabel();
+      ClearValidOccurencesView();
       if(!PathsExists() || !double.TryParse(SimTresholdValue.Text.Replace('.', ','), out double threshold))
       {
         UpdateButtonText(TreeStartButton, "Incorrect inputs!");
@@ -121,6 +121,14 @@ namespace WorkflowPatternFinder
       }
       TreeStartButton.Content = "Busy...";
       ChangeEnabledTreeButtons(false);
+      if(_countNumberOfPatternsWithinModel)
+      {
+        ((GridView)ValidOccurencesView.View).Columns[1].Header = "# of Occurrences";
+      }
+      else
+      {
+        ((GridView)ValidOccurencesView.View).Columns[1].Header = "Similarity Score";
+      }
       TreeProgressBar.IsIndeterminate = true;
 
       var induced = _treatAsInducedSubTree;
@@ -169,7 +177,9 @@ namespace WorkflowPatternFinder
           timer.Stop();
           var lines = result.Replace("\r\n", "|").Split('|').ToList();
           foreach(var line in lines)
+          {
             Debug.WriteLine(line);
+          }
 
           var validSubTrees = lines.SkipWhile(c => !c.StartsWith("Valid trees:")).Skip(1);
           var validOutput = new Dictionary<string, double>();
@@ -201,14 +211,8 @@ namespace WorkflowPatternFinder
           {
             var path = kvp.Key;
             var score = Math.Round(kvp.Value, 2);
-            var tabs = "\t";
 
-            // Shorter paths need more spacing in order for the score to line up nicely with the other results.
-            if(path.Length < 62)
-            {
-              tabs += "\t";
-            }
-            ValidOccurencesList.Items.Add($"{path}{tabs}{score}");
+            ValidOccurencesView.Items.Add(new ValidOccurencesViewObject() { PatternPath = path, SimilarityScore = score });
           }
         }
       }
@@ -231,17 +235,24 @@ namespace WorkflowPatternFinder
       }
     }
 
-    private void ListBox_DoubleClick(object sender, MouseButtonEventArgs e)
+    private void ListView_DoubleClick(object sender, MouseButtonEventArgs e)
     {
-      var listName = ((System.Windows.Controls.ListBox)sender).Name;
+
+      var listName = ((System.Windows.Controls.ListView)sender).Name;
       var selectedFile = "";
-      if(listName == "ProcessTreeList")
+      if(listName == "ProcessTreeView")
       {
-        selectedFile = ProcessTreeList.SelectedItem?.ToString();
+        if(ProcessTreeView.SelectedItem != null)
+        {
+          selectedFile = ((ProcessTreeViewObject)ProcessTreeView.SelectedItem).TreePath;
+        }
       }
-      else if(listName == "ValidOccurencesList")
+      else if(listName == "ValidOccurencesView")
       {
-        selectedFile = ValidOccurencesList.SelectedItem?.ToString().Split('\t').First();
+        if(ValidOccurencesView.SelectedItem != null)
+        {
+          selectedFile = ((ValidOccurencesViewObject)ValidOccurencesView.SelectedItem).PatternPath;
+        }
       }
       else
       {
@@ -251,16 +262,16 @@ namespace WorkflowPatternFinder
       if(File.Exists(selectedFile))
       {
         var patternMembers = "";
-        if(listName == "ValidOccurencesList")
+        if(listName == "ValidOccurencesView")
         {
           var selectedPattern = _foundPatterns.Single(p => p.FilePath == selectedFile);
-          patternMembers = string.Join(",", selectedPattern.Ids.Select(t => $"{t.Key}:{t.Value}"));
+    patternMembers = string.Join(",", selectedPattern.Ids.Select(t => $"{t.Key}:{t.Value}"));
         }
         if(e.ChangedButton == MouseButton.Left)
         {
           var workflowName = GetWorkflowName(selectedFile);
-          RenderTreeInPython(selectedFile, patternMembers, workflowName);
-        }
+  RenderTreeInPython(selectedFile, patternMembers, workflowName);
+}
         else if(e.ChangedButton == MouseButton.Right)
         {
           OpenFileInNotePad(selectedFile);
@@ -269,392 +280,408 @@ namespace WorkflowPatternFinder
     }
 
     private void ImportTreeLabel_DoubleClick(object sender, MouseButtonEventArgs e)
+{
+  var selectedFile = ImportTreeLabel.Content.ToString();
+  OpenDirectoryInExplorer(selectedFile);
+}
+
+private void ImportPatternLabel_DoubleClick(object sender, MouseButtonEventArgs e)
+{
+  var selectedFile = ImportPatternLabel.Content.ToString();
+  if(File.Exists(selectedFile))
+  {
+    if(e.ChangedButton == MouseButton.Left)
     {
-      var selectedFile = ImportTreeLabel.Content.ToString();
-      OpenDirectoryInExplorer(selectedFile);
+      RenderTreeInPython(selectedFile);
     }
-
-    private void ImportPatternLabel_DoubleClick(object sender, MouseButtonEventArgs e)
+    else if(e.ChangedButton == MouseButton.Right)
     {
-      var selectedFile = ImportPatternLabel.Content.ToString();
-      if(File.Exists(selectedFile))
-      {
-        if(e.ChangedButton == MouseButton.Left)
-        {
-          RenderTreeInPython(selectedFile);
-        }
-        else if(e.ChangedButton == MouseButton.Right)
-        {
-          OpenFileInNotePad(selectedFile);
-        }
-      }
+      OpenFileInNotePad(selectedFile);
     }
+  }
+}
 
-    private void PreProcessingButton_Click(object sender, RoutedEventArgs e)
-    {
-      ChangeEnabledPreProcessingButtons(false);
-      _importExcelDir = ImportExcelDirectoryLabel.Content.ToString();
-      _promScriptPath = PromScriptLabel.Content.ToString();
-      _noiseThreshold = InductiveMinerNoiseThresholdTextBox.Text;
+private void PreProcessingButton_Click(object sender, RoutedEventArgs e)
+{
+  ChangeEnabledPreProcessingButtons(false);
+  _importExcelDir = ImportExcelDirectoryLabel.Content.ToString();
+  _promScriptPath = PromScriptLabel.Content.ToString();
+  _noiseThreshold = InductiveMinerNoiseThresholdTextBox.Text;
 
-      Task DoWork()
-      {
-        var tasks = new List<Task>
+  Task DoWork()
+  {
+    var tasks = new List<Task>
         {
           Task.Run((Action)StartPreprocessing)
         };
-        return Task.WhenAll(tasks);
-      }
-      StartPreprocessingTask(DoWork);
-    }
+    return Task.WhenAll(tasks);
+  }
+  StartPreprocessingTask(DoWork);
+}
 
 
-    void StartPreprocessing()
-    {
-      Program.PreProcessingPhase(_importExcelDir, _promScriptPath, _noiseThreshold);
-    }
+void StartPreprocessing()
+{
+  Program.PreProcessingPhase(_importExcelDir, _promScriptPath, _noiseThreshold);
+}
 
-    private void StartPreprocessingTask(Func<Task> task, Action completedTask = null)
-    {
-      ConsoleLabel.Content = "Busy...";
-      PreProgress.IsIndeterminate = true;
+private void StartPreprocessingTask(Func<Task> task, Action completedTask = null)
+{
+  ConsoleLabel.Content = "Busy...";
+  PreProgress.IsIndeterminate = true;
 
-      var scheduler = TaskScheduler.FromCurrentSynchronizationContext();
+  var scheduler = TaskScheduler.FromCurrentSynchronizationContext();
 
-      Task.Factory
-        .StartNew(() =>
-          task()
-            .ContinueWith(async t =>
-            {
-              await FinishPreprocessingTask(t.Exception);
-              completedTask?.Invoke();
-            }, scheduler));
-    }
-
-    private async Task FinishPreprocessingTask(Exception ex)
-    {
-      UpdateButtonText(PreProcessingButton, "Done!");
-      TryToUpdateProcessTreeList();
-      ConsoleLabel.Content = "Start...";
-      ChangeEnabledPreProcessingButtons(true);
-      PreProgress.IsIndeterminate = false;
-    }
-
-    private void ImportExcelDirectoryLabel_DoubleClick(object sender, MouseButtonEventArgs e)
-    {
-      var selectedFile = ImportExcelDirectoryLabel.Content.ToString();
-      OpenDirectoryInExplorer(selectedFile);
-    }
-
-    private void ImportExcelDirectoryButton_Click(object sender, RoutedEventArgs e)
-    {
-      FolderBrowserDialog fbd = new FolderBrowserDialog();
-      fbd.Description = "Select a directory that contains workflow logs in .xlsx format.";
-      fbd.SelectedPath = @"C:\Thesis\Profit analyses\testmap";
-      DialogResult result = fbd.ShowDialog();
-      if(result == System.Windows.Forms.DialogResult.OK)
-      {
-        UpdateExcelDirectoryUI(fbd.SelectedPath);
-
-        TryToUpdateProcessTreeList();
-      }
-    }
-
-    private void TryToUpdateProcessTreeList()
-    {
-      ProcessTreeList.Items.Clear();
-      var processTreeDirectory = Path.Combine(ImportExcelDirectoryLabel.Content.ToString(), "ptml");
-      if(Directory.Exists(processTreeDirectory))
-      {
-        var allFiles = Directory.GetFiles(processTreeDirectory);
-        foreach(string path in allFiles)
+  Task.Factory
+    .StartNew(() =>
+      task()
+        .ContinueWith(async t =>
         {
-          ProcessTreeList.Items.Add(path);
-        }
+          await FinishPreprocessingTask(t.Exception);
+          completedTask?.Invoke();
+        }, scheduler));
+}
 
-        ProcessTreeListLabel.Content = $"Process trees created (file path)\t{allFiles.Count()} models loaded";
-      }
+private async Task FinishPreprocessingTask(Exception ex)
+{
+  UpdateButtonText(PreProcessingButton, "Done!");
+  TryToUpdateProcessTreeView();
+  ConsoleLabel.Content = "Start...";
+  ChangeEnabledPreProcessingButtons(true);
+  PreProgress.IsIndeterminate = false;
+}
+
+private void ImportExcelDirectoryLabel_DoubleClick(object sender, MouseButtonEventArgs e)
+{
+  var selectedFile = ImportExcelDirectoryLabel.Content.ToString();
+  OpenDirectoryInExplorer(selectedFile);
+}
+
+private void ImportExcelDirectoryButton_Click(object sender, RoutedEventArgs e)
+{
+  FolderBrowserDialog fbd = new FolderBrowserDialog();
+  fbd.Description = "Select a directory that contains workflow logs in .xlsx format.";
+  fbd.SelectedPath = @"C:\Thesis\Profit analyses\testmap";
+  DialogResult result = fbd.ShowDialog();
+  if(result == System.Windows.Forms.DialogResult.OK)
+  {
+    UpdateExcelDirectoryUI(fbd.SelectedPath);
+
+    TryToUpdateProcessTreeView();
+  }
+}
+
+private void TryToUpdateProcessTreeView()
+{
+  ProcessTreeView.Items.Clear();
+  var processTreeDirectory = Path.Combine(ImportExcelDirectoryLabel.Content.ToString(), "ptml");
+  if(Directory.Exists(processTreeDirectory))
+  {
+    var allFiles = Directory.GetFiles(processTreeDirectory);
+    foreach(string path in allFiles)
+    {
+      ProcessTreeView.Items.Add(new ProcessTreeViewObject() { TreePath = path });
     }
 
-    private void UpdateExcelDirectoryUI(string path)
-    {
-      if(Directory.EnumerateFiles(path).Any(s => s.EndsWith(".xlsx")))
-      {
-        ImportExcelDirectoryLabel.Content = path;
-      }
-      else
-      {
-        UpdateButtonText(ImportExcelDirectoryButton, _incorrectDir, 3000);
-      }
-    }
+    ProcessTreeViewLabel.Content = $"Process trees created (file path)\t{allFiles.Count()} models loaded";
+  }
+}
 
-    private void PromScriptLabel_DoubleClick(object sender, MouseButtonEventArgs e)
-    {
-      var selectedFile = PromScriptLabel.Content.ToString();
-      OpenFileInNotePad(selectedFile);
-    }
+private void UpdateExcelDirectoryUI(string path)
+{
+  if(Directory.EnumerateFiles(path).Any(s => s.EndsWith(".xlsx")))
+  {
+    ImportExcelDirectoryLabel.Content = path;
+  }
+  else
+  {
+    UpdateButtonText(ImportExcelDirectoryButton, _incorrectDir, 3000);
+  }
+}
 
-    private void PromScriptButton_Click(object sender, RoutedEventArgs e)
+private void PromScriptLabel_DoubleClick(object sender, MouseButtonEventArgs e)
+{
+  var selectedFile = PromScriptLabel.Content.ToString();
+  OpenFileInNotePad(selectedFile);
+}
+
+private void PromScriptButton_Click(object sender, RoutedEventArgs e)
+{
+  OpenFileDialog ofd = new OpenFileDialog();
+  ofd.FileName = @"C:\Users\dst\eclipse-workspace\ProM\ProcessTreeMiner.txt";
+  DialogResult result = ofd.ShowDialog();
+  if(result == System.Windows.Forms.DialogResult.OK)
+  {
+    if(ofd.FileName.EndsWith(".txt"))
     {
-      OpenFileDialog ofd = new OpenFileDialog();
-      ofd.FileName = @"C:\Users\dst\eclipse-workspace\ProM\ProcessTreeMiner.txt";
-      DialogResult result = ofd.ShowDialog();
-      if(result == System.Windows.Forms.DialogResult.OK)
+      PromScriptLabel.Content = ofd.FileName;
+    }
+    else
+    {
+      UpdateButtonText(PromScriptButton, _incorrectFile, 3000);
+    }
+  }
+}
+
+private void ChangeEnabledPreProcessingButtons(bool isEnabled)
+{
+  // pre processing buttons
+  PreProcessingButton.IsEnabled = isEnabled;
+  ImportExcelDirectoryButton.IsEnabled = isEnabled;
+  PromScriptButton.IsEnabled = isEnabled;
+}
+
+private void ChangeEnabledTreeButtons(bool isEnabled)
+{
+  //tree finder buttons
+  TreeStartButton.IsEnabled = isEnabled;
+  ImportPatternButton.IsEnabled = isEnabled;
+  ImportTreeButton.IsEnabled = isEnabled;
+  InducedCheckBox.IsEnabled = isEnabled;
+  CountCheckBox.IsEnabled = isEnabled;
+}
+
+private void ClearValidOccurencesView()
+{
+  _foundPatterns.Clear();
+  ValidOccurencesView.Items.Clear();
+}
+
+private void ClearDebugLabel(int interval = 5000)
+{
+  var timer = new Timer { Interval = interval };
+  timer.Tick += (s, f) =>
+  {
+    ResultDebug.Content = "";
+    timer.Stop();
+  };
+  timer.Start();
+}
+
+private bool PathsExists()
+{
+  if(File.Exists(ImportPatternLabel.Content.ToString()))
+  {
+    if(Directory.Exists(ImportTreeLabel.Content.ToString()))
+    {
+      return true;
+    }
+  }
+  return false;
+}
+
+private void UpdateButtonText(Button button, string message, int interval = 5000)
+{
+  var normal = button.Content.ToString();
+  var timer = new Timer { Interval = interval };
+  timer.Tick += (s, f) =>
+  {
+    button.Content = normal;
+    button.Foreground = Brushes.Black;
+    timer.Stop();
+  };
+  timer.Start();
+  button.Content = message;
+  button.Foreground = new SolidColorBrush(Color.FromArgb(255, 255, 0, 0));
+}
+
+private void OpenFileInNotePad(string filePath)
+{
+  Process.Start(_notePadPath, filePath);
+}
+
+private void OpenDirectoryInExplorer(string directoryPath)
+{
+  if(Directory.Exists(directoryPath))
+  {
+    Process.Start(directoryPath);
+  }
+}
+
+private void ExcelDrop(object sender, System.Windows.DragEventArgs e)
+{
+  if(e.Data.GetDataPresent(DataFormats.FileDrop))
+  {
+    // Note that you can have more than one file.
+    var file = ((string[])e.Data.GetData(DataFormats.FileDrop)).Where(Directory.Exists).First();
+    UpdateExcelDirectoryUI(file);
+  }
+}
+
+private void ShowModel_Click(object sender, RoutedEventArgs e)
+{
+  var modelPath = ModelPathLabel.Content.ToString();
+  if(!File.Exists(modelPath))
+  {
+    UpdateButtonText(TrainModelButton, "Incorrect inputs!");
+    return;
+  }
+
+  var scriptPath = @"C:\Users\dst\Source\Repos\WorkflowPatternFinder\WorkflowPatternFinder\Gensim\PlotModel.py";
+
+  ProcessStartInfo start = new ProcessStartInfo
+  {
+    FileName = Program.GetPythonExe(),
+    Arguments = $"\"{scriptPath}\" \"{modelPath}\"",
+    UseShellExecute = false,
+    RedirectStandardOutput = true
+  };
+
+  Process.Start(start);
+}
+
+private void CheckThresholdInput(object sender, TextCompositionEventArgs e)
+{
+  e.Handled = !e.Text.Any(x => Char.IsDigit(x) || '.'.Equals(x));
+}
+
+private void CheckIfInputIsDigit(object sender, TextCompositionEventArgs e)
+{
+  e.Handled = !e.Text.Any(x => Char.IsDigit(x));
+}
+
+private void ChangeModelButton_Click(object sender, RoutedEventArgs e)
+{
+  OpenFileDialog ofd = new OpenFileDialog();
+  ofd.DefaultExt = ".gz";
+  ofd.Title = "Select a word2vec model.";
+  ofd.FileName = @"C:\Thesis\Profit analyses\testmap\trained.gz";
+  DialogResult result = ofd.ShowDialog();
+  if(result == System.Windows.Forms.DialogResult.OK)
+  {
+    if(ofd.FileName.EndsWith(".gz"))
+    {
+      ModelPathLabel.Content = ofd.FileName;
+    }
+    else
+    {
+      UpdateButtonText(TrainModelButton, _incorrectFile, 3000);
+    }
+  }
+}
+
+private void TrainModelButton_Click(object sender, RoutedEventArgs e)
+{
+  if(Program.CheckIfPythonAndJavaAreInstalled())
+  {
+    var csvBaseDirectory = Path.Combine(Path.GetDirectoryName(ModelPathLabel.Content.ToString()), "csv");
+    if(Directory.Exists(csvBaseDirectory))
+    {
+      var windowSize = WindowSizeValue.Text;
+      var minCount = MinCountValue.Text;
+      var epochs = NumberOfEpochsValue.Text;
+      var scriptPath = @"C:\Users\dst\Source\Repos\WorkflowPatternFinder\WorkflowPatternFinder\Gensim\TrainWord2VecModel.py";
+      Program.TrainWord2VecModel(scriptPath, csvBaseDirectory, windowSize, minCount, epochs);
+    }
+    else
+    {
+      UpdateButtonText(TrainModelButton, _incorrectFile, 3000);
+    }
+  }
+}
+
+private void RenderTreeInPython(string filePath, string patternMembers = "", string workflowName = "")
+{
+  var scriptPath = @"C:\Users\dst\Source\Repos\WorkflowPatternFinder\WorkflowPatternFinder\Gensim\RenderTree.py";
+
+  ProcessStartInfo start = new ProcessStartInfo
+  {
+    FileName = Program.GetPythonExe(),
+    Arguments = $"\"{scriptPath}\" \"{filePath}\" \"{patternMembers}\" \"{workflowName}\"",
+    UseShellExecute = false,
+    RedirectStandardOutput = true
+  };
+  using(var process = Process.Start(start))
+  {
+    using(StreamReader reader = process?.StandardOutput)
+    {
+      Console.Write(reader.ReadToEnd());
+    }
+  }
+
+  Activate();
+}
+
+private string GetWorkflowName(string filePath)
+{
+  var workflowNameFile = Path.Combine(Path.GetDirectoryName(Path.GetDirectoryName(filePath)), "workflownames.csv");
+  var names = File.ReadAllLines(workflowNameFile);
+  var fileKey = Path.GetFileNameWithoutExtension(filePath);
+  var workflowName = names.First(r => r.Split(';')[0] == fileKey).Split(';')[1];
+  return workflowName;
+}
+
+private void ValidOccurencesView_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+{
+  if(e.Key == Key.Enter)
+  {
+    var selectedItem = ValidOccurencesView.SelectedItem;
+    var selectedFile = selectedItem?.ToString().Split('\t').First();
+    if(File.Exists(selectedFile))
+    {
+      var selectedPattern = _foundPatterns.Single(p => p.FilePath == selectedFile);
+      var patternMembers = string.Join(",", selectedPattern.Ids);
+      RenderTreeInPython(selectedFile, patternMembers);
+    }
+  }
+}
+
+private void CountCheckBox_Click(object sender, RoutedEventArgs e)
+{
+  if(CountCheckBox.IsChecked == true)
+  {
+    _countNumberOfPatternsWithinModel = true;
+  }
+  else
+  {
+    _countNumberOfPatternsWithinModel = false;
+  }
+}
+
+private void RemakeProcessTreesButton_Click(object sender, RoutedEventArgs e)
+{
+  PreProgress.IsIndeterminate = true;
+  ChangeEnabledPreProcessingButtons(false);
+  _importExcelDir = ImportExcelDirectoryLabel.Content.ToString();
+  _promScriptPath = PromScriptLabel.Content.ToString();
+  var noiseThreshold = InductiveMinerNoiseThresholdTextBox.Text;
+  if(Directory.Exists(_importExcelDir) && File.Exists(_promScriptPath))
+  {
+    Program.RemakeProcessTrees(_importExcelDir, _promScriptPath, noiseThreshold);
+  }
+  ChangeEnabledPreProcessingButtons(true);
+  PreProgress.IsIndeterminate = false;
+}
+
+private void TermQueryButton_Click(object sender, RoutedEventArgs e)
+{
+  SimilarTermsList.Items.Clear();
+  if(Program.CheckIfPythonAndJavaAreInstalled())
+  {
+    var modelpath = ModelPathLabel.Content.ToString();
+    if(File.Exists(modelpath))
+    {
+      var currentTerm = TermQueryTextBox.Text;
+      var scriptPath = @"C:\Users\dst\Source\Repos\WorkflowPatternFinder\WorkflowPatternFinder\Gensim\TermSimilarityQuery.py";
+      var output = Program.GetSimilarTerms(scriptPath, modelpath, currentTerm).SkipWhile(l => !l.Contains("Similar terms:")).ToList();
+      foreach(var line in output.Skip(1))
       {
-        if(ofd.FileName.EndsWith(".txt"))
+        if(!string.IsNullOrEmpty(line))
         {
-          PromScriptLabel.Content = ofd.FileName;
-        }
-        else
-        {
-          UpdateButtonText(PromScriptButton, _incorrectFile, 3000);
-        }
-      }
-    }
+          Debug.WriteLine(line);
+          var lineSplit = line.Split(':');
+          var term = lineSplit[0];
+          var score = lineSplit[1].Substring(0, 6);
 
-    private void ChangeEnabledPreProcessingButtons(bool isEnabled)
-    {
-      // pre processing buttons
-      PreProcessingButton.IsEnabled = isEnabled;
-      ImportExcelDirectoryButton.IsEnabled = isEnabled;
-      PromScriptButton.IsEnabled = isEnabled;
-    }
-
-    private void ChangeEnabledTreeButtons(bool isEnabled)
-    {
-      //tree finder buttons
-      TreeStartButton.IsEnabled = isEnabled;
-      ImportPatternButton.IsEnabled = isEnabled;
-      ImportTreeButton.IsEnabled = isEnabled;
-      InducedCheckBox.IsEnabled = isEnabled;
-      CountCheckBox.IsEnabled = isEnabled;
-    }
-
-    private void ClearValidOccurencesList()
-    {
-      _foundPatterns.Clear();
-      ValidOccurencesList.Items.Clear();
-    }
-
-    private void ClearDebugLabel(int interval = 5000)
-    {
-      var timer = new Timer { Interval = interval };
-      timer.Tick += (s, f) =>
-      {
-        ResultDebug.Content = "";
-        timer.Stop();
-      };
-      timer.Start();
-    }
-
-    private bool PathsExists()
-    {
-      if(File.Exists(ImportPatternLabel.Content.ToString()))
-      {
-        if(Directory.Exists(ImportTreeLabel.Content.ToString()))
-        {
-          return true;
-        }
-      }
-      return false;
-    }
-
-    private void UpdateButtonText(Button button, string message, int interval = 5000)
-    {
-      var normal = button.Content.ToString();
-      var timer = new Timer { Interval = interval };
-      timer.Tick += (s, f) =>
-      {
-        button.Content = normal;
-        button.Foreground = Brushes.Black;
-        timer.Stop();
-      };
-      timer.Start();
-      button.Content = message;
-      button.Foreground = new SolidColorBrush(Color.FromArgb(255, 255, 0, 0));
-    }
-
-    private void OpenFileInNotePad(string filePath)
-    {
-      Process.Start(_notePadPath, filePath);
-    }
-
-    private void OpenDirectoryInExplorer(string directoryPath)
-    {
-      if(Directory.Exists(directoryPath))
-      {
-        Process.Start(directoryPath);
-      }
-    }
-
-    private void ExcelDrop(object sender, System.Windows.DragEventArgs e)
-    {
-      if(e.Data.GetDataPresent(DataFormats.FileDrop))
-      {
-        // Note that you can have more than one file.
-        var file = ((string[])e.Data.GetData(DataFormats.FileDrop)).Where(Directory.Exists).First();
-        UpdateExcelDirectoryUI(file);
-      }
-    }
-
-    private void ShowModel_Click(object sender, RoutedEventArgs e)
-    {
-      var modelPath = ModelPathLabel.Content.ToString();
-      if(!File.Exists(modelPath))
-      {
-        UpdateButtonText(TrainModelButton, "Incorrect inputs!");
-        return;
-      }
-
-      var scriptPath = @"C:\Users\dst\Source\Repos\WorkflowPatternFinder\WorkflowPatternFinder\Gensim\PlotModel.py";
-
-      ProcessStartInfo start = new ProcessStartInfo
-      {
-        FileName = Program.GetPythonExe(),
-        Arguments = $"\"{scriptPath}\" \"{modelPath}\"",
-        UseShellExecute = false,
-        RedirectStandardOutput = true
-      };
-
-      Process.Start(start);
-    }
-
-    private void CheckThresholdInput(object sender, TextCompositionEventArgs e)
-    {
-      e.Handled = !e.Text.Any(x => Char.IsDigit(x) || '.'.Equals(x));
-    }
-
-    private void CheckIfInputIsDigit(object sender, TextCompositionEventArgs e)
-    {
-      e.Handled = !e.Text.Any(x => Char.IsDigit(x));
-    }
-
-    private void ChangeModelButton_Click(object sender, RoutedEventArgs e)
-    {
-      OpenFileDialog ofd = new OpenFileDialog();
-      ofd.DefaultExt = ".gz";
-      ofd.Title = "Select a word2vec model.";
-      ofd.FileName = @"C:\Thesis\Profit analyses\testmap\trained.gz";
-      DialogResult result = ofd.ShowDialog();
-      if(result == System.Windows.Forms.DialogResult.OK)
-      {
-        if(ofd.FileName.EndsWith(".gz"))
-        {
-          ModelPathLabel.Content = ofd.FileName;
-        }
-        else
-        {
-          UpdateButtonText(TrainModelButton, _incorrectFile, 3000);
+          SimilarTermsList.Items.Add(new MatchingTerm() { Term = term, Score = score });
         }
       }
     }
-
-    private void TrainModelButton_Click(object sender, RoutedEventArgs e)
+    else
     {
-      if(Program.CheckIfPythonAndJavaAreInstalled())
-      {
-        var csvBaseDirectory = Path.Combine(Path.GetDirectoryName(ModelPathLabel.Content.ToString()), "csv");
-        if(Directory.Exists(csvBaseDirectory))
-        {
-          var windowSize = WindowSizeValue.Text;
-          var minCount = MinCountValue.Text;
-          var epochs = NumberOfEpochsValue.Text;
-          var scriptPath = @"C:\Users\dst\Source\Repos\WorkflowPatternFinder\WorkflowPatternFinder\Gensim\TrainWord2VecModel.py";
-          Program.TrainWord2VecModel(scriptPath, csvBaseDirectory, windowSize, minCount, epochs);
-        }
-        else
-        {
-          UpdateButtonText(TrainModelButton, _incorrectFile, 3000);
-        }
-      }
+      UpdateButtonText(TermQueryButton, _incorrectFile, 3000);
     }
-
-    private void RenderTreeInPython(string filePath, string patternMembers = "", string workflowName = "")
-    {
-      var scriptPath = @"C:\Users\dst\Source\Repos\WorkflowPatternFinder\WorkflowPatternFinder\Gensim\RenderTree.py";
-
-      ProcessStartInfo start = new ProcessStartInfo
-      {
-        FileName = Program.GetPythonExe(),
-        Arguments = $"\"{scriptPath}\" \"{filePath}\" \"{patternMembers}\" \"{workflowName}\"",
-        UseShellExecute = false,
-        RedirectStandardOutput = true
-      };
-      using(var process = Process.Start(start))
-      {
-        using(StreamReader reader = process?.StandardOutput)
-        {
-          Console.Write(reader.ReadToEnd());
-        }
-      }
-
-      Activate();
-    }
-
-    private string GetWorkflowName(string filePath)
-    {
-      var workflowNameFile = Path.Combine(Path.GetDirectoryName(Path.GetDirectoryName(filePath)), "workflownames.csv");
-      var names = File.ReadAllLines(workflowNameFile);
-      var fileKey = Path.GetFileNameWithoutExtension(filePath);
-      var workflowName = names.First(r => r.Split(';')[0] == fileKey).Split(';')[1];
-      return workflowName;
-    }
-
-    private void ValidOccurencesList_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
-    {
-      if(e.Key == Key.Enter)
-      {
-        var selectedItem = ValidOccurencesList.SelectedItem;
-        var selectedFile = selectedItem?.ToString().Split('\t').First();
-        if(File.Exists(selectedFile))
-        {
-          var selectedPattern = _foundPatterns.Single(p => p.FilePath == selectedFile);
-          var patternMembers = string.Join(",", selectedPattern.Ids);
-          RenderTreeInPython(selectedFile, patternMembers);
-        }
-      }
-    }
-
-    private void CountCheckBox_Click(object sender, RoutedEventArgs e)
-    {
-      if(CountCheckBox.IsChecked == true)
-      {
-        _countNumberOfPatternsWithinModel = true;
-      }
-      else
-      {
-        _countNumberOfPatternsWithinModel = false;
-      }
-    }
-
-    private void UpdateListSummaryLabel()
-    {
-      var sep = "\t\t\t\t";
-      if(CountCheckBox.IsChecked == true)
-      {
-        _countNumberOfPatternsWithinModel = true;
-        ListSummaryLabel.Content = $"Patterns found (file path){sep}# of occurrences";
-      }
-      else
-      {
-        _countNumberOfPatternsWithinModel = false;
-        ListSummaryLabel.Content = $"Patterns found (file path){sep}Similarity Score";
-      }
-    }
-
-    private void RemakeProcessTreesButton_Click(object sender, RoutedEventArgs e)
-    {
-      PreProgress.IsIndeterminate = true;
-      ChangeEnabledPreProcessingButtons(false);
-      _importExcelDir = ImportExcelDirectoryLabel.Content.ToString();
-      _promScriptPath = PromScriptLabel.Content.ToString();
-      var noiseThreshold = InductiveMinerNoiseThresholdTextBox.Text;
-      if(Directory.Exists(_importExcelDir) && File.Exists(_promScriptPath))
-      {
-        Program.RemakeProcessTrees(_importExcelDir, _promScriptPath, noiseThreshold);
-      }
-      ChangeEnabledPreProcessingButtons(true);
-      PreProgress.IsIndeterminate = false;
-    }
+  }
+}
   }
 }

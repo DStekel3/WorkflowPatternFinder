@@ -7,6 +7,10 @@ import time
 import sys 
 from pathlib import Path
 import os
+import csv
+import re
+from gensim.parsing.preprocessing import strip_short, strip_numeric, strip_punctuation
+from gensim.parsing.preprocessing import stem # applies stemming to text. This function is not used yet
 
 directory = r"C:\Thesis\Profit analyses\testmap\csv"
 _window = 2
@@ -39,6 +43,7 @@ raw_corpus = []
 
 fileIndex = 1
 
+
 for pathObj in pathlist:
     start = time.time()
     path = str(pathObj)
@@ -48,10 +53,6 @@ for pathObj in pathlist:
     # from openpyxl import load_workbook
     # wb = load_workbook(path, read_only=True)
     # ws = wb[wb.sheetnames[0]]
-    import csv
-    import re
-    from gensim.parsing.preprocessing import strip_short, strip_numeric, strip_punctuation
-    from gensim.parsing.preprocessing import stem # applies stemming to text. This function is not used yet
     
     with open(path) as csvfile:
         ws = csv.DictReader(csvfile, delimiter=';')

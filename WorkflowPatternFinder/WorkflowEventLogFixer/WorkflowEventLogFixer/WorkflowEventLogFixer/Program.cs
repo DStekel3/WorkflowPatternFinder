@@ -570,5 +570,27 @@ namespace WorkflowEventLogFixer
     {
       return _pythonExe;
     }
+
+    public static List<string> GetSimilarTerms(string scriptPath, string modelpath, string currentTerm)
+    {
+      ProcessStartInfo start = new ProcessStartInfo
+      {
+        FileName = _pythonExe,
+        Arguments = $"\"{scriptPath}\" \"{modelpath}\" \"{currentTerm}\"",
+        UseShellExecute = false,
+        WindowStyle = ProcessWindowStyle.Maximized,
+        RedirectStandardOutput = true
+      };
+      //cmd is full path to python.exe
+      //args is path to .py file and any cmd line args
+      using(var process = Process.Start(start))
+      {
+        using(StreamReader reader = process?.StandardOutput)
+        {
+          var output = reader?.ReadToEnd().Replace("\r\n", "|").Split('|').ToList();
+          return output;
+        }
+      }
+    }
   }
 }

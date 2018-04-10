@@ -893,9 +893,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Event.cs" />
+    <Compile Include="MatchingTerm.cs" />
     <Compile Include="Node.cs" />
     <Compile Include="ProcessTree.cs" />
     <Compile Include="ProcessTreeLoader.cs" />
+    <Compile Include="ValidOccurencesViewObject.cs" />
+    <Compile Include="ProcessTreeViewObject.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="CsvObject.cs" />

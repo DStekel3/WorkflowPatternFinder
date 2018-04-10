@@ -7,8 +7,6 @@ import gensim
 from gensim import models
 from gensim.models import Doc2Vec
 import nltk
-import warnings
-warnings.filterwarnings(action='ignore', category=UserWarning, module='gensim')
 
 
 class Query(object):
@@ -21,7 +19,7 @@ class Query(object):
         self._model = Doc2Vec.load(path_to_model, mmap=None)
         # print('loaded model')
 
-    def GetSimilarity(self, treeSentence, patternSentence):
+    def GetSentenceSimilarity(self, treeSentence, patternSentence):
         if self._model is None:
             raise ValueError('The model is not loaded yet.')
         result = (0.0, '')
@@ -35,3 +33,9 @@ class Query(object):
                         result = (self._model.wv.similarity(patternWord, treeWord), treeWord)
         # print('returning: ' +str(result))
         return result
+
+    def GetMostSimilarTerms(self, term):
+        similarTerms = self._model.wv.most_similar(positive=[term.lower()], topn=20)
+        return similarTerms
+        
+        
