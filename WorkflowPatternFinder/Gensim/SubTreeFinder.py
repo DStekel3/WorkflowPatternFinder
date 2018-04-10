@@ -45,7 +45,7 @@ class SubTreeFinder(object):
 
   def DoesBranchContainPattern(self, tNode, pNode, allPatterns, induced=False):
     patternMembers = []
-    simTuple = self.AreSimilar(tNode, pNode)    
+    simTuple = self.AreSimilar(tNode, pNode)
     if self.IsTupleTrue(simTuple):
       patternMembers = [tNode.GetId()]
       pChildren = pNode.GetChildren()
@@ -85,7 +85,6 @@ class SubTreeFinder(object):
           return (True, self.GetScore(found), self.GetPatternMembers(found))
     return (False, 0)
 
-
   def IsTupleTrue(self, tuple):
     try:
       return tuple[0]
@@ -104,6 +103,12 @@ class SubTreeFinder(object):
     except:
       raise ValueError("This is not a proper tuple.")
 
+  def GetPatternWord(self, tuple):
+    try:
+      return tuple[3]
+    except:
+      return False;
+
   def AreSimilar(self, tNode, pNode):
     if pNode.GetType() == tNode.GetType():
       if pNode.GetType() == 'ManualTask':
@@ -111,13 +116,13 @@ class SubTreeFinder(object):
       else:
         return (True, 1, tNode.GetId())
     else:
-        return (False, 0)
+        return (False, 0, tNode.GetId())
     
   def AreSimilarAccordingToDoc2Vec(self, tNode, pNode):
     score = self._query.GetSimilarity(tNode.GetEvent(), pNode.GetEvent())
     if score[0] > self._simThreshold:
       return (True, score[0], tNode.GetId(), score[1])
-    return (False, score)
+    return (False, score[0], tNode.GetId(), score[1])
     
   def ContainsSiblings(self, tNode, pNode):
     similars = []
