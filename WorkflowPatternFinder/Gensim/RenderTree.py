@@ -3,6 +3,7 @@ import os
 os.environ["PATH"] += os.pathsep + 'C:/Program Files (x86)/Graphviz2.38/bin/'
 import enums # learn more: https://python.org/pypi/enums
 import sys
+import re
 import random
 from Node import *
 from ProcessTree import *
@@ -13,7 +14,16 @@ from os.path import isfile, join
 
 if len(sys.argv) == 4:
   tree = ProcessTreeLoader.LoadTree(sys.argv[1])
-  patternMembers = sys.argv[2].split(',')
+  patternMembers = []
+  if any(sys.argv[2]):
+    patternMembers = sys.argv[2].split(',')
+  print('pattern members: ',patternMembers)
+  
+  patternIds = {}
+  for pattern in patternMembers:
+    patternParts = pattern.split(':')
+    patternIds[patternParts[0]] = patternParts[1]
+
   workflowName = sys.argv[3]
 
   dot = Digraph(comment='Workflow Model')
@@ -22,10 +32,17 @@ if len(sys.argv) == 4:
   nodelist = [root]
   while any(nodelist):
     currentNode = nodelist.pop(0)
+    print('get event: ',currentNode.GetEvent())
     myColor = 'black'
-    if currentNode.GetId() in patternMembers:
+    nodeLabel = currentNode.GetEvent()
+    if currentNode.GetId() in patternIds.keys():
       myColor = 'red'
-    dot.node(currentNode.GetId(), currentNode.GetEvent(), color = myColor)
+      specialWord = patternIds[currentNode.GetId()]
+      print('special word: '+specialWord)
+      if(specialWord != ""):
+        pat = re.compile(specialWord, re.IGNORECASE)
+        nodeLabel = "<"+ pat.sub("<u>"+specialWord+"</u>", currentNode.GetEvent()).replace("\n", "<br/>") + ">"
+    dot.node(currentNode.GetId(), nodeLabel, color = myColor)
     parent = currentNode.GetParent()
     if parent:
       dot.edge(parent.GetId(), currentNode.GetId())

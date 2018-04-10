@@ -27,7 +27,7 @@ class Node(object):
 
     def EscapeCharacters(self, name):
       result = name.replace('|', '\n')
-      result = result.replace('&', '\amp;')
+      result = result.replace('&', '&amp;')
       result = result.replace('<', '&lt;')
       result = result.replace('>', '&gt;')
       result = result.replace('"', '&quot;')

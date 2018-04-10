@@ -30,24 +30,26 @@ class SubTreeFinder(object):
     treeNodes = tree.GetNodes()
     allPatterns = []
     for tNode in treeNodes:
-      if tNode.GetId() not in allPatterns:
+      if tNode.GetId() not in [i[0] for i in allPatterns]:
         result = self.DoesBranchContainPattern(tNode, pNode, allPatterns, induced)
         if result[0]:
-          if result[2]:
-            newPattern = True
-            for member in result[2]:
-              if member in flatten(allPatterns):
-                newPattern = False
-                break
-            if newPattern:
-              allPatterns.append(result[2])            
+          newPattern = True
+          for member in result[2]:
+            print("matching: member = ", str(member), "result[2] = ", str(result[2]))
+            if member in allPatterns:
+              newPattern = False
+              break
+          if newPattern:
+            for tuple in result[2]:
+              allPatterns.append(tuple)    
     return allPatterns
 
   def DoesBranchContainPattern(self, tNode, pNode, allPatterns, induced=False):
     patternMembers = []
     simTuple = self.AreSimilar(tNode, pNode)
     if self.IsTupleTrue(simTuple):
-      patternMembers = [tNode.GetId()]
+      patternMembers.append((tNode.GetId(), self.GetPatternWord(simTuple)))
+      print ('pattern members: '+str(patternMembers))
       pChildren = pNode.GetChildren()
       tChildren = tNode.GetChildren()
       if self.ContainsSiblings(tNode, pNode):
@@ -64,7 +66,8 @@ class SubTreeFinder(object):
                     break
           if len(pFound) == len(pChildren):
               for node in pFound:
-                patternMembers.extend(node[1])
+                print('node: ', str(node), ", patternMembers: ", str(patternMembers)) 
+                patternMembers.extend((node[1]))
               pFound.append((self.GetScore(simTuple), self.GetPatternMembers(simTuple)))
               total = pFound
               min_score = 1
@@ -77,12 +80,13 @@ class SubTreeFinder(object):
               except:
                 raise ValueError('object in total is not correct')
         else:
+          print ('in else statement')
           return (True, self.GetScore(simTuple), patternMembers)
     if induced and pNode.IsRoot() or not induced:
       for treeChild in tNode.GetChildren():
         found = self.DoesBranchContainPattern(treeChild, pNode, allPatterns, induced)
         if(self.IsTupleTrue(found)):
-          return (True, self.GetScore(found), self.GetPatternMembers(found))
+          return (True, self.GetScore(found), self.GetPatternMembers(found), self.GetPatternWord(found))
     return (False, 0)
 
   def IsTupleTrue(self, tuple):
@@ -107,16 +111,16 @@ class SubTreeFinder(object):
     try:
       return tuple[3]
     except:
-      return False;
+      return "";
 
   def AreSimilar(self, tNode, pNode):
     if pNode.GetType() == tNode.GetType():
       if pNode.GetType() == 'ManualTask':
         return self.AreSimilarAccordingToDoc2Vec(tNode, pNode)
       else:
-        return (True, 1, tNode.GetId())
+        return (True, 1, tNode.GetId(), '')
     else:
-        return (False, 0, tNode.GetId())
+        return (False, 0, tNode.GetId(), '')
     
   def AreSimilarAccordingToDoc2Vec(self, tNode, pNode):
     score = self._query.GetSimilarity(tNode.GetEvent(), pNode.GetEvent())

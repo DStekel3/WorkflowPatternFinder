@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Forms;
@@ -169,21 +170,27 @@ namespace WorkflowPatternFinder
           var lines = result.Replace("\r\n", "|").Split('|').ToList();
           foreach(var line in lines)
             Debug.WriteLine(line);
-          
+
           var validSubTrees = lines.SkipWhile(c => !c.StartsWith("Valid trees:")).Skip(1);
           var validOutput = new Dictionary<string, double>();
           foreach(string validTree in validSubTrees)
           {
             if(!string.IsNullOrEmpty(validTree))
             {
-              var splittedResult = validTree.Split(',');
+              var splittedResult = validTree.Split(';');
               var treePath = splittedResult[0];
               var score = splittedResult[1];
               var patternMembers = splittedResult.Skip(2).ToList();
 
               if(File.Exists(treePath))
               {
-                _foundPatterns.Add(new PatternObject(treePath, score, patternMembers));
+                var kvps = new List<KeyValuePair<string, string>>();
+                foreach(var str in patternMembers)
+                {
+                  var filtered = RemoveSpecialCharacters(str).Split(' ').ToList();
+                  kvps.Add(new KeyValuePair<string, string>(filtered[0], filtered[1]));
+                }
+                _foundPatterns.Add(new PatternObject(treePath, score, kvps));
                 validOutput.Add(treePath, double.Parse(score.Replace(".", ",")));
                 Debug.WriteLine($"{treePath} is a subtree!");
               }
@@ -208,6 +215,10 @@ namespace WorkflowPatternFinder
       return _foundPatterns;
     }
 
+    public static string RemoveSpecialCharacters(string str)
+    {
+      return Regex.Replace(str, "[',()]+", "", RegexOptions.Compiled);
+    }
     private void InducedCheckBox_Click(object sender, RoutedEventArgs e)
     {
       if(InducedCheckBox.IsChecked == true)
@@ -243,7 +254,7 @@ namespace WorkflowPatternFinder
         if(listName == "ValidOccurencesList")
         {
           var selectedPattern = _foundPatterns.Single(p => p.FilePath == selectedFile);
-          patternMembers = string.Join(",", selectedPattern.Ids);
+          patternMembers = string.Join(",", selectedPattern.Ids.Select(t => $"{t.Key}:{t.Value}"));
         }
         if(e.ChangedButton == MouseButton.Left)
         {
@@ -576,7 +587,7 @@ namespace WorkflowPatternFinder
           Console.Write(reader.ReadToEnd());
         }
       }
-      
+
       Activate();
     }
 

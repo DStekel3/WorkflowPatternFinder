@@ -32,7 +32,7 @@ if len(sys.argv) == 7:
     finder.SetSimilarityThreshold(simThreshold)
     
     for treePath in allTreePaths:
-        print('Searching in tree '+str(allTreePaths.index(treePath))+' of ' + str(len(allTreePaths)))
+        print('Searching in tree ' + str(allTreePaths.index(treePath) + 1) + ' of ' + str(len(allTreePaths)))
         tree = ProcessTreeLoader.LoadTree(treePath)
         if not countPatterns:
           result = finder.IsValidSubTree(tree, pattern, induced)
@@ -41,12 +41,16 @@ if len(sys.argv) == 7:
         else:
           result = finder.GetValidSubTrees(tree, pattern, induced)
           if any(result):
-            validTrees.append((treePath, len(result), flatten(result)))
-          # Implement that script returns number of patterns instead of score of pattern
+            validTrees.append((treePath, len(result)/pattern.GetTreeSize(), result))
+          
     if len(validTrees) > 0:
         print("Valid trees:")
-        for path, score, patternMembers in validTrees:
-            print(path + "," + str(score)+","+",".join(patternMembers))
+        for tree in validTrees:
+            path = tree[0]
+            score = tree[1] 
+            patternMembers = tree[2]
+            print(path + ";" + str(score) + ";" + ";".join(map(str, patternMembers)))
+
 else:
   print("False number of arguments")
 

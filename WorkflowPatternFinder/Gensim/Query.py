@@ -25,11 +25,13 @@ class Query(object):
         if self._model is None:
             raise ValueError('The model is not loaded yet.')
         result = (0.0, '')
-        for treeWord in treeSentence.lower().split():
-            for patternWord in patternSentence.lower().split():
+
+        for patternWord in patternSentence.lower().split():
+            for treeWord in treeSentence.lower().split():
                 if treeWord in self._model.wv.vocab and patternWord in self._model.wv.vocab:
-                    score = self._model.wv.similarity(treeWord, patternWord)
+                    score = self._model.wv.similarity(patternWord, treeWord)
                     if score > result[0]:
-                        result = (self._model.wv.similarity(treeWord, patternWord), treeWord)
+                        print ('returning '+ str((self._model.wv.similarity(patternWord, treeWord), treeWord)))
+                        result = (self._model.wv.similarity(patternWord, treeWord), treeWord)
         # print('returning: ' +str(result))
         return result
