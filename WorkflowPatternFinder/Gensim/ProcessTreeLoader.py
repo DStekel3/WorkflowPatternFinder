@@ -46,5 +46,6 @@ class ProcessTreeLoader(object):
             childId = child.attrib['targetId']
             tree.SetParentalRelation(parentId, childId)
         # print('tree size:', tree.GetTreeSize())
+        tree.SetNumbers()
         return tree  
             

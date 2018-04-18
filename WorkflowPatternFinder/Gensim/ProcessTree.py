@@ -31,6 +31,9 @@ class ProcessTree(object):
       
     def GetRoot(self):
         return self._root
+
+    def GetTreeSize(self):
+        return len(self._nodes)
     
     def SetParentalRelation(self, parentId, childId):
         parent = self.GetNode(parentId)
@@ -38,5 +41,12 @@ class ProcessTree(object):
         parent.AddChild(child)
         child.SetParent(parent)
 
-    def GetTreeSize(self):
-        return len(self._nodes)
+    def SetNumbers(self):
+        nodelist = [self.GetRoot()]
+        number = 0
+        while any(nodelist):
+          currentNode = nodelist.pop(0)
+          currentNode.SetNumber(number)
+          for child in currentNode.GetChildren():
+            nodelist.append(child)
+          number += 1

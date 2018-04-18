@@ -29,33 +29,7 @@ namespace WorkflowEventLogFixer
 
     public static void Main(string[] args)
     {
-      // PreProcessingPhase(args[0], args[1]);
-
-      var trees = LoadProcessTrees(_basePtmlFileDirectory);
-      var pattern = CreatePattern();
-
-      List<string> validOccurrences = new List<string>();
-
-      var induced = false;
-
-      foreach(var tree in trees)
-      {
-        if(SubTreeFinder.IsValidSubTree(tree, pattern, induced))
-        {
-          validOccurrences.Add(tree.GetFilePath());
-          if(induced)
-          {
-            Console.WriteLine($"Given pattern is an induced subtree in {tree.GetFilePath()}");
-          }
-          else
-          {
-            Console.WriteLine($"Given pattern is an embedded subtree in {tree.GetFilePath()}");
-          }
-        }
-      }
-
-      Console.WriteLine($"In total, {validOccurrences.Count} occurrence(s) found after searching in {trees.Count} models.");
-      Console.WriteLine("Done.");
+      
     }
 
     public static void PreProcessingPhase(string importDir, string promScript, string noiseThreshold)
@@ -218,13 +192,6 @@ namespace WorkflowEventLogFixer
       return true;
     }
 
-    private static ProcessTree CreatePattern()
-    {
-      // Deprecated
-      // var testFile = Path.Combine(Directory.GetCurrentDirectory(), "TextFiles", "testPattern.ptml");
-      // return LoadSingleTree(testFile);
-      return null;
-    }
 
     public static List<ProcessTree> LoadProcessTrees(string basePtmlFileDirectory)
     {
@@ -559,11 +526,18 @@ namespace WorkflowEventLogFixer
         FileName = _pythonExe,
         Arguments = $"\"{scriptFile}\" \"{csvDirectory}\" \"{windowSize}\" \"{minCount}\" \"{epochs}\"",
         UseShellExecute = false,
-        WindowStyle = ProcessWindowStyle.Maximized
+        WindowStyle = ProcessWindowStyle.Maximized,
+        RedirectStandardOutput = true
       };
       //cmd is full path to python.exe
       //args is path to .py file and any cmd line args
-      Process.Start(start);
+      using(var process = Process.Start(start))
+      {
+        using(StreamReader reader = process?.StandardOutput)
+        {
+          var output = reader?.ReadToEnd().Replace("\r\n", "|").Split('|').ToList();
+        }
+      }
     }
 
     public static string GetPythonExe()

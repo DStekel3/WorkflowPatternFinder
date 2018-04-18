@@ -123,7 +123,7 @@ class SubTreeFinder(object):
         return (False, 0, tNode.GetId(), '')
     
   def AreSimilarAccordingToDoc2Vec(self, tNode, pNode):
-    score = self._query.GetSentenceSimilarity(tNode.GetEvent(), pNode.GetEvent())
+    score = self._query.GetSentenceSimilarityMaxVariant(tNode.GetEvent(), pNode.GetEvent())
     if score[0] > self._simThreshold:
       return (True, score[0], tNode.GetId(), score[1])
     return (False, score[0], tNode.GetId(), score[1])

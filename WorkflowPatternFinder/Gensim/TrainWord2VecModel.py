@@ -24,7 +24,7 @@ for arg in args:
   print(arg)
   print(arg)
 
-if len(args) == 2:
+if len(args) >= 2:
     print("args:", args)
     directory = args[1]
     if os.path.isdir(args[1]):
@@ -45,7 +45,6 @@ fileIndex = 1
 
 
 for pathObj in pathlist:
-    start = time.time()
     path = str(pathObj)
     # print(path)
     print("Reading file "+ str(fileIndex), end="\r")
@@ -57,7 +56,7 @@ for pathObj in pathlist:
     with open(path) as csvfile:
         ws = csv.DictReader(csvfile, delimiter=';')
         # print("Loading in csv took", round(time.time() - start, 3), "seconds.")
-        start = time.time()
+        
         # read all distinct sentences in the current file. We define a sentence as the combination of "taakomschrijving" and "actieomschrijving".
         # here you iterate over the rows in the specific column
         sentences = []
@@ -104,8 +103,9 @@ from gensim.models import Doc2Vec
 model = gensim.models.Doc2Vec(taggedDocs, window=_window, min_count=_min_count, epochs=_epochs, corpus_count = len(taggedDocs), workers = 8)
 print(model)
 
+start = time.time()
 model.train(taggedDocs, total_examples=model.corpus_count, epochs=model.epochs)
-
+print("Training the model took ", round(time.time() - start, 3), "seconds.")
 import os
 
 new_path = os.path.abspath(os.path.join(directory, os.pardir)) + "/trained.gz"

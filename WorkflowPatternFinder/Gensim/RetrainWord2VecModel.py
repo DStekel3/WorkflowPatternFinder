@@ -22,11 +22,9 @@ args = sys.argv
 sys.stdout.writelines("# of args: "+str(len(args)))
 
 for arg in args:
-  sys.stdout.writelines(arg)
   print(arg)
 
 if len(args) >= 2:
-    print("args:", args)
     path_to_model = args[1]
     if os.path.isfile(args[1]):
       sys.stdout.writelines("valid file found!")
@@ -41,7 +39,8 @@ if len(args) == 5:
 model = Doc2Vec.load(path_to_model, mmap=None)
 model._clear_post_train()
 
-model.train(documents = model.docvecs, total_examples=model.corpus_count, epochs=model.epochs)
+
+model.train(documents = model.docvecs, total_examples=model.corpus_count, epochs=int(_epochs))
 
 model.save(path_to_model)
 print("Trained model and saved to "+path_to_model)

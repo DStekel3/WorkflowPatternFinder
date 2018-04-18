@@ -19,7 +19,7 @@ class Query(object):
         self._model = Doc2Vec.load(path_to_model, mmap=None)
         # print('loaded model')
 
-    def GetSentenceSimilarity(self, treeSentence, patternSentence):
+    def GetSentenceSimilarityMaxVariant(self, treeSentence, patternSentence):
         if self._model is None:
             raise ValueError('The model is not loaded yet.')
         result = (0.0, '')
@@ -29,13 +29,43 @@ class Query(object):
                 if treeWord in self._model.wv.vocab and patternWord in self._model.wv.vocab:
                     score = self._model.wv.similarity(patternWord, treeWord)
                     if score > result[0]:
-                        print ('returning '+ str((self._model.wv.similarity(patternWord, treeWord), treeWord)))
-                        result = (self._model.wv.similarity(patternWord, treeWord), treeWord)
+                        # print('found (' + str(score) + "," + treeWord + ')')
+                        result = (score, treeWord)
         # print('returning: ' +str(result))
         return result
 
+    def GetSentenceSimilarityAverageVariant(self, treeSentence, patternSentence):
+        if self._model is None:
+            raise ValueError('The model is not loaded yet.')
+        result = (0.0, '')
+        scores = []
+        bestWord = ""
+        for patternWord in patternSentence.lower().split():
+            for treeWord in treeSentence.lower().split():
+                if treeWord in self._model.wv.vocab and patternWord in self._model.wv.vocab:
+                    score = self._model.wv.similarity(patternWord, treeWord)
+                    if len(scores) == 0 or score > max(scores):
+                      bestWord = treeWord
+                    scores.append(score)
+                    # print('found (' + str(score) + "," + treeWord + ')')
+        # print('returning: ' +str(result))
+        if len(scores) > 0:
+          result = (sum(scores)/float(len(scores)), bestWord)
+        return result
+
     def GetMostSimilarTerms(self, term):
-        similarTerms = self._model.wv.most_similar(positive=[term.lower()], topn=20)
+      if term.strip() == "":
+        return []
+      if self._model is None:
+        raise ValueError('The model is not loaded yet.')
+        return []
+      else:
+        terms = term.lower().split()
+        myWords = []
+        for word in terms:
+          if word in self._model.wv.vocab:
+            myWords.append(word)
+        similarTerms = self._model.wv.most_similar(positive=myWords, topn=100)
         return similarTerms
         
         

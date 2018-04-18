@@ -22,14 +22,17 @@ if len(sys.argv) == 4:
   patternIds = {}
   for pattern in patternMembers:
     patternParts = pattern.split(':')
-    patternIds[patternParts[0]] = patternParts[1]
-
+    patternIds[patternParts[0]] = patternParts[2]
   workflowName = sys.argv[3]
-
-  dot = Digraph(comment='Workflow Model')
-
+  legend = Digraph()
+  legend.node('a')
+  legend.node('b')
+  legend.edge('a', 'b')
+  
+  myGraph = Digraph()
   root = tree.GetRoot()
   nodelist = [root]
+  number = 0
   while any(nodelist):
     currentNode = nodelist.pop(0)
     print('get event: ',currentNode.GetEvent())
@@ -38,19 +41,21 @@ if len(sys.argv) == 4:
     if currentNode.GetId() in patternIds.keys():
       myColor = 'red'
       specialWord = patternIds[currentNode.GetId()]
-      print('special word: '+specialWord)
+      print('special word: ' + specialWord)
       if(specialWord != ""):
         pat = re.compile(specialWord, re.IGNORECASE)
-        nodeLabel = "<"+ pat.sub("<u>"+specialWord+"</u>", currentNode.GetEvent()).replace("\n", "<br/>") + ">"
-    dot.node(currentNode.GetId(), nodeLabel, color = myColor)
+        nodeLabel = "<" + pat.sub("<u>" + specialWord + "</u>", currentNode.GetEvent()).replace("\n", "<br/>") + ">"
+    myGraph.node(currentNode.GetId(), nodeLabel, color = myColor, xlabel= str(number))
     parent = currentNode.GetParent()
     if parent:
-      dot.edge(parent.GetId(), currentNode.GetId())
+      myGraph.edge(parent.GetId(), currentNode.GetId())
     for child in currentNode.GetChildren():
       nodelist.append(child)
+    number += 1
+  myGraph.subgraph(graph= legend)
     
-  print(dot.source)
-  dot.render(workflowName+str(random.randint(1,100001))+".gv", view=True)
+  print(myGraph.source)
+  myGraph.render(workflowName + str(random.randint(1,100001)) + ".gv", view=True)
   
 exit
 ### example graph:
