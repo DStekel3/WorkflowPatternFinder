@@ -144,6 +144,12 @@ namespace WorkflowPatternFinder
       TreeProgressBar.IsIndeterminate = false;
     }
 
+    private void GetProcessTreeQuality(string ptmlFile)
+    {
+      var xesFile = ptmlFile.Replace("ptml", "xes");
+      Program.GetProcessTreeQuality(xesFile, ptmlFile);
+    }
+
     private List<PatternObject> CallGensim(bool induced, double simThreshold, string similarityVariant)
     {
       var treeBasePath = ImportTreeLabel.Content.ToString();
@@ -269,6 +275,10 @@ namespace WorkflowPatternFinder
         else if(e.ChangedButton == MouseButton.Right)
         {
           OpenFileInNotePad(selectedFile);
+        }
+        else if(e.ChangedButton == MouseButton.Middle)
+        {
+          GetProcessTreeQuality(selectedFile);
         }
       }
     }
