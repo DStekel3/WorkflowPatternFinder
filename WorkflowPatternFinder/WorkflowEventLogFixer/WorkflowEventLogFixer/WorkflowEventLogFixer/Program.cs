@@ -17,6 +17,7 @@ namespace WorkflowEventLogFixer
     private static string _basePtmlFileDirectory = Path.Combine(_baseDirectory, "ptml");
     private static string _basePnmlFileDirectory = Path.Combine(_baseDirectory, "pnml");
     private static string _baseEtmDirectory = Path.Combine(_baseDirectory, "etm");
+    private static string _PTQualityOutputFile = Path.Combine(_baseDirectory, "PTQ_output.txt");
     private static string _pythonExe = "";
     private static string _javaExe = "";
     private static string _word2VecScriptFile = @"C:\Users\dst\Source\Repos\WorkflowPatternFinder\WorkflowPatternFinder\Gensim\TrainWord2VecModel.py";
@@ -24,7 +25,7 @@ namespace WorkflowEventLogFixer
     private static string _petriNetScriptFile = @"C:\Users\dst\eclipse-workspace\ProM\PetriNetMiner.txt";
     private static string _etmScriptFile = @"C:\Users\dst\eclipse-workspace\ProM\EvolutionaryTreeMiner.txt";
     private static string _PTQualityScriptFile = @"C:\Users\dst\eclipse-workspace\ProM\MinePTQuality.txt";
-    private static string _PromCLI = @"C:\Users\dst\eclipse-workspace\ProM\ProM_CLI.bat";
+    private static string _promCLI = @"C:\Users\dst\eclipse-workspace\ProM\ProM_CLI.bat";
 
     //convert each event log to:
     // 1. A csv-file, which is filtered on workflow instances.
@@ -46,49 +47,49 @@ namespace WorkflowEventLogFixer
       {
         CheckExistanceOfScriptFiles();
 
-        var files = Directory.EnumerateFiles(_baseDirectory).Where(c => c.EndsWith(".xlsx")).ToList();
+        //var files = Directory.EnumerateFiles(_baseDirectory).Where(c => c.EndsWith(".xlsx")).ToList();
 
-        var workflowNames = new Dictionary<string, string>();
+        //var workflowNames = new Dictionary<string, string>();
 
-        for(int t = 0; t < files.Count; t++)
-        {
-          var file = files[t];
-          Console.WriteLine($"Busy with {Path.GetFileNameWithoutExtension(file)}...({t + 1}/{files.Count})");
-          var workflowNamesFound = SplitExcelFileIntoSeparateWorkflowLogs(file);
-          foreach(var name in workflowNamesFound)
-          {
-            workflowNames.Add(name.Key, name.Value);
-          }
-        }
+        //for(int t = 0; t < files.Count; t++)
+        //{
+        //  var file = files[t];
+        //  Console.WriteLine($"Busy with {Path.GetFileNameWithoutExtension(file)}...({t + 1}/{files.Count})");
+        //  var workflowNamesFound = SplitExcelFileIntoSeparateWorkflowLogs(file);
+        //  foreach(var name in workflowNamesFound)
+        //  {
+        //    workflowNames.Add(name.Key, name.Value);
+        //  }
+        //}
 
         // Write workflow descriptions to a separate file. This way, we can find the name of a workflow model by reading within this file.
         var workflowNameFile = Path.Combine(_baseDirectory, "workflownames.csv");
         //WriteWorkflowNamesToFile(workflowNames, workflowNameFile);
 
         //Apply word2vec throughout the workflow logs and give similar events similar names.
-        ApplyWord2VecThroughGensimScript(_baseCsvFileDirectory);
+        //ApplyWord2VecThroughGensimScript(_baseCsvFileDirectory);
 
-        Console.WriteLine("Creating XES files...");
-        ConvertCsvToXesFiles();
+        //Console.WriteLine("Creating XES files...");
+        //ConvertCsvToXesFiles();
 
         // Create ptml files
-        CreatePtmlFilesWithImi(noiseThreshold);
+        //CreatePtmlFilesWithImi(noiseThreshold);
 
         // Create pnml files
-        CreatePnmlFiles();
+        //CreatePnmlFiles();
 
         // Create ptml files with Evolutionary Tree Miner
-        CreatePtmlFilesWithETM();
+        //CreatePtmlFilesWithETM();
 
         // Compute quality dimensions
         MineProcessTreeQuality();
       }
     }
 
-    private static void InitializePaths(string importDir, string promScript)
+    private static void InitializePaths(string importDir, string promPath)
     {
+      UpdateScriptFilePaths(promPath);
       _baseDirectory = importDir;
-      _processTreeScriptFile = promScript;
 
       // update all directory paths
       _baseCsvFileDirectory = Path.Combine(_baseDirectory, "csv");
@@ -96,23 +97,24 @@ namespace WorkflowEventLogFixer
       _basePtmlFileDirectory = Path.Combine(_baseDirectory, "ptml");
       _basePnmlFileDirectory = Path.Combine(_baseDirectory, "pnml");
       _baseEtmDirectory = Path.Combine(_baseDirectory, "etm");
+      _PTQualityOutputFile = Path.Combine(_baseDirectory, "PTQ_output.txt");
     }
 
-    public static void RemakeProcessTrees(string importDir, string promScript, string noiseThreshold)
+    public static void RemakeProcessTrees(string importDir, string promPath, string noiseThreshold)
     {
-      InitializePaths(importDir, promScript);
+      InitializePaths(importDir, promPath);
 
       // Create ptml files with the inductive miner (infrequent)
-      //CreatePtmlFilesWithImi(noiseThreshold);
+      CreatePtmlFilesWithImi(noiseThreshold);
       
       // Create pnml files
-      //CreatePnmlFiles();
+      CreatePnmlFiles();
 
       //Create ptml files with the evolutionary tree miner
       CreatePtmlFilesWithETM();
 
       // Compute quality dimensions
-      //MineProcessTreeQuality();
+      MineProcessTreeQuality();
     }
 
     private static void CreatePtmlFilesWithETM()
@@ -490,6 +492,19 @@ namespace WorkflowEventLogFixer
       return filteredLog;
     }
 
+    /// <summary>
+    /// Update paths to ProM script files.
+    /// </summary>
+    /// <param name="promBasePath"></param>
+    public static void UpdateScriptFilePaths(string promBasePath)
+    {
+      _processTreeScriptFile = Path.Combine(promBasePath, PromCustomFileNames.GetProcessTreeMiner());
+      _petriNetScriptFile = Path.Combine(promBasePath, PromCustomFileNames.GetPetriNetMiner());
+      _etmScriptFile = Path.Combine(promBasePath, PromCustomFileNames.GetEvoluationaryTreeMiner());
+      _PTQualityScriptFile = Path.Combine(promBasePath, PromCustomFileNames.GetPTQualityMiner());
+      _promCLI = Path.Combine(promBasePath, PromCustomFileNames.GetCLI());
+    }
+
     private static bool EventContainsNoise(Event currentEvent)
     {
       if(!int.TryParse(currentEvent.InstanceID, out int a))
@@ -609,23 +624,27 @@ namespace WorkflowEventLogFixer
         FileName = _pythonExe,
         Arguments = $"\"{scriptFile}\" \"{csvDirectory}\" \"{windowSize}\" \"{minCount}\" \"{epochs}\"",
         UseShellExecute = false,
-        WindowStyle = ProcessWindowStyle.Maximized,
-        RedirectStandardOutput = true
+        WindowStyle = ProcessWindowStyle.Maximized
       };
-      //cmd is full path to python.exe
-      //args is path to .py file and any cmd line args
-      using(var process = Process.Start(start))
-      {
-        using(StreamReader reader = process?.StandardOutput)
-        {
-          var output = reader?.ReadToEnd().Replace("\r\n", "|").Split('|').ToList();
-        }
-      }
+      var process = Process.Start(start);
+      process.WaitForExit();
+      process.Close();
     }
 
-    public static void GetProcessTreeQuality(string xesFile, string ptmlFile)
+    public static bool DoesProcessTreeQualityFileExist()
     {
-      
+      return File.Exists(_PTQualityOutputFile);
+    }
+
+    public static string GetProcessTreeQuality(string ptmlFile)
+    {
+      var read = File.ReadAllLines(_PTQualityOutputFile);
+      var resultingLine = read.Single(f => f.StartsWith(ptmlFile));
+      if(resultingLine != null)
+      {
+        return resultingLine.Split(';')[1].Split(' ')[0];
+      }
+      return "-";
     }
 
     public static void MineProcessTreeQuality()
@@ -634,7 +653,7 @@ namespace WorkflowEventLogFixer
       ProcessStartInfo startInfo = new ProcessStartInfo
       {
         WorkingDirectory = Path.GetDirectoryName(_PTQualityScriptFile) ?? throw new InvalidOperationException(),
-        FileName = _PromCLI,
+        FileName = _promCLI,
         Arguments = $"-f {Path.GetFileName(_PTQualityScriptFile)}",
         UseShellExecute = false
       };

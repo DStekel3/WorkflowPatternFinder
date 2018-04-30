@@ -26,8 +26,8 @@
               <DropShadowEffect Opacity="0.7" ShadowDepth="3"/>
             </Button.Effect>
           </Button>
-          <Label x:Name="PromScriptLabel" Content="Script location..." HorizontalAlignment="Left" Margin="10,207,0,0" VerticalAlignment="Top" Width="677" MouseDoubleClick="PromScriptLabel_DoubleClick" FontSize="24" Background="White" Grid.ColumnSpan="2"/>
-          <Button x:Name="PromScriptButton" Content="Select Inductive Miner script" HorizontalAlignment="Left" Margin="10,254,0,0" VerticalAlignment="Top" Width="322" Click="PromScriptButton_Click" RenderTransformOrigin="0.615,0.6" Height="50" FontSize="24" Grid.ColumnSpan="2">
+          <Label x:Name="PromLabel" Content="ProM location..." HorizontalAlignment="Left" Margin="10,207,0,0" VerticalAlignment="Top" Width="677" MouseDoubleClick="PromLabel_DoubleClick" FontSize="24" Background="White" Grid.ColumnSpan="2"/>
+          <Button x:Name="PromButton" Content="Select ProM Location" HorizontalAlignment="Left" Margin="10,254,0,0" VerticalAlignment="Top" Width="322" Click="PromButton_Click" RenderTransformOrigin="0.615,0.6" Height="50" FontSize="24" Grid.ColumnSpan="2">
             <Button.Effect>
               <DropShadowEffect ShadowDepth="3" Opacity="0.7"/>
             </Button.Effect>
@@ -55,7 +55,8 @@
             </ListView.Effect>
             <ListView.View>
               <GridView>
-                <GridViewColumn Header="Process Tree" DisplayMemberBinding="{Binding TreePath}" Width="800"/>
+                <GridViewColumn x:Name="TreeColumn" Header="Process Tree" DisplayMemberBinding="{Binding TreePath}" Width="650"/>
+                <GridViewColumn x:Name="QualityColumn" Header="Quality" DisplayMemberBinding="{Binding Quality}" Width="150"/>
               </GridView>
             </ListView.View>
           </ListView>

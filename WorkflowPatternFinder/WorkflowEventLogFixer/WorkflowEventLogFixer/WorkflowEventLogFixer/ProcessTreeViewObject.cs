@@ -9,5 +9,7 @@ namespace WorkflowPatternFinder
   public class ProcessTreeViewObject
   {
     public string TreePath { get; set; }
+
+    public string Quality { get; set; }
   }
 }

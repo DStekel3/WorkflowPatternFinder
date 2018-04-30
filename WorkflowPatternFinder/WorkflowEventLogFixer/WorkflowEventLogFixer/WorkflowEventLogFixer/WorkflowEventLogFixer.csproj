@@ -897,6 +897,7 @@
     <Compile Include="Node.cs" />
     <Compile Include="ProcessTree.cs" />
     <Compile Include="ProcessTreeLoader.cs" />
+    <Compile Include="PromCustomFileNames.cs" />
     <Compile Include="ValidOccurencesViewObject.cs" />
     <Compile Include="ProcessTreeViewObject.cs" />
     <Compile Include="Program.cs" />

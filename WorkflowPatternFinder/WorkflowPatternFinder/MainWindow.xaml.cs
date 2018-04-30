@@ -29,10 +29,11 @@ namespace WorkflowPatternFinder
     private bool _countNumberOfPatternsWithinModel = false;
     private string _notePadPath;
     private string _importExcelDir;
-    private string _promScriptPath;
+    private string _promBasePath;
     private string _noiseThreshold;
     private string _incorrectDir = "Incorrect directory!";
     private string _incorrectFile = "Incorrect file!";
+    private string _missingScriptFile = "Missing ProM scripts!";
     private List<PatternObject> _foundPatterns = new List<PatternObject>();
 
     public MainWindow()
@@ -144,12 +145,6 @@ namespace WorkflowPatternFinder
       TreeProgressBar.IsIndeterminate = false;
     }
 
-    private void GetProcessTreeQuality(string ptmlFile)
-    {
-      var xesFile = ptmlFile.Replace("ptml", "xes");
-      Program.GetProcessTreeQuality(xesFile, ptmlFile);
-    }
-
     private List<PatternObject> CallGensim(bool induced, double simThreshold, string similarityVariant)
     {
       var treeBasePath = ImportTreeLabel.Content.ToString();
@@ -237,7 +232,6 @@ namespace WorkflowPatternFinder
 
     private void ListView_DoubleClick(object sender, MouseButtonEventArgs e)
     {
-
       var listName = ((System.Windows.Controls.ListView)sender).Name;
       var selectedFile = "";
       if(listName == "ProcessTreeView")
@@ -276,10 +270,6 @@ namespace WorkflowPatternFinder
         {
           OpenFileInNotePad(selectedFile);
         }
-        else if(e.ChangedButton == MouseButton.Middle)
-        {
-          GetProcessTreeQuality(selectedFile);
-        }
       }
     }
 
@@ -309,7 +299,7 @@ namespace WorkflowPatternFinder
     {
       ChangeEnabledPreProcessingButtons(false);
       _importExcelDir = ImportExcelDirectoryLabel.Content.ToString();
-      _promScriptPath = PromScriptLabel.Content.ToString();
+      _promBasePath = PromLabel.Content.ToString();
       _noiseThreshold = InductiveMinerNoiseThresholdTextBox.Text;
 
       Task DoWork()
@@ -326,7 +316,7 @@ namespace WorkflowPatternFinder
 
     void StartPreprocessing()
     {
-      Program.PreProcessingPhase(_importExcelDir, _promScriptPath, _noiseThreshold);
+      Program.PreProcessingPhase(_importExcelDir, _promBasePath, _noiseThreshold);
     }
 
     private void StartPreprocessingTask(Func<Task> task, Action completedTask = null)
@@ -379,12 +369,24 @@ namespace WorkflowPatternFinder
     {
       ProcessTreeView.Items.Clear();
       var processTreeDirectory = Path.Combine(ImportExcelDirectoryLabel.Content.ToString(), "ptml");
+
       if(Directory.Exists(processTreeDirectory))
       {
         var allFiles = Directory.GetFiles(processTreeDirectory);
-        foreach(string path in allFiles)
+        if(Program.DoesProcessTreeQualityFileExist())
         {
-          ProcessTreeView.Items.Add(new ProcessTreeViewObject() { TreePath = path });
+          foreach(string path in allFiles)
+          {
+            var ptQuality = Program.GetProcessTreeQuality(path);
+            ProcessTreeView.Items.Add(new ProcessTreeViewObject { TreePath = path, Quality = ptQuality });
+          }
+        }
+        else
+        {
+          foreach(string path in allFiles)
+          {
+            ProcessTreeView.Items.Add(new ProcessTreeViewObject { TreePath = path, Quality = "-" });
+          }
         }
 
         ProcessTreeViewLabel.Content = $"Process trees created (file path)\t{allFiles.Count()} models loaded";
@@ -403,26 +405,42 @@ namespace WorkflowPatternFinder
       }
     }
 
-    private void PromScriptLabel_DoubleClick(object sender, MouseButtonEventArgs e)
+    private void PromLabel_DoubleClick(object sender, MouseButtonEventArgs e)
     {
-      var selectedFile = PromScriptLabel.Content.ToString();
-      OpenFileInNotePad(selectedFile);
+      var selectedDirectory = PromLabel.Content.ToString();
+      OpenDirectoryInExplorer(selectedDirectory);
     }
 
-    private void PromScriptButton_Click(object sender, RoutedEventArgs e)
+    private void PromButton_Click(object sender, RoutedEventArgs e)
     {
-      OpenFileDialog ofd = new OpenFileDialog();
-      ofd.FileName = @"C:\Users\dst\eclipse-workspace\ProM\ProcessTreeMiner.txt";
+      var scriptFiles = PromCustomFileNames.GetAllNames();
+      FolderBrowserDialog ofd = new FolderBrowserDialog();
+      var standardPath = @"C:\Users\dst\eclipse-workspace\ProM";
+      if(Directory.Exists(standardPath))
+      {
+        ofd.SelectedPath = standardPath;
+      }
       DialogResult result = ofd.ShowDialog();
       if(result == System.Windows.Forms.DialogResult.OK)
       {
-        if(ofd.FileName.EndsWith(".txt"))
+        if(Directory.Exists(ofd.SelectedPath))
         {
-          PromScriptLabel.Content = ofd.FileName;
+          var files = Directory.EnumerateFiles(ofd.SelectedPath);
+          foreach(var scriptFileName in scriptFiles)
+          {
+            if(!files.Any(f => f.EndsWith(scriptFileName)))
+            {
+              UpdateButtonText(PromButton, _missingScriptFile);
+              break;
+            }
+          }
+          _promBasePath = ofd.SelectedPath;
+          PromLabel.Content = _promBasePath;
+          Program.UpdateScriptFilePaths(_promBasePath);
         }
         else
         {
-          UpdateButtonText(PromScriptButton, _incorrectFile, 3000);
+          UpdateButtonText(PromButton, _incorrectFile);
         }
       }
     }
@@ -432,7 +450,7 @@ namespace WorkflowPatternFinder
       // pre processing buttons
       PreProcessingButton.IsEnabled = isEnabled;
       ImportExcelDirectoryButton.IsEnabled = isEnabled;
-      PromScriptButton.IsEnabled = isEnabled;
+      PromButton.IsEnabled = isEnabled;
     }
 
     private void ChangeEnabledTreeButtons(bool isEnabled)
@@ -647,11 +665,11 @@ namespace WorkflowPatternFinder
       PreProgress.IsIndeterminate = true;
       ChangeEnabledPreProcessingButtons(false);
       _importExcelDir = ImportExcelDirectoryLabel.Content.ToString();
-      _promScriptPath = PromScriptLabel.Content.ToString();
+      _promBasePath = PromLabel.Content.ToString();
       var noiseThreshold = InductiveMinerNoiseThresholdTextBox.Text;
-      if(Directory.Exists(_importExcelDir) && File.Exists(_promScriptPath))
+      if(Directory.Exists(_importExcelDir) && Directory.Exists(_promBasePath))
       {
-        Program.RemakeProcessTrees(_importExcelDir, _promScriptPath, noiseThreshold);
+        Program.RemakeProcessTrees(_importExcelDir, _promBasePath, noiseThreshold);
       }
       ChangeEnabledPreProcessingButtons(true);
       PreProgress.IsIndeterminate = false;
