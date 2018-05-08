@@ -4,7 +4,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>44ea4a09-4254-4601-acb2-be3e847d45c4</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>PatternDiscoveryScript.py</StartupFile>
+    <StartupFile>SentenceQuery.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
@@ -14,7 +14,7 @@
     <IsWindowsApplication>False</IsWindowsApplication>
     <InterpreterId>Global|PythonCore|3.4</InterpreterId>
     <LaunchProvider>Standard Python launcher</LaunchProvider>
-    <CommandLineArguments>"C:\Thesis\Profit analyses\04-04-2018\trained.gz" "1" "5" "2"</CommandLineArguments>
+    <CommandLineArguments>"C:\Thesis\Profit analyses\testmap\trained.gz" "goedkeuren"</CommandLineArguments>
     <EnableNativeCodeDebugging>False</EnableNativeCodeDebugging>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
@@ -27,6 +27,9 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Gensim.py" />
+    <Compile Include="GetSynonyms.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Node.py">
       <SubType>Code</SubType>
     </Compile>
@@ -56,6 +59,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="RetrainWord2VecModel.py" />
+    <Compile Include="SentenceQuery.py" />
     <Compile Include="TermSimilarityQuery.py">
       <SubType>Code</SubType>
     </Compile>

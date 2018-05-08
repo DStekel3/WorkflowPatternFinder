@@ -6,9 +6,9 @@
         xmlns:local="clr-namespace:WorkflowPatternFinder"
         xmlns:forms="clr-namespace:System.Windows.Forms;assembly=System.Windows.Forms"
         mc:Ignorable="d"
-        Title="TreeMiner" Height="802" Width="1600" Background="#FF838383" VerticalAlignment="Stretch" ScrollViewer.HorizontalScrollBarVisibility="Visible" ScrollViewer.CanContentScroll="True" UseLayoutRounding="False" HorizontalContentAlignment="Stretch">
+        Title="TreeMiner" Height="802" Width="1600" Background="#FF838383" VerticalAlignment="Stretch" ScrollViewer.HorizontalScrollBarVisibility="Visible" ScrollViewer.CanContentScroll="True" UseLayoutRounding="False" HorizontalContentAlignment="Stretch" KeyDown="KeysDown" WindowStartupLocation="CenterScreen">
   <Grid Margin="0,0,0,0">
-    <TabControl x:Name="tabControl" VerticalAlignment="Stretch" HorizontalContentAlignment="Stretch">
+    <TabControl x:Name="TabControl" VerticalAlignment="Stretch" HorizontalContentAlignment="Stretch">
       <TabItem Header="Pre-processing" Margin="10,0,-14,-2" IsSelected ="True" UseLayoutRounding="False" FontSize="24">
         <Grid Background="#FFE5E5E5" UseLayoutRounding="False">
           <Grid.ColumnDefinitions>
@@ -21,23 +21,12 @@
               <DropShadowEffect Opacity="0.69" ShadowDepth="3"/>
             </Button.Effect>
           </Button>
-          <Button x:Name="PreProcessingButton" Content="Start Pre-processing steps..." HorizontalAlignment="Left" Margin="73,503,0,0" VerticalAlignment="Top" Width="344" Height="76" Click="PreProcessingButton_Click" Foreground="Black" FontSize="24" Grid.ColumnSpan="2">
-            <Button.Effect>
-              <DropShadowEffect Opacity="0.7" ShadowDepth="3"/>
-            </Button.Effect>
-          </Button>
           <Label x:Name="PromLabel" Content="ProM location..." HorizontalAlignment="Left" Margin="10,207,0,0" VerticalAlignment="Top" Width="677" MouseDoubleClick="PromLabel_DoubleClick" FontSize="24" Background="White" Grid.ColumnSpan="2"/>
           <Button x:Name="PromButton" Content="Select ProM Location" HorizontalAlignment="Left" Margin="10,254,0,0" VerticalAlignment="Top" Width="322" Click="PromButton_Click" RenderTransformOrigin="0.615,0.6" Height="50" FontSize="24" Grid.ColumnSpan="2">
             <Button.Effect>
               <DropShadowEffect ShadowDepth="3" Opacity="0.7"/>
             </Button.Effect>
           </Button>
-          <Label x:Name="ConsoleLabel" Content="Click start..." HorizontalAlignment="Left" Margin="73,596,0,0" VerticalAlignment="Top" Width="485" Height="54" FontSize="24" Grid.ColumnSpan="2"/>
-          <ProgressBar x:Name="PreProgress" HorizontalAlignment="Left" Height="69" Margin="573,551,0,0" VerticalAlignment="Top" Width="662" IsIndeterminate="False" Grid.Column="1">
-            <ProgressBar.Effect>
-              <DropShadowEffect Opacity="0.7" ShadowDepth="3"/>
-            </ProgressBar.Effect>
-          </ProgressBar>
           <TextBox x:Name="InductiveMinerNoiseThresholdTextBox" HorizontalAlignment="Left" Height="59" Margin="4,381,0,0" TextWrapping="Wrap" Text="0.2" VerticalAlignment="Top" Width="78" FontSize="36" SpellCheck.IsEnabled="True" PreviewTextInput="CheckThresholdInput" RenderTransformOrigin="1.828,-0.713" Grid.Column="1">
             <TextBox.Effect>
               <DropShadowEffect Opacity="0.7" ShadowDepth="3"/>
@@ -49,6 +38,17 @@
               <DropShadowEffect Opacity="0.7" ShadowDepth="3"/>
             </Button.Effect>
           </Button>
+          <Button x:Name="PreProcessingButton" Content="Start Pre-processing steps..." HorizontalAlignment="Left" Margin="73,503,0,0" VerticalAlignment="Top" Width="344" Height="76" Click="PreProcessingButton_Click" Foreground="Black" FontSize="24" Grid.ColumnSpan="2">
+            <Button.Effect>
+              <DropShadowEffect Opacity="0.7" ShadowDepth="3"/>
+            </Button.Effect>
+          </Button>
+          <Label x:Name="ConsoleLabel" Content="Click start..." HorizontalAlignment="Left" Margin="73,596,0,0" VerticalAlignment="Top" Width="485" Height="54" FontSize="24" Grid.ColumnSpan="2"/>
+          <ProgressBar x:Name="PreProgress" HorizontalAlignment="Left" Height="69" Margin="573,551,0,0" VerticalAlignment="Top" Width="662" IsIndeterminate="False" Grid.Column="1">
+            <ProgressBar.Effect>
+              <DropShadowEffect Opacity="0.7" ShadowDepth="3"/>
+            </ProgressBar.Effect>
+          </ProgressBar>
           <ListView x:Name="ProcessTreeView" ItemsSource="{Binding ProcessTreeView}" HorizontalAlignment="Left" Height="433" Margin="517,89,0,0" VerticalAlignment="Top" Width="800" Grid.Column="1" FontSize="20" MouseDoubleClick="ListView_DoubleClick">
             <ListView.Effect>
               <DropShadowEffect Opacity="0.7" ShadowDepth="3"/>
@@ -82,6 +82,18 @@
             </Button.Effect>
           </Button>
           <CheckBox x:Name="InducedCheckBox" Content="Treat as induced subtree" HorizontalAlignment="Left" Margin="10,316,0,0" VerticalAlignment="Top" Click="InducedCheckBox_Click" RenderTransformOrigin="0.493,3.452" Height="31" Width="287" Grid.ColumnSpan="2"/>
+          <CheckBox x:Name="CountCheckBox" Content="Count number of subtrees in model" HorizontalAlignment="Left" Margin="10,360,0,0" VerticalAlignment="Top" Click="CountCheckBox_Click" Grid.ColumnSpan="2"/>
+          <Label x:Name="SimThresholdLabel" Content="w2v Similarity Threshold:" HorizontalAlignment="Left" Margin="99,396,0,0" VerticalAlignment="Top" Grid.Column="1"/>
+          <TextBox x:Name="SimTresholdValue" HorizontalAlignment="Left" Height="42" Margin="463,400,0,0" TextWrapping="Wrap" Text="0.8" VerticalAlignment="Top" Width="90" FontSize="24" SpellCheck.IsEnabled="True" PreviewTextInput="CheckThresholdInput" RenderTransformOrigin="1.828,-0.713" Grid.Column="1">
+            <TextBox.Effect>
+              <DropShadowEffect Opacity="0.7" ShadowDepth="3"/>
+            </TextBox.Effect>
+          </TextBox>
+          <Label x:Name="SimVariantLabel" Content="w2v Similarity Variant:" HorizontalAlignment="Left" Margin="99,447,0,0" VerticalAlignment="Top" Grid.Column="1"/>
+          <ComboBox x:Name="SimilarityVariantComboBox" Grid.Column="1" HorizontalAlignment="Left" Margin="433,447,0,0" VerticalAlignment="Top" Width="120" SelectedIndex="0">
+            <Label x:Name="VariantMaxValue" Content="max" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+            <Label x:Name="VariantAverageValue" Content="average" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+          </ComboBox>
           <Button x:Name="TreeStartButton" Content="Start mining..." HorizontalAlignment="Left" Margin="123,508,0,0" VerticalAlignment="Top" Width="268" Height="62" Click="StartTreeButton_Click" Foreground="Black" FontSize="36" Grid.ColumnSpan="2">
             <Button.Effect>
               <DropShadowEffect Opacity="0.7" ShadowDepth="3"/>
@@ -105,22 +117,10 @@
               <DropShadowEffect Opacity="0.7" ShadowDepth="3"/>
             </ProgressBar.Effect>
           </ProgressBar>
-          <TextBox x:Name="SimTresholdValue" HorizontalAlignment="Left" Height="42" Margin="463,400,0,0" TextWrapping="Wrap" Text="0.8" VerticalAlignment="Top" Width="90" FontSize="24" SpellCheck.IsEnabled="True" PreviewTextInput="CheckThresholdInput" RenderTransformOrigin="1.828,-0.713" Grid.Column="1">
-            <TextBox.Effect>
-              <DropShadowEffect Opacity="0.7" ShadowDepth="3"/>
-            </TextBox.Effect>
-          </TextBox>
-          <Label x:Name="SimThresholdLabel" Content="w2v Similarity Threshold:" HorizontalAlignment="Left" Margin="99,396,0,0" VerticalAlignment="Top" Grid.Column="1"/>
-          <CheckBox x:Name="CountCheckBox" Content="Count number of subtrees in model" HorizontalAlignment="Left" Margin="10,360,0,0" VerticalAlignment="Top" Click="CountCheckBox_Click" Grid.ColumnSpan="2"/>
-          <ComboBox x:Name="SimilarityVariantComboBox" Grid.Column="1" HorizontalAlignment="Left" Margin="433,447,0,0" VerticalAlignment="Top" Width="120" SelectedIndex="0">
-            <Label x:Name="VariantMaxValue" Content="max" HorizontalAlignment="Left" VerticalAlignment="Top"/>
-            <Label x:Name="VariantAverageValue" Content="average" HorizontalAlignment="Left" VerticalAlignment="Top"/>
-          </ComboBox>
-          <Label x:Name="SimVariantLabel" Content="w2v Similarity Variant:" HorizontalAlignment="Left" Margin="99,447,0,0" VerticalAlignment="Top" Grid.Column="1"/>
-        </Grid>
+          </Grid>
       </TabItem>
       <TabItem Header="Train word2vec" Margin="30,0,-34,-2" FontSize="24">
-        <Grid Background="#FFE5E5E5" Margin="0,0,-2,0">
+        <Grid Background="#FFE5E5E5" Margin="0,0,-2,0" UseLayoutRounding="False">
           <Grid.ColumnDefinitions>
             <ColumnDefinition Width="133*"/>
             <ColumnDefinition Width="895*"/>
@@ -131,30 +131,30 @@
               <DropShadowEffect Opacity="0.7" ShadowDepth="3"/>
             </TextBox.Effect>
           </TextBox>
-          <Label x:Name="NumberOfEpochsLabel" Content="Number of epochs:" HorizontalAlignment="Left" Margin="10,190,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.482,0.976" Grid.ColumnSpan="2" Width="215"/>
-          <TextBox x:Name="NumberOfEpochsValue" HorizontalAlignment="Left" Height="48" Margin="88,190,0,0" TextWrapping="Wrap" Text="5" VerticalAlignment="Top" Width="95" FontSize="36" SpellCheck.IsEnabled="True" PreviewTextInput="CheckIfInputIsDigit" RenderTransformOrigin="1.828,-0.713" Grid.Column="1">
-            <TextBox.Effect>
-              <DropShadowEffect Opacity="0.7" ShadowDepth="3"/>
-            </TextBox.Effect>
-          </TextBox>
           <Label x:Name="MinCountLabel" Content="Minimum count:" HorizontalAlignment="Left" Margin="10,124,0,0" VerticalAlignment="Top"/>
           <TextBox x:Name="MinCountValue" HorizontalAlignment="Left" Height="52" Margin="87,115,0,0" TextWrapping="Wrap" Text="5" VerticalAlignment="Top" Width="95" FontSize="36" SpellCheck.IsEnabled="True" PreviewTextInput="CheckIfInputIsDigit" RenderTransformOrigin="1.828,-0.713" Grid.Column="1">
             <TextBox.Effect>
               <DropShadowEffect Opacity="0.7" ShadowDepth="3"/>
             </TextBox.Effect>
           </TextBox>
-          <Button x:Name="TrainModelButton" Content="Train model" HorizontalAlignment="Left" Margin="0,391,0,0" VerticalAlignment="Top" Width="271" RenderTransformOrigin="0.547,1.5" Height="58" Click="TrainModelButton_Click" Grid.Column="1">
-            <Button.Effect>
+          <Label x:Name="NumberOfEpochsLabel" Content="Number of epochs:" HorizontalAlignment="Left" Margin="10,190,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.482,0.976" Grid.ColumnSpan="2" Width="215"/>
+          <TextBox x:Name="NumberOfEpochsValue" HorizontalAlignment="Left" Height="48" Margin="88,190,0,0" TextWrapping="Wrap" Text="5" VerticalAlignment="Top" Width="95" FontSize="36" SpellCheck.IsEnabled="True" PreviewTextInput="CheckIfInputIsDigit" RenderTransformOrigin="1.828,-0.713" Grid.Column="1">
+            <TextBox.Effect>
               <DropShadowEffect Opacity="0.7" ShadowDepth="3"/>
-            </Button.Effect>
-          </Button>
+            </TextBox.Effect>
+          </TextBox>
           <Label x:Name="ModelPathLabel" Content="Model not found..." HorizontalAlignment="Left" Margin="10,256,0,0" VerticalAlignment="Top" Grid.ColumnSpan="2" Width="687" Background="White"/>
           <Button x:Name="ChangeModelButton" Content="Select model" HorizontalAlignment="Left" Margin="10,303,0,0" VerticalAlignment="Top" Width="246" Height="54" Click="ChangeModelButton_Click" Grid.ColumnSpan="2">
             <Button.Effect>
               <DropShadowEffect Opacity="0.7" ShadowDepth="3"/>
             </Button.Effect>
           </Button>
-          <Button x:Name="PlotModelButton" Content="Plot model" HorizontalAlignment="Left" Margin="232,75,0,0" VerticalAlignment="Top" Width="260" Click="ShowModel_Click" Grid.Column="1" Height="62">
+          <Button x:Name="TrainModelButton" Content="Train model" HorizontalAlignment="Left" Margin="0,391,0,0" VerticalAlignment="Top" Width="271" RenderTransformOrigin="0.547,1.5" Height="58" Click="TrainModelButton_Click" Grid.Column="1">
+            <Button.Effect>
+              <DropShadowEffect Opacity="0.7" ShadowDepth="3"/>
+            </Button.Effect>
+          </Button>
+          <Button x:Name="PlotModelButton" Content="Plot 2D model" HorizontalAlignment="Left" Margin="232,75,0,0" VerticalAlignment="Top" Width="260" Click="ShowModel_Click" Grid.Column="1" Height="62">
             <Button.Effect>
               <DropShadowEffect Opacity="0.7" ShadowDepth="3"/>
             </Button.Effect>
@@ -164,23 +164,28 @@
               <DropShadowEffect Opacity="0.7" ShadowDepth="3"/>
             </TextBox.Effect>
           </TextBox>
-          <Button x:Name="TermQueryButton" Content="Retrieve most similar terms" Grid.Column="1" HorizontalAlignment="Left" Margin="158,550,0,0" VerticalAlignment="Top" Width="315" Height="58" FontSize="24" Click="TermQueryButton_Click">
+          <Button x:Name="TermQueryButton" Content="Retrieve most similar terms" Grid.Column="1" HorizontalAlignment="Left" Margin="152,500,0,0" VerticalAlignment="Top" Width="315" Height="58" FontSize="24" Click="TermQueryButton_Click">
             <Button.Effect>
               <DropShadowEffect Opacity="0.7" ShadowDepth="3"/>
             </Button.Effect>
           </Button>
-          <ListView x:Name="SimilarTermsList" ItemsSource="{Binding SimilarTermsList}" HorizontalAlignment="Left" Height="433" Margin="517,89,0,0" VerticalAlignment="Top" Width="600" Grid.Column="1" FontSize="20">
+          <Button x:Name="SentenceQueryButton" Content="Retrieve Sentences" Grid.Column="1" HorizontalAlignment="Left" Margin="151.6,590,0,0" VerticalAlignment="Top" Width="315" Height="58" FontSize="24" Click="SentenceQueryButton_Click">
+            <Button.Effect>
+              <DropShadowEffect Opacity="0.7" ShadowDepth="3"/>
+            </Button.Effect>
+          </Button>
+          <ListView x:Name="SimilarTermsList" ItemsSource="{Binding SimilarTermsList}" HorizontalAlignment="Left" Height="433" Margin="517,89,0,0" VerticalAlignment="Top" Width="840" Grid.Column="1" FontSize="20">
             <ListView.Effect>
               <DropShadowEffect Opacity="0.7" ShadowDepth="3"/>
             </ListView.Effect>
             <ListView.View>
               <GridView>
-                <GridViewColumn Header="Term" DisplayMemberBinding="{Binding Term}" Width="400"/>
-                <GridViewColumn Header="Score" DisplayMemberBinding="{Binding Score}" Width="200"/>
+                <GridViewColumn Header="Term" DisplayMemberBinding="{Binding Term}" Width="720"/>
+                <GridViewColumn Header="Score" DisplayMemberBinding="{Binding Score}" Width="120"/>
               </GridView>
             </ListView.View>
           </ListView>
-        </Grid>
+          </Grid>
       </TabItem>
     </TabControl>
 

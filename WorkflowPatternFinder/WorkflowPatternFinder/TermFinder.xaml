@@ -1,0 +1,15 @@
+﻿<Window x:Class="WorkflowPatternFinder.TermFinder"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:WorkflowPatternFinder"
+        mc:Ignorable="d"
+        Title="TermFinder" Height="150" Width="300" MinWidth="0.7" KeyDown="KeyPressed" WindowStyle="ToolWindow" Top="0" Left="0" WindowStartupLocation="CenterOwner">
+    <Grid x:Name="Finder" Background="Gainsboro">
+    <Label x:Name="FindTermLabel" Content="Search for term:" HorizontalAlignment="Left" Margin="37,20,0,0" VerticalAlignment="Top"/>
+    <TextBox x:Name="FindTermTextBox" HorizontalAlignment="Left" Height="23" Margin="37,46,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="167"/>
+    <Button x:Name="FindTermButton" Content="Find next" HorizontalAlignment="Left" Margin="37,84,0,0" VerticalAlignment="Top" Width="76" Click="FindTermButton_Click"/>
+
+  </Grid>
+</Window>

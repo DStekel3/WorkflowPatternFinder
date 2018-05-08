@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Diagnostics;
+using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using OfficeOpenXml;
 
@@ -27,6 +28,8 @@ namespace WorkflowEventLogFixer
     private static string _PTQualityScriptFile = @"C:\Users\dst\eclipse-workspace\ProM\MinePTQuality.txt";
     private static string _promCLI = @"C:\Users\dst\eclipse-workspace\ProM\ProM_CLI.bat";
 
+    private static List<string> _modelQualityCache = new List<string>();
+
     //convert each event log to:
     // 1. A csv-file, which is filtered on workflow instances.
     // 2. A xes-file, which is needed for further workflow analysis.
@@ -34,7 +37,7 @@ namespace WorkflowEventLogFixer
 
     public static void Main(string[] args)
     {
-      
+
     }
 
     public static void PreProcessingPhase(string importDir, string promScript, string noiseThreshold)
@@ -86,9 +89,12 @@ namespace WorkflowEventLogFixer
       }
     }
 
-    private static void InitializePaths(string importDir, string promPath)
+    public static void InitializePaths(string importDir, string promPath = null)
     {
-      UpdateScriptFilePaths(promPath);
+      if(!string.IsNullOrEmpty(promPath))
+      {
+        UpdateScriptFilePaths(promPath);
+      }
       _baseDirectory = importDir;
 
       // update all directory paths
@@ -98,6 +104,7 @@ namespace WorkflowEventLogFixer
       _basePnmlFileDirectory = Path.Combine(_baseDirectory, "pnml");
       _baseEtmDirectory = Path.Combine(_baseDirectory, "etm");
       _PTQualityOutputFile = Path.Combine(_baseDirectory, "PTQ_output.txt");
+      _modelQualityCache.Clear();
     }
 
     public static void RemakeProcessTrees(string importDir, string promPath, string noiseThreshold)
@@ -106,7 +113,7 @@ namespace WorkflowEventLogFixer
 
       // Create ptml files with the inductive miner (infrequent)
       CreatePtmlFilesWithImi(noiseThreshold);
-      
+
       // Create pnml files
       CreatePnmlFiles();
 
@@ -227,7 +234,7 @@ namespace WorkflowEventLogFixer
       }
     }
 
-    
+
     public static bool CheckIfPythonAndJavaAreInstalled()
     {
       ProcessStartInfo info = new ProcessStartInfo
@@ -348,7 +355,7 @@ namespace WorkflowEventLogFixer
       process.WaitForExit();
     }
 
-    private static Dictionary<string,string> SplitExcelFileIntoSeparateWorkflowLogs(string file)
+    private static Dictionary<string, string> SplitExcelFileIntoSeparateWorkflowLogs(string file)
     {
       var events = GetEvents(file);
       var groups = events.GroupBy(e => e.WorkflowID);
@@ -638,8 +645,12 @@ namespace WorkflowEventLogFixer
 
     public static string GetProcessTreeQuality(string ptmlFile)
     {
-      var read = File.ReadAllLines(_PTQualityOutputFile);
-      var resultingLine = read.Single(f => f.StartsWith(ptmlFile));
+      if(!_modelQualityCache.Any())
+      {
+        _modelQualityCache = File.ReadAllLines(_PTQualityOutputFile).ToList();
+      }
+
+      var resultingLine = _modelQualityCache.SingleOrDefault(f => f.StartsWith(ptmlFile));
       if(resultingLine != null)
       {
         return resultingLine.Split(';')[1].Split(' ')[0];
@@ -743,12 +754,36 @@ namespace WorkflowEventLogFixer
       }
     }
 
+    
+
     public static string GetPythonExe()
     {
       return _pythonExe;
     }
 
     public static List<string> GetSimilarTerms(string scriptPath, string modelpath, string currentTerm)
+    {
+      ProcessStartInfo start = new ProcessStartInfo
+      {
+        FileName = _pythonExe,
+        Arguments = $"\"{scriptPath}\" \"{modelpath}\" \"{currentTerm}\"",
+        UseShellExecute = false,
+        WindowStyle = ProcessWindowStyle.Maximized,
+        RedirectStandardOutput = true
+      };
+      //cmd is full path to python.exe
+      //args is path to .py file and any cmd line args
+      using(var process = Process.Start(start))
+      {
+        using(StreamReader reader = process?.StandardOutput)
+        {
+          var output = reader?.ReadToEnd().Replace("\r\n", "|").Split('|').ToList();
+          return output;
+        }
+      }
+    }
+
+    public static List<string> GetSentences(string scriptPath, string modelpath, string currentTerm)
     {
       ProcessStartInfo start = new ProcessStartInfo
       {

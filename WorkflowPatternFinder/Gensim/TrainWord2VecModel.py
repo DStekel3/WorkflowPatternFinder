@@ -22,7 +22,6 @@ print("# of args: "+str(len(args)))
 
 for arg in args:
   print(arg)
-  print(arg)
 
 if len(args) >= 2:
     print("args:", args)
@@ -79,12 +78,36 @@ for pathObj in pathlist:
 import nltk
 from nltk.corpus import stopwords
 stoplist = set(stopwords.words('dutch'))
-# print("stop words:", stoplist)
+# {'door', 'heeft', 'doch', 'dit', 'ja', 'is', 'zonder', 'van',
+# 'onder', 'reeds', 'met', 'moet', 'tegen', 'geweest', 'ons', 'alles', 
+# 'worden', 'hun', 'me', 'wie', 'omdat', 'kan', 'ze', 'hem', 'veel', 'mij', 
+# 'de', 'hebben', 'niet', 'uit', 'dat', 'zal', 'daar', 'ben', 'als', 'hier', 
+# 'waren', 'kunnen', 'nog', 'of', 'kon', 'was', 'mijn', 'zij', 'tot', 'je', 'over', 
+# 'toch', 'niets', 'doen', 'al', 'het', 'een', 'voor', 'zo', 'nu', 'wordt', 'men', 'naar', 
+# 'want', 'dus', 'ook', 'andere', 'toen', 'iets', 'had', 'zou', 'er', 'ge', 'na', 'u', 'meer', 
+# 'aan', 'eens', 'wil', 'die', 'altijd', 'hoe', 'iemand', 'om', 'deze', 'bij', 'werd', 'dan', 
+# 'en', 'in', 'te', 'haar', 'zich', 'der', 'geen', 'uw', 'hij', 'wat', 'heb', 'op', 'maar', 
+# 'wezen', 'ik', 'zijn', 'zelf'}
 
 # Lowercase each document, split it by white space and filter out stopwords
-texts = [[word for word in document.lower().split() if word not in stoplist and not any(char>126 for char in word)]
+texts = [[word for word in document.lower().split() if word.decode('utf-8') not in stoplist and not any(char>126 for char in word.lower())]
          for document in raw_corpus]
-        
+
+distinctTexts = [list(x) for x in set(tuple(x) for x in texts)]
+
+import os.path
+
+f = open(os.path.join(os.path.dirname(directory), "sentences.txt"), "w")
+
+for line in distinctTexts:
+  print(line)
+  elements = [word.decode('utf-8') for word in line]
+  elements.append(str(texts.count(line)))
+  f.write(' '.join(elements)+"\n")
+f.close()
+
+print('number of sentences: '+str(len(texts)))
+
 ####
 #### Doc2Vec approach
 ####
@@ -93,6 +116,8 @@ import gensim
 from gensim import models
 from gensim.models import doc2vec
 from gensim.models.doc2vec import TaggedDocument
+
+print('tagging docs')
 
 taggedDocs = []
 for idx, doc in enumerate(texts):

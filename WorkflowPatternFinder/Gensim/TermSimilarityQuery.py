@@ -19,10 +19,8 @@ if len(args) == 3:
   modelpath = args[1]
   myTerm = args[2]
   query = Query()
-
   query.LoadModel(modelpath)
   similarTerms = query.GetMostSimilarTerms(myTerm)
-  #print(similarTerms)
   print("Similar terms:")
   for term in similarTerms:
     print(str(term[0])+":"+str(term[1]))

@@ -35,6 +35,7 @@ namespace WorkflowPatternFinder
     private string _incorrectFile = "Incorrect file!";
     private string _missingScriptFile = "Missing ProM scripts!";
     private List<PatternObject> _foundPatterns = new List<PatternObject>();
+    private Window tFinder;
 
     public MainWindow()
     {
@@ -360,8 +361,10 @@ namespace WorkflowPatternFinder
       if(result == System.Windows.Forms.DialogResult.OK)
       {
         UpdateExcelDirectoryUI(fbd.SelectedPath);
-
+        var t = new Stopwatch();
+        t.Start();
         TryToUpdateProcessTreeView();
+        t.Stop();
       }
     }
 
@@ -398,6 +401,8 @@ namespace WorkflowPatternFinder
       if(Directory.EnumerateFiles(path).Any(s => s.EndsWith(".xlsx")))
       {
         ImportExcelDirectoryLabel.Content = path;
+        _importExcelDir = path;
+        Program.InitializePaths(_importExcelDir);
       }
       else
       {
@@ -703,6 +708,52 @@ namespace WorkflowPatternFinder
         {
           UpdateButtonText(TermQueryButton, _incorrectFile, 3000);
         }
+      }
+    }
+
+    private void SentenceQueryButton_Click(object sender, RoutedEventArgs e)
+    {
+      SimilarTermsList.Items.Clear();
+      if(Program.CheckIfPythonAndJavaAreInstalled())
+      {
+        var modelpath = ModelPathLabel.Content.ToString();
+        if(File.Exists(modelpath))
+        {
+          var currentTerm = TermQueryTextBox.Text.ToLower();
+          var scriptPath = @"C:\Users\dst\Source\Repos\WorkflowPatternFinder\WorkflowPatternFinder\Gensim\SentenceQuery.py";
+          var output = Program.GetSentences(scriptPath, modelpath, currentTerm).SkipWhile(l => !l.Contains("Sentences:")).ToList();
+          foreach(var line in output.Skip(1))
+          {
+            if(!string.IsNullOrEmpty(line))
+            {
+              Debug.WriteLine(line);
+              var lineSplit = line.Split();
+              var term = string.Join(" ", lineSplit.TakeWhile(x => !x.isnumeric()).ToList());
+              var score = lineSplit.LastOrDefault();
+
+              SimilarTermsList.Items.Add(new MatchingTerm() { Term = term, Score = score });
+            }
+          }
+        }
+        else
+        {
+          UpdateButtonText(SentenceQueryButton, _incorrectFile, 3000);
+        }
+      }
+    }
+
+    private void KeysDown(object sender, System.Windows.Input.KeyEventArgs e)
+    {
+      if(Keyboard.IsKeyDown(Key.LeftCtrl) && Keyboard.IsKeyDown(Key.F))
+      {
+        if(!((TabItem)TabControl.SelectedValue).Header.ToString().Contains("word2vec"))
+        {
+          return;
+        }
+        tFinder = new TermFinder();
+        tFinder.Owner = this;
+        tFinder.Show();
+        tFinder.Activate();
       }
     }
   }
