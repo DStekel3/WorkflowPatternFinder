@@ -54,23 +54,23 @@ namespace WorkflowEventLogFixer
 
         var workflowNames = new Dictionary<string, string>();
 
-        //for(int t = 0; t < files.Count; t++)
-        //{
-        //  var file = files[t];
-        //  Console.WriteLine($"Busy with {Path.GetFileNameWithoutExtension(file)}...({t + 1}/{files.Count})");
-        //  var workflowNamesFound = SplitExcelFileIntoSeparateWorkflowLogs(file);
-        //  foreach(var name in workflowNamesFound)
-        //  {
-        //    workflowNames.Add(name.Key, name.Value);
-        //  }
-        //}
+        for(int t = 0; t < files.Count; t++)
+        {
+          var file = files[t];
+          Console.WriteLine($"Busy with {Path.GetFileNameWithoutExtension(file)}...({t + 1}/{files.Count})");
+          var workflowNamesFound = SplitExcelFileIntoSeparateWorkflowLogs(file);
+          foreach(var name in workflowNamesFound)
+          {
+            workflowNames.Add(name.Key, name.Value);
+          }
+        }
 
         // Write workflow descriptions to a separate file. This way, we can find the name of a workflow model by reading within this file.
-        //var workflowNameFile = Path.Combine(_baseDirectory, "workflownames.csv");
-        //WriteWorkflowNamesToFile(workflowNames, workflowNameFile);
+        var workflowNameFile = Path.Combine(_baseDirectory, "workflownames.csv");
+        WriteWorkflowNamesToFile(workflowNames, workflowNameFile);
 
         //Apply word2vec throughout the workflow logs and give similar events similar names.
-        //ApplyWord2VecThroughGensimScript(_baseCsvFileDirectory);
+        ApplyWord2VecThroughGensimScript(_baseCsvFileDirectory);
 
         //Console.WriteLine("Creating XES files...");
         ConvertCsvToXesFiles();
