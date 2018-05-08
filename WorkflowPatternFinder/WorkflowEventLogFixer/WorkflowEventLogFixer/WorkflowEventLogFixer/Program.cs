@@ -50,9 +50,9 @@ namespace WorkflowEventLogFixer
       {
         CheckExistanceOfScriptFiles();
 
-        //var files = Directory.EnumerateFiles(_baseDirectory).Where(c => c.EndsWith(".xlsx")).ToList();
+        var files = Directory.EnumerateFiles(_baseDirectory).Where(c => c.EndsWith(".xlsx")).ToList();
 
-        //var workflowNames = new Dictionary<string, string>();
+        var workflowNames = new Dictionary<string, string>();
 
         //for(int t = 0; t < files.Count; t++)
         //{
@@ -66,23 +66,23 @@ namespace WorkflowEventLogFixer
         //}
 
         // Write workflow descriptions to a separate file. This way, we can find the name of a workflow model by reading within this file.
-        var workflowNameFile = Path.Combine(_baseDirectory, "workflownames.csv");
+        //var workflowNameFile = Path.Combine(_baseDirectory, "workflownames.csv");
         //WriteWorkflowNamesToFile(workflowNames, workflowNameFile);
 
         //Apply word2vec throughout the workflow logs and give similar events similar names.
         //ApplyWord2VecThroughGensimScript(_baseCsvFileDirectory);
 
         //Console.WriteLine("Creating XES files...");
-        //ConvertCsvToXesFiles();
+        ConvertCsvToXesFiles();
 
         // Create ptml files
-        //CreatePtmlFilesWithImi(noiseThreshold);
+        CreatePtmlFilesWithImi(noiseThreshold);
 
         // Create pnml files
-        //CreatePnmlFiles();
+        CreatePnmlFiles();
 
         // Create ptml files with Evolutionary Tree Miner
-        //CreatePtmlFilesWithETM();
+        // CreatePtmlFilesWithETM();
 
         // Compute quality dimensions
         MineProcessTreeQuality();
@@ -429,9 +429,9 @@ namespace WorkflowEventLogFixer
       {
         WindowStyle = ProcessWindowStyle.Maximized,
         UseShellExecute = false,
-        FileName = @"C:\Users\dst\Source\Repos\CSV-to-XES\CSVtoXES\CsvToXesDirectory.bat",
+        FileName = @"C:\Users\dst\Source\Repos\WorkflowPatternFinder\WorkflowPatternFinder\WorkflowEventLogFixer\WorkflowEventLogFixer\WorkflowEventLogFixer\CSVtoXES\CsvToXesDirectory.bat",
         Arguments = $"\"{_javaExe}\" \"{_baseCsvFileDirectory}\" \"{_baseXesFileDirectory}\"",
-        WorkingDirectory = @"C:\Users\dst\Source\Repos\CSV-to-XES\CSVtoXES"
+        WorkingDirectory = @"C:\Users\dst\Source\Repos\WorkflowPatternFinder\WorkflowPatternFinder\WorkflowEventLogFixer\WorkflowEventLogFixer\WorkflowEventLogFixer\CSVtoXES"
       };
 
       Process process = new Process { StartInfo = startInfo };

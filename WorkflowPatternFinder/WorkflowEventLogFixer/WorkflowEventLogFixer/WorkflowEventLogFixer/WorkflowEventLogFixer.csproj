@@ -910,11 +910,15 @@
     <None Include="App.config">
       <SubType>Designer</SubType>
     </None>
+    <None Include="CSVtoXES\CsvToXesDirectory.bat" />
+    <None Include="CSVtoXES\mapping.properties" />
     <None Include="packages.config">
       <SubType>Designer</SubType>
     </None>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="CSVtoXES\CSVtoXESDir.jar" />
+    <Content Include="CSVtoXES\pom.xml" />
     <Content Include="DundasWinChart.xml" />
     <Content Include="System.Net.Http.Formatting.xml" />
     <Content Include="System.Net.Http.xml" />
