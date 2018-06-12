@@ -4,7 +4,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>44ea4a09-4254-4601-acb2-be3e847d45c4</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>SentenceQuery.py</StartupFile>
+    <StartupFile>PatternDiscoveryScript.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
@@ -14,7 +14,7 @@
     <IsWindowsApplication>False</IsWindowsApplication>
     <InterpreterId>Global|PythonCore|3.4</InterpreterId>
     <LaunchProvider>Standard Python launcher</LaunchProvider>
-    <CommandLineArguments>"C:\Thesis\Profit analyses\testmap\trained.gz" "goedkeuren"</CommandLineArguments>
+    <CommandLineArguments>"C:\Thesis\Profit analyses\04-04-2018\trained.gz" "goedkeuren"</CommandLineArguments>
     <EnableNativeCodeDebugging>False</EnableNativeCodeDebugging>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
@@ -26,8 +26,11 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="DutchEmbeddings.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Gensim.py" />
-    <Compile Include="GetSynonyms.py">
+    <Compile Include="SynoniemenDotNet.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Node.py">

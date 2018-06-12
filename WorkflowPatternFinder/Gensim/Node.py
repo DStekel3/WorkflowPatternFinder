@@ -4,7 +4,7 @@ from copy import copy
 class Node(object):
     """A Node object."""
 
-    def __init__(self, type, id, name = None):
+    def __init__(self, type, id, name=None):
         self._type = type
         self._name = name
         self._id = id
@@ -12,6 +12,7 @@ class Node(object):
         self._children = [] 
         self._isVisited = False
         self._number = -1
+        self._treeSize = 1
 
         if name != None:
           self._name = self.EscapeCharacters(name)
@@ -86,6 +87,7 @@ class Node(object):
 
     def AddChild(self, child):
         self._children.append(child)
+        self._treeSize = self._treeSize + 1
 
     def SetRoot(self, isRoot):
         self._isRoot = isRoot
@@ -95,3 +97,6 @@ class Node(object):
   
     def SetNumber(self, number):
         self._number = number
+
+    def GetSubtreeSize(self):
+        return self._treeSize

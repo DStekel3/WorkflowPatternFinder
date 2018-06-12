@@ -39,7 +39,7 @@ if len(sys.argv) == 8:
         print('Searching in tree ' + str(allTreePaths.index(treePath) + 1) + ' of ' + str(len(allTreePaths)))
         tree = ProcessTreeLoader.LoadTree(treePath)
         if not countPatterns:
-          result = finder.IsValidSubTree(tree, pattern, induced)
+          result = finder.GetMatch(tree, pattern, induced)
           if result[0]:
               print('\t found pattern in this tree.')
               validTrees.append((treePath, result[1]))

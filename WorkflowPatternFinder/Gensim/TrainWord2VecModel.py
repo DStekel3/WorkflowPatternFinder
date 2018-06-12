@@ -57,9 +57,8 @@ for pathObj in pathlist:
         # print("Loading in csv took", round(time.time() - start, 3), "seconds.")
         
         # read all distinct sentences in the current file. We define a sentence as the combination of "taakomschrijving" and "actieomschrijving".
-        # here you iterate over the rows in the specific column
+        # iterate over the rows in the specific column
         sentences = []
-        
         for row in ws:
             # sys.stdout.write("reading line " + str(ws.line_num) + "\r")
             try:

@@ -8,6 +8,8 @@ from gensim import models
 from gensim.models import Doc2Vec
 import nltk
 from Query import *
+from SynoniemenDotNet import *
+
 
 args = sys.argv
 print(len(args))
@@ -19,8 +21,16 @@ if len(args) == 3:
   modelpath = args[1]
   myTerm = args[2]
   query = Query()
-  query.LoadModel(modelpath)
+  # query.LoadModel(modelpath)
+  query.LoadBinModel(r"C:\Users\dst\Source\Repos\WorkflowPatternFinder\WorkflowPatternFinder\Gensim\datasets\wikipedia-160.bin")
   similarTerms = query.GetMostSimilarTerms(myTerm)
+
+  parser = XmlParser()
+  synonyms = parser.WoordenboekGetSynonyms(myTerm)
+  antonyms = parser.WoordenboekGetAntonyms(myTerm)
+
+  similarTerms = list(filter(lambda x: x[0] not in antonyms, similarTerms))
+
   print("Similar terms:")
   for term in similarTerms:
     print(str(term[0])+":"+str(term[1]))

@@ -16,40 +16,42 @@ class PatternDiscovery(object):
   _query = None
   _dict = []
   _orderedTypes = ["sequence", "xorLoop", "sequenceLoop", "andLoop"]
-  _similarityVariant = "average"
+  _similarityVariant = "max"
 
   def LoadWord2VecModel(self):
     if self._word2VecTrainedModelPath is not None:
       self._query = Query()
-      self._query.LoadModel(self._word2VecTrainedModelPath)
+      # self._query.LoadModel(self._word2VecTrainedModelPath)
+      # self._query.LoadBinModel('datasets/wikipedia-160.bin')
+      self._query.LoadBinModel(r"C:\Users\dst\Source\Repos\WorkflowPatternFinder\WorkflowPatternFinder\Gensim\datasets\wikipedia-160.bin")
     else:
       raise ValueError('The path to model is not set yet.')
 
-  def GetValidSubTrees(self, tree, pattern, isInduced=False):
+  def GetValidSubTrees(self, T, P, isInduced=False):
       self._dict = []
       flatten = lambda x: [item for sublist in x for item in sublist]
-      pNode = pattern.GetRoot()
-      treeNodes = tree.GetNodes()
+      p = P.GetRoot()
+      treeNodes = T.GetNodes()
       allPatterns = []
       allSelections = []
-      for tNode in treeNodes:
+      for t in treeNodes:
         if True: #tNode.GetId() not in [i[0] for i in allPatterns] and tNode.GetId() not in self._dict:
           result = (True, [])
           while result[0]:
             if isInduced:
-              result = self.IsInducedPattern(tNode, pNode)
+              result = self.GetInducedMatch(t, p)
             else:
-              result = self.IsSubsumedPattern(tNode, pNode)
+              result = self.GetSubsumedMatchOld(t, p)
             if result[0]:
               newPattern = False
               for member in result[1]:
-                print("matching: member = ", str(member), "pattern members = ", str(result[1]))
+                #print("matching: member = ", str(member), "pattern members = ", str(result[1]))
                 if member not in allPatterns:
                   newPattern = True
               if newPattern:
                 selection = []
                 for tuple in result[1]:
-                  selection.append(tree.GetNode(tuple[0]).GetNumber())
+                  selection.append(T.GetNode(tuple[0]).GetNumber())
                   if tuple not in allPatterns:
                     allPatterns.append(tuple)
                   if tuple[0] not in self._dict:
@@ -58,137 +60,173 @@ class PatternDiscovery(object):
                 break
       return allPatterns
 
-  def IsValidSubTree(self, tree, pattern, isInduced):
-    # walk through tree nodes, using breadth first search
+  def GetMatch(self, T, P, isInduced):
+    # walk through tree nodes, using breadth first traversal
     self._dict = []
-    pNode = pattern.GetRoot()
-    nodelist = [tree.GetRoot()]
+    p = P.GetRoot()
+    nodelist = [T.GetRoot()]
     while len(nodelist) > 0:
       # pop first element and add its children to the nodelist
-      node = nodelist.pop(0)
-      for child in node.GetChildren():
+      t = nodelist.pop(0)
+      for child in t.GetChildren():
         nodelist.append(child)
       result = (False, [])
-      if isInduced:
-        result = self.IsInducedPattern(node, pNode)
-      else:
-        result = self.IsSubsumedPattern(node, pNode)
-      if result[0]:
-        selection = []
-        for selectedNode in [i[0] for i in result[1]]:
-          selection.append(tree.GetNode(selectedNode).GetNumber())
-        return result
+      if self.AreSimilar(t, p):
+        if isInduced:
+          result = self.GetInducedMatch(t, p)
+        else:
+          result = self.GetSubsumedMatch(t, p)
+        if result[0]:
+          selection = []
+          for selectedNode in [i[0] for i in result[1]]:
+            selection.append(T.GetNode(selectedNode).GetNumber())
+          return result
     return (False, [])
 
-  def IsSubsumedPattern(self, tNode, pNode, selectedNodes = []):
+  def GetSubsumedMatchOld(self, t, p, selectedNodes = []):
     # check whether the given nodes are similar
-    equal = self.AreSimilar(tNode, pNode)
+    equal = self.AreSimilar(t, p)
     rootScore = equal[1]
     if equal[0]:
-      tChildren = tNode.GetChildren()
-      matches = [(tNode.GetId(), pNode.GetId(), rootScore, self.GetPatternWord(equal))]
-      pChildren = pNode.GetChildren()
-      for p in pChildren:
-        for t in tChildren:
-          if t.GetId() not in self._dict and t.GetId() not in [i[0] for i in matches + selectedNodes]:
+      tChildren = t.GetChildren()
+      matches = [(t.GetId(), p.GetId(), rootScore, self.GetPatternWord(equal))]
+      pChildren = p.GetChildren()
+      for pc in pChildren:
+        for tc in tChildren:
+          if tc.GetId() not in self._dict and tc.GetId() not in [i[0] for i in matches + selectedNodes]:
             newSelection = deepcopy(selectedNodes)
             newSelection.extend(matches)
-            ans = self.IsSubsumedPattern(t, p, newSelection)
+            ans = self.GetSubsumedMatchOld(tc, pc, newSelection)
             if ans[0]:
               matches.extend(ans[1])
               break
-      if len(matches) == len(pNode.GetDescendants()) + 1:
+      if len(matches) == len(p.GetDescendants()) + 1:
         return (True, matches)
-    if not pNode.IsRoot():
-      for child in tNode.GetChildren():
-        if child.GetId() not in self._dict and child.GetId() not in [i[0] for i in selectedNodes]:
-          ans = self.IsSubsumedPattern(child, pNode, selectedNodes)
+    if not p.IsRoot():
+      for tc in t.GetChildren():
+        if tc.GetId() not in self._dict and tc.GetId() not in [i[0] for i in selectedNodes]:
+          ans = self.GetSubsumedMatchOld(tc, p, selectedNodes)
           if ans[0]:
             return ans
     return (False, [])
 
-  def IsInducedPattern(self, tNode, pNode):
+  def GetSubsumedMatch(self, t, p):
     # search for a node similar as pNode
-    if pNode.GetType() in self._orderedTypes:
-      return self.IsInducedPatternOrdered(tNode, pNode)
+    if p.GetType() in self._orderedTypes:
+      return self.GetSubsumedMatchOrdered(t, p)
     else:
-      return self.IsInducedPatternUnordered(tNode, pNode)
+      return self.GetSubsumedMatchUnordered(t, p)
     return (False, [])
 
-  def IsInducedPatternOrdered(self, tNode, pNode):
+  def GetInducedMatch(self, t, p):
+    # search for a node similar as pNode
+    if p.GetType() in self._orderedTypes:
+      return self.GetInducedMatchOrdered(t, p)
+    else:
+      return self.GetInducedMatchUnordered(t, p)
+    return (False, [])
+
+  def GetSubsumedMatchOrdered(self, t, p):
+    rootMatch = self.AreSimilar(t,p)
+    rootScore = rootMatch[1]
+    if rootMatch[0]:
+      # first try to find an induced match
+      match = self.GetInducedMatchOrdered(t,p)
+      if match[0]:
+        return match
+
+      matches = [(t.GetId(), p.GetId(), rootMatch[1], self.GetPatternWord(rootMatch))]
+      for pc in p.GetChildren():
+        for tc in t.GetChildren():
+          if tc.GetId() not in [i[0] for i in matches] and self.AreSimilar(tc, pc):
+            match = self.GetSubsumedMatchOrdered(tc,pc)
+            if match[0]:
+              matches.extend(match[1])
+              break
+
+      if len(matches) == p.GetSubtreeSize():
+        return (True, matches)
+
+    if not p.IsRoot:
+        for tc in t.GetChildren():
+          if self.AreSimilar(tc, p)[0]:
+            match = self.GetSubsumedMatchOrdered(tc,p)
+            if match[0]:
+              return match
+    return (False, [])
+
+  def GetSubsumedMatchUnordered(self, t, p):
+    rootMatch = self.AreSimilar(t,p)
+    rootScore = rootMatch[1]
+    if rootMatch[0]:
+      # first try to find an induced match
+      match = self.GetInducedMatchUnordered(t,p)
+      if match[0]:
+        return match
+
+      matches = [(t.GetId(), p.GetId(), rootMatch[1], self.GetPatternWord(rootMatch))]
+      for pc in p.GetChildren():
+        for tc in t.GetChildren():
+          if tc.GetId() not in [i[0] for i in matches] and self.AreSimilar(tc, pc):
+            # try to find the node in the subtree with tc as root node
+            match = self.GetSubsumedMatchOrdered(tc,pc)
+            if match[0]:
+              matches.extend(match[1])
+              break
+
+      if len(matches) == p.GetSubtreeSize():
+        return (True, matches)
+
+    if not p.IsRoot:
+        for tc in t.GetChildren():
+          if self.AreSimilar(tc, p)[0]:
+            match = self.GetSubsumedMatchUnordered(tc,p)
+            if match[0]:
+              return match
+    return (False, [])
+
+  def GetInducedMatchOrdered(self, t, p):
     # check whether the given nodes are similar
-    equal = self.AreSimilar(tNode, pNode)
+    equal = self.AreSimilar(t, p)
     rootScore = equal[1]
     if equal[0]:
-      pChildren = pNode.GetChildren()
-      matches = [(tNode.GetId(), pNode.GetId(), rootScore, self.GetPatternWord(equal))]
+      pChildren = p.GetChildren()
+      tChildren = t.GetChildren()
+      matches = [(t.GetId(), p.GetId(), rootScore, self.GetPatternWord(equal))]
       if (len(pChildren) == 0):
         return (True, matches)
-      # get possible sets of siblings in the tree and try to match them with
-      # the pattern children
-      sets = self.GetSetsOfChildren(tNode, len(pChildren))
-      for index in range(0, len(sets)):
-        set = list(sets[index])
-        matches = [(tNode.GetId(), pNode.GetId(), rootScore)]
-        score = 0
-        match = None
-        for n in range(0, len(set)):
-          if set[n].GetId() not in [i[0] for i in matches]:
-            ans = self.AreSimilar(set[n], pChildren[n])
-            if ans[0]:
-              matches.append((set[n], pChildren[n].GetId(), ans[1]))
-        if len(matches) == len(pChildren) + 1:
-          final = []
-          matches = [(tNode.GetId(), pNode.GetId(), rootScore, self.GetPatternWord(equal))]
-          for place in range(0, len(pChildren)):
-            lastAns = self.IsInducedPattern(set[place], pChildren[place])
-            if p.GetId() not in [i[0] for i in matches]:
-              if lastAns[0]:
-                final.append(lastAns)
-                matches.extend(lastAns[1])
-          if len(final) == len(pChildren) and False not in [res[0] for res in final]:
+      startIndex = 0
+      for pc in pChildren:
+          for tc in tChildren[startIndex:len(tChildren)]:
+              if self.AreSimilar(tc, pc)[0]:
+                  match = self.GetInducedMatch(tc, pc)
+                  if match[0]:
+                      matches.extend(match[1])
+                      startIndex = tChildren.index(tc)
+                      break
+      if len(matches) == p.GetSubtreeSize():
             return (True, matches)
     return (False, [])
 
-  def IsInducedPatternUnordered(self, tNode, pNode):
+  def GetInducedMatchUnordered(self, t, p):
     # check whether the given nodes are similar
-    equal = self.AreSimilar(tNode, pNode)
+    equal = self.AreSimilar(t, p)
     rootScore = equal[1]
     if equal[0]:
-      pChildren = pNode.GetChildren()
-      matches = [(tNode.GetId(), pNode.GetId(), rootScore, self.GetPatternWord(equal))]
-      if len(pChildren) == 0:
+      pChildren = p.GetChildren()
+      tChildren = t.GetChildren()
+      matches = [(t.GetId(), p.GetId(), rootScore, self.GetPatternWord(equal))]
+      if (len(pChildren) == 0):
         return (True, matches)
-      # get possible sets of siblings in the tree and try to match them with
-      # the pattern children
-      sets = self.GetSetsOfChildren(tNode, len(pChildren))
-      for index in range(0, len(sets)):
-        set = list(sets[index])
-        matches = [(tNode.GetId(), pNode.GetId(), rootScore)]
-        for p in pChildren:
-          score = 0
-          match = None
-          for s in set:
-            if s.GetId() not in [i[0] for i in matches]:
-              ans = self.AreSimilar(s, p)
-              if ans[0] and ans[1] > score:
-                score = ans[1]
-                match = s
-          if match != None:
-            matches.append((match.GetId(), p.GetId(), score))
-        # when this set matches the children, move within your pattern tree and
-        # search further...
-        if len(matches) == len(pChildren) + 1:
-          final = []
-          matches = [(tNode.GetId(), pNode.GetId(), rootScore, self.GetPatternWord(equal))]
-          for p in pChildren:
-            t = set[pChildren.index(p)]
-            if p.GetId() not in [i[0] for i in matches]:
-              pChildAns = self.IsInducedPattern(t, p)
-              if pChildAns[0]:
-                final.append(pChildAns)
-                matches.extend(pChildAns[1])
-          if len(final) == len(pChildren) and False not in [res[0] for res in final]:
+      for pc in pChildren:
+          for tc in tChildren:
+              if tc.GetId() not in [i[0] for i in matches]:
+                  if(self.AreSimilar(tc, pc)):
+                      match = self.GetInducedMatch(tc,pc)
+                      if(match[0]):
+                          matches.extend(match[1])
+                          break
+      if len(matches) == p.GetSubtreeSize():
             return (True, matches)
     return (False, [])
   

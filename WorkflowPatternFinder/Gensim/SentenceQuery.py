@@ -1,4 +1,3 @@
-# This script reads in a collection of excel files...
 import warnings
 warnings.filterwarnings(action='ignore', category=UserWarning, module='gensim')
 

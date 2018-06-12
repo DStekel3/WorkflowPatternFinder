@@ -14,7 +14,8 @@ class SubTreeFinder(object):
   def LoadWord2VecModel(self):
     if self._word2VecTrainedModelPath is not None:
       self._query = Query()
-      self._query.LoadModel(self._word2VecTrainedModelPath)
+      # self._query.LoadModel(self._word2VecTrainedModelPath)
+      self._query.LoadBinModel('datasets/wikipedia-160.bin')
     else:
       raise ValueError('The path to model is not set yet.')
 
@@ -35,7 +36,7 @@ class SubTreeFinder(object):
         if result[0]:
           newPattern = True
           for member in result[2]:
-            print("matching: member = ", str(member), "result[2] = ", str(result[2]))
+            #print("matching: member = ", str(member), "result[2] = ", str(result[2]))
             if member in allPatterns:
               newPattern = False
               break
