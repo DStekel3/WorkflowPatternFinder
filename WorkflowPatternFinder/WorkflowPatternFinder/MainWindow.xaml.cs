@@ -17,6 +17,7 @@ using Button = System.Windows.Controls.Button;
 using DataFormats = System.Windows.Forms.DataFormats;
 using Timer = System.Windows.Forms.Timer;
 using IronPython.Runtime.Operations;
+using System.Globalization;
 
 namespace WorkflowPatternFinder
 {
@@ -46,10 +47,15 @@ namespace WorkflowPatternFinder
 
     private void FindNotePadPath()
     {
-      var standardPath = @"C:\Program Files (x86)\Notepad++\notepad++.exe";
+      var standardPath = @"C:\Program Files\Notepad++\notepad++.exe";
+      var standardPathx86 = @"C:\Program Files (x86)\Notepad++\notepad++.exe";
       if(File.Exists(standardPath))
       {
         _notePadPath = standardPath;
+      }
+      else if(File.Exists(standardPathx86))
+      {
+        _notePadPath = standardPathx86;
       }
       else
       {
@@ -73,7 +79,7 @@ namespace WorkflowPatternFinder
     {
       FolderBrowserDialog fbd = new FolderBrowserDialog();
       fbd.Description = "Select a directory that contains .ptml files.";
-      fbd.SelectedPath = @"C:\Thesis\Profit analyses\testmap\ptml";
+      fbd.SelectedPath = Path.Combine(Program.GetDatasetBasePath(), @"testmap\ptml");
       DialogResult result = fbd.ShowDialog();
       if(result == System.Windows.Forms.DialogResult.OK)
       {
@@ -98,7 +104,7 @@ namespace WorkflowPatternFinder
       OpenFileDialog ofd = new OpenFileDialog();
       ofd.DefaultExt = ".ptml";
       ofd.Title = "Select a file containing your process tree pattern (.ptml format).";
-      ofd.FileName = @"C:\Users\dst\Source\Repos\WorkflowPatternFinder\WorkflowPatternFinder\WorkflowPatternFinder\Example Patterns\testPattern.ptml";
+      ofd.FileName = Path.Combine(Program.GetToolBasePath(), @"WorkflowPatternFinder\WorkflowPatternFinder\WorkflowPatternFinder\Example Patterns\accordeer1.ptml");
       DialogResult result = ofd.ShowDialog();
       if(result == System.Windows.Forms.DialogResult.OK)
       {
@@ -116,7 +122,7 @@ namespace WorkflowPatternFinder
     private void StartTreeButton_Click(object sender, RoutedEventArgs e)
     {
       ClearValidOccurencesView();
-      if(!PathsExists() || !double.TryParse(SimTresholdValue.Text.Replace('.', ','), out double threshold))
+      if(!PathsExists() || !double.TryParse(SimTresholdValue.Text.Replace('.', ','), NumberStyles.Any, CultureInfo.InvariantCulture, out double threshold))
       {
         UpdateButtonText(TreeStartButton, "Incorrect inputs!");
         return;
@@ -151,7 +157,7 @@ namespace WorkflowPatternFinder
       var treeBasePath = ImportTreeLabel.Content.ToString();
       var patternPath = ImportPatternLabel.Content.ToString();
       var modelPath = Path.Combine(Directory.GetParent(ImportTreeLabel.Content.ToString()).FullName, "trained.gz");
-      var scriptPath = @"C:\Users\dst\Source\Repos\WorkflowPatternFinder\WorkflowPatternFinder\Gensim\Gensim.py";
+      var scriptPath = Path.Combine(Program.GetToolBasePath(), @"WorkflowPatternFinder\WorkflowPatternFinder\Gensim\Gensim.py");
 
       var timer = new Stopwatch();
       timer.Start();
@@ -197,7 +203,7 @@ namespace WorkflowPatternFinder
                   kvps.Add(new KeyValuePair<string, string>(filtered[0], $"{filtered[1]}:{filtered[3]}"));
                 }
                 _foundPatterns.Add(new PatternObject(treePath, score, kvps));
-                validOutput.Add(treePath, double.Parse(score.Replace(".", ",")));
+                validOutput.Add(treePath, double.Parse(score, CultureInfo.InvariantCulture));
                 Debug.WriteLine($"{treePath} is a subtree!");
               }
             }
@@ -356,7 +362,7 @@ namespace WorkflowPatternFinder
     {
       FolderBrowserDialog fbd = new FolderBrowserDialog();
       fbd.Description = "Select a directory that contains workflow logs in .xlsx format.";
-      fbd.SelectedPath = @"C:\Thesis\Profit analyses\testmap";
+      fbd.SelectedPath = Path.Combine(Program.GetDatasetBasePath(), @"testmap");
       DialogResult result = fbd.ShowDialog();
       if(result == System.Windows.Forms.DialogResult.OK)
       {
@@ -420,7 +426,7 @@ namespace WorkflowPatternFinder
     {
       var scriptFiles = PromCustomFileNames.GetAllNames();
       FolderBrowserDialog ofd = new FolderBrowserDialog();
-      var standardPath = @"C:\Users\dst\eclipse-workspace\ProM";
+      var standardPath = Program.GetProMBasePath();
       if(Directory.Exists(standardPath))
       {
         ofd.SelectedPath = standardPath;
@@ -544,7 +550,7 @@ namespace WorkflowPatternFinder
         return;
       }
 
-      var scriptPath = @"C:\Users\dst\Source\Repos\WorkflowPatternFinder\WorkflowPatternFinder\Gensim\PlotModel.py";
+      var scriptPath = Path.Combine(Program.GetToolBasePath(), @"WorkflowPatternFinder\WorkflowPatternFinder\Gensim\PlotModel.py");
 
       ProcessStartInfo start = new ProcessStartInfo
       {
@@ -572,7 +578,7 @@ namespace WorkflowPatternFinder
       OpenFileDialog ofd = new OpenFileDialog();
       ofd.DefaultExt = ".gz";
       ofd.Title = "Select a word2vec model.";
-      ofd.FileName = @"C:\Thesis\Profit analyses\testmap\trained.gz";
+      ofd.FileName = Path.Combine(Program.GetDatasetBasePath(), @"testmap\trained.gz");
       DialogResult result = ofd.ShowDialog();
       if(result == System.Windows.Forms.DialogResult.OK)
       {
@@ -597,7 +603,7 @@ namespace WorkflowPatternFinder
           var windowSize = WindowSizeValue.Text;
           var minCount = MinCountValue.Text;
           var epochs = NumberOfEpochsValue.Text;
-          var scriptPath = @"C:\Users\dst\Source\Repos\WorkflowPatternFinder\WorkflowPatternFinder\Gensim\TrainWord2VecModel.py";//@"C:\Users\dst\Source\Repos\WorkflowPatternFinder\WorkflowPatternFinder\Gensim\TrainWord2VecModel.py";
+          var scriptPath = Path.Combine(Program.GetToolBasePath(), @"WorkflowPatternFinder\WorkflowPatternFinder\Gensim\TrainWord2VecModel.py");
           Program.TrainWord2VecModel(scriptPath, csvBaseDirectory, windowSize, minCount, epochs);
         }
         else
@@ -609,7 +615,7 @@ namespace WorkflowPatternFinder
 
     private void RenderTreeInPython(string filePath, string patternMembers = "", string workflowName = "")
     {
-      var scriptPath = @"C:\Users\dst\Source\Repos\WorkflowPatternFinder\WorkflowPatternFinder\Gensim\RenderTree.py";
+      var scriptPath = Path.Combine(Program.GetToolBasePath(), @"WorkflowPatternFinder\WorkflowPatternFinder\Gensim\RenderTree.py");
 
       ProcessStartInfo start = new ProcessStartInfo
       {
@@ -689,7 +695,7 @@ namespace WorkflowPatternFinder
         if(File.Exists(modelpath))
         {
           var currentTerm = TermQueryTextBox.Text;
-          var scriptPath = @"C:\Users\dst\Source\Repos\WorkflowPatternFinder\WorkflowPatternFinder\Gensim\TermSimilarityQuery.py";
+          var scriptPath = Path.Combine(Program.GetToolBasePath(), @"WorkflowPatternFinder\WorkflowPatternFinder\Gensim\TermSimilarityQuery.py");
           var output = Program.GetSimilarTerms(scriptPath, modelpath, currentTerm).SkipWhile(l => !l.Contains("Similar terms:")).ToList();
           foreach(var line in output.Skip(1))
           {
@@ -698,7 +704,11 @@ namespace WorkflowPatternFinder
               Debug.WriteLine(line);
               var lineSplit = line.Split(':');
               var term = lineSplit[0];
-              var score = lineSplit[1].Substring(0, 6);
+              var score = lineSplit[1];
+              if(score.Length > 7)
+              {
+                score = score.Substring(0, 6);
+              }
 
               SimilarTermsList.Items.Add(new MatchingTerm() { Term = term, Score = score });
             }
@@ -720,7 +730,7 @@ namespace WorkflowPatternFinder
         if(File.Exists(modelpath))
         {
           var currentTerm = TermQueryTextBox.Text.ToLower();
-          var scriptPath = @"C:\Users\dst\Source\Repos\WorkflowPatternFinder\WorkflowPatternFinder\Gensim\SentenceQuery.py";
+          var scriptPath = Path.Combine(Program.GetToolBasePath(), @"WorkflowPatternFinder\WorkflowPatternFinder\Gensim\SentenceQuery.py");
           var output = Program.GetSentences(scriptPath, modelpath, currentTerm).SkipWhile(l => !l.Contains("Sentences:")).ToList();
           foreach(var line in output.Skip(1))
           {

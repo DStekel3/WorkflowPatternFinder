@@ -24,10 +24,7 @@ if len(sys.argv) == 4:
     patternParts = pattern.split(':')
     patternIds[patternParts[0]] = patternParts[2]
   workflowName = sys.argv[3]
-  legend = Digraph()
-  legend.node('a')
-  legend.node('b')
-  legend.edge('a', 'b')
+
   
   myGraph = Digraph()
   root = tree.GetRoot()
@@ -52,10 +49,9 @@ if len(sys.argv) == 4:
     for child in currentNode.GetChildren():
       nodelist.append(child)
     number += 1
-  myGraph.subgraph(graph= legend)
     
   print(myGraph.source)
-  myGraph.render(workflowName + str(random.randint(1,100001)) + ".gv", view=True)
+  myGraph.render(''.join(e for e in workflowName if e.isalnum()) + str(random.randint(1,100001)) + ".gv", view=True)
   
 exit
 ### example graph:

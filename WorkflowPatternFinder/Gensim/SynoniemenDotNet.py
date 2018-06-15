@@ -9,7 +9,7 @@ class XmlParser:
     
   def GetSynonyms(self, word):
     zoekTerm = word
-    htmlFile = urlopen(self._baseUrl+zoekTerm)
+    htmlFile = urlopen(self._baseUrl + zoekTerm)
     content = htmlFile.read()
     htmlFile.close()
     soup = BeautifulSoup(content, "lxml")
@@ -54,7 +54,7 @@ class XmlParser:
   def WoordenboekGetAntonyms(self, word):
     antonyms = []
     zoekTerm = word
-    htmlFile = urlopen(self._woordenboekAntonymsUrl+zoekTerm)
+    htmlFile = urlopen(self._woordenboekAntonymsUrl + zoekTerm)
     content = htmlFile.read()
     htmlFile.close()
     soup = BeautifulSoup(content, "lxml")
@@ -65,15 +65,16 @@ class XmlParser:
           for child in list(item.children):
             if child.name == 'a':
               print(child.text)
-              antonyms.append(child.text)
-              itsSynonyms = self.WoordenboekGetSynonyms(child.text)
-              antonyms.extend(itsSynonyms)
+              if len(child.text.split()) <= 1 :
+                antonyms.append(child.text)
+                itsSynonyms = self.WoordenboekGetSynonyms(child.text)
+                antonyms.extend(itsSynonyms)
     return antonyms
 
   def WoordenboekGetSynonyms(self, word):
     synonyms = []
     zoekTerm = word
-    htmlFile = urlopen(self._woordenboekSynonymsUrl+zoekTerm)
+    htmlFile = urlopen(self._woordenboekSynonymsUrl + zoekTerm)
     content = htmlFile.read()
     htmlFile.close()
     soup = BeautifulSoup(content, "lxml")
@@ -84,15 +85,7 @@ class XmlParser:
           for child in list(item.children):
             if child.name == 'a':
               print(child.text)  
-              synonyms.append(child.text)
+              if len(child.text.split()) <= 1 :
+                synonyms.append(child.text)
     except: return []
     return synonyms
-    
-
-
-
-
-# x = XmlParser()
-# x.GetSynonyms('beoordelen')
-# x.WoordenboekGetAntonyms('goedkeuren')
-# x.WoordenboekGetSynonyms('goedkeuren')

@@ -21,9 +21,7 @@ class PatternDiscovery(object):
   def LoadWord2VecModel(self):
     if self._word2VecTrainedModelPath is not None:
       self._query = Query()
-      # self._query.LoadModel(self._word2VecTrainedModelPath)
-      # self._query.LoadBinModel('datasets/wikipedia-160.bin')
-      self._query.LoadBinModel(r"C:\Users\dst\Source\Repos\WorkflowPatternFinder\WorkflowPatternFinder\Gensim\datasets\wikipedia-160.bin")
+      self._query.LoadBinModel()
     else:
       raise ValueError('The path to model is not set yet.')
 

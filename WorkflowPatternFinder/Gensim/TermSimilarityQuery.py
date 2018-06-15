@@ -22,7 +22,7 @@ if len(args) == 3:
   myTerm = args[2]
   query = Query()
   # query.LoadModel(modelpath)
-  query.LoadBinModel(r"C:\Users\dst\Source\Repos\WorkflowPatternFinder\WorkflowPatternFinder\Gensim\datasets\wikipedia-160.bin")
+  query.LoadBinModel()
   similarTerms = query.GetMostSimilarTerms(myTerm)
 
   parser = XmlParser()
@@ -32,5 +32,7 @@ if len(args) == 3:
   similarTerms = list(filter(lambda x: x[0] not in antonyms, similarTerms))
 
   print("Similar terms:")
+  for synonym in synonyms:
+    print(synonym+":1")
   for term in similarTerms:
     print(str(term[0])+":"+str(term[1]))
