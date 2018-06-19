@@ -55,7 +55,7 @@
             </ListView.Effect>
             <ListView.View>
               <GridView>
-                <GridViewColumn x:Name="TreeColumn" Header="Process Tree" DisplayMemberBinding="{Binding TreePath}" Width="650"/>
+                <GridViewColumn x:Name="TreeColumn" Header="Process Tree" DisplayMemberBinding="{Binding TreeSummary}" Width="650"/>
                 <GridViewColumn x:Name="QualityColumn" Header="Quality" DisplayMemberBinding="{Binding Quality}" Width="150"/>
               </GridView>
             </ListView.View>
@@ -106,7 +106,7 @@
             </ListView.Effect>
             <ListView.View>
               <GridView>
-                <GridViewColumn Header="Patterns" DisplayMemberBinding="{Binding PatternPath}" Width="610"/>
+                <GridViewColumn Header="Patterns" DisplayMemberBinding="{Binding TreePath}" Width="610"/>
                 <GridViewColumn Header="Similarity Score" DisplayMemberBinding="{Binding SimilarityScore}" Width="210"/>
               </GridView>
             </ListView.View>

@@ -202,8 +202,10 @@ namespace WorkflowPatternFinder
                   var filtered = RemoveSpecialCharacters(str).Split(' ').ToList();
                   kvps.Add(new KeyValuePair<string, string>(filtered[0], $"{filtered[1]}:{filtered[3]}"));
                 }
-                _foundPatterns.Add(new PatternObject(treePath, score, kvps));
-                validOutput.Add(treePath, double.Parse(score, CultureInfo.InvariantCulture));
+                var newPattern = new PatternObject(treePath, score, kvps);
+                _foundPatterns.Add(newPattern);
+                //validOutput.Add(treePath, double.Parse(score, CultureInfo.InvariantCulture));
+                validOutput.Add($"{newPattern.DatabaseName}-{newPattern.WorkflowName}", newPattern.Score);
                 Debug.WriteLine($"{treePath} is a subtree!");
               }
             }
@@ -214,7 +216,7 @@ namespace WorkflowPatternFinder
             var path = kvp.Key;
             var score = Math.Round(kvp.Value, 2);
 
-            ValidOccurencesView.Items.Add(new ValidOccurencesViewObject() { PatternPath = path, SimilarityScore = score });
+            ValidOccurencesView.Items.Add(new ValidOccurencesViewObject(path) {SimilarityScore = score });
           }
         }
       }
@@ -240,19 +242,22 @@ namespace WorkflowPatternFinder
     private void ListView_DoubleClick(object sender, MouseButtonEventArgs e)
     {
       var listName = ((System.Windows.Controls.ListView)sender).Name;
-      var selectedFile = "";
+      ProcessTreeObject selectedTree = null;
+
+      PatternObject selectedPattern = null;
       if(listName == "ProcessTreeView")
       {
         if(ProcessTreeView.SelectedItem != null)
         {
-          selectedFile = ((ProcessTreeViewObject)ProcessTreeView.SelectedItem).TreePath;
+          selectedTree = ((ProcessTreeObject)ProcessTreeView.SelectedItem);
         }
       }
       else if(listName == "ValidOccurencesView")
       {
         if(ValidOccurencesView.SelectedItem != null)
         {
-          selectedFile = ((ValidOccurencesViewObject)ValidOccurencesView.SelectedItem).PatternPath;
+          var patternSummary = ((ValidOccurencesViewObject)ValidOccurencesView.SelectedItem).TreePath;
+          selectedPattern = _foundPatterns.Single(p => p.TreeSummary == patternSummary);
         }
       }
       else
@@ -260,22 +265,22 @@ namespace WorkflowPatternFinder
         return;
       }
 
-      if(File.Exists(selectedFile))
+      
+      if(selectedPattern != null || selectedTree != null)
       {
         var patternMembers = "";
+        var selectedItem = selectedPattern ?? selectedTree;
         if(listName == "ValidOccurencesView")
         {
-          var selectedPattern = _foundPatterns.Single(p => p.FilePath == selectedFile);
           patternMembers = string.Join(",", selectedPattern.Ids.Select(t => $"{t.Key}:{t.Value}"));
         }
         if(e.ChangedButton == MouseButton.Left)
         {
-          var workflowName = GetWorkflowName(selectedFile);
-          RenderTreeInPython(selectedFile, patternMembers, workflowName);
+          RenderTreeInPython(selectedItem.TreePath, patternMembers, selectedItem.WorkflowName);
         }
         else if(e.ChangedButton == MouseButton.Right)
         {
-          OpenFileInNotePad(selectedFile);
+          OpenFileInNotePad(selectedItem.TreePath);
         }
       }
     }
@@ -387,20 +392,21 @@ namespace WorkflowPatternFinder
           foreach(string path in allFiles)
           {
             var ptQuality = Program.GetProcessTreeQuality(path);
-            ProcessTreeView.Items.Add(new ProcessTreeViewObject { TreePath = path, Quality = ptQuality });
+            ProcessTreeView.Items.Add(new ProcessTreeObject(path) {Quality = ptQuality });
           }
         }
         else
         {
           foreach(string path in allFiles)
           {
-            ProcessTreeView.Items.Add(new ProcessTreeViewObject { TreePath = path, Quality = "-" });
+            ProcessTreeView.Items.Add(new ProcessTreeObject(path) {Quality = "-" });
           }
         }
 
         ProcessTreeViewLabel.Content = $"Process trees created (file path)\t{allFiles.Count()} models loaded";
       }
     }
+    
 
     private void UpdateExcelDirectoryUI(string path)
     {
@@ -635,22 +641,6 @@ namespace WorkflowPatternFinder
       Activate();
     }
 
-    private string GetWorkflowName(string filePath)
-    {
-      try
-      {
-        var workflowNameFile = Path.Combine(Path.GetDirectoryName(Path.GetDirectoryName(filePath)), "workflownames.csv");
-        var names = File.ReadAllLines(workflowNameFile);
-        var fileKey = Path.GetFileNameWithoutExtension(filePath);
-        var workflowName = names.First(r => r.Split(';')[0] == fileKey).Split(';')[1];
-        return workflowName;
-      }
-      catch
-      {
-        return Guid.NewGuid().ToString();
-      }
-    }
-
     private void ValidOccurencesView_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
     {
       if(e.Key == Key.Enter)
@@ -659,7 +649,7 @@ namespace WorkflowPatternFinder
         var selectedFile = selectedItem?.ToString().Split('\t').First();
         if(File.Exists(selectedFile))
         {
-          var selectedPattern = _foundPatterns.Single(p => p.FilePath == selectedFile);
+          var selectedPattern = _foundPatterns.Single(p => p.TreePath == selectedFile);
           var patternMembers = string.Join(",", selectedPattern.Ids);
           RenderTreeInPython(selectedFile, patternMembers);
         }
