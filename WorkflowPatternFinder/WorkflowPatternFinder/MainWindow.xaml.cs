@@ -122,7 +122,7 @@ namespace WorkflowPatternFinder
     private void StartTreeButton_Click(object sender, RoutedEventArgs e)
     {
       ClearValidOccurencesView();
-      if(!PathsExists() || !double.TryParse(SimTresholdValue.Text.Replace('.', ','), NumberStyles.Any, CultureInfo.InvariantCulture, out double threshold))
+      if(!PathsExists() || !double.TryParse(SimTresholdValue.Text, NumberStyles.Any, CultureInfo.InvariantCulture, out double threshold))
       {
         UpdateButtonText(TreeStartButton, "Incorrect inputs!");
         return;
@@ -637,11 +637,18 @@ namespace WorkflowPatternFinder
 
     private string GetWorkflowName(string filePath)
     {
-      var workflowNameFile = Path.Combine(Path.GetDirectoryName(Path.GetDirectoryName(filePath)), "workflownames.csv");
-      var names = File.ReadAllLines(workflowNameFile);
-      var fileKey = Path.GetFileNameWithoutExtension(filePath);
-      var workflowName = names.First(r => r.Split(';')[0] == fileKey).Split(';')[1];
-      return workflowName;
+      try
+      {
+        var workflowNameFile = Path.Combine(Path.GetDirectoryName(Path.GetDirectoryName(filePath)), "workflownames.csv");
+        var names = File.ReadAllLines(workflowNameFile);
+        var fileKey = Path.GetFileNameWithoutExtension(filePath);
+        var workflowName = names.First(r => r.Split(';')[0] == fileKey).Split(';')[1];
+        return workflowName;
+      }
+      catch
+      {
+        return Guid.NewGuid().ToString();
+      }
     }
 
     private void ValidOccurencesView_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
