@@ -22,21 +22,21 @@ class Query(object):
         self._synonyms = {}
         self._antonyms = {}
         self._xmlParser = XmlParser()
-        training_corpus = alp.tagged_sents()
+        #training_corpus = alp.tagged_sents()
 
         curTime = time.time()
         # PerceptronTagger (takes very long to train)
         
-        try:
-            f = open('tagger.pckl', 'rb')
-            self._tagger = pickle.load(f)
-            f.close()
-        except:
-            self._tagger = PerceptronTagger(load=True)
-            self._tagger.train(list(training_corpus))
-            f = open('tagger.pckl', 'wb')
-            pickle.dump(self._tagger, f)
-            f.close()
+        #try:
+        #    f = open('tagger.pckl', 'rb')
+        #    self._tagger = pickle.load(f)
+        #    f.close()
+        #except:
+        #    self._tagger = PerceptronTagger(load=True)
+        #    self._tagger.train(list(training_corpus))
+        #    f = open('tagger.pckl', 'wb')
+        #    pickle.dump(self._tagger, f)
+        #    f.close()
         
         print((time.time()-curTime))
         self._stemmer = SnowballStemmer("dutch")
@@ -46,7 +46,7 @@ class Query(object):
         self._model = Doc2Vec.load(path_to_model, mmap=None)
         # print('loaded model')
 
-    def LoadBinModel(self, path_to_model):
+    def LoadBinModel(self, path_to_model = r"C:\Users\AFAS\WorkflowPatternFinder\WorkflowPatternFinder\Gensim\datasets\wikipedia-160.bin"):
         self._model = KeyedVectors.load(path_to_model, mmap='r')
 
     def FindSynonyms(self, word):
@@ -126,7 +126,7 @@ class Query(object):
         for word in terms:
           if word in self._model.wv.vocab:
             myWords.append(word)
-        similarTerms = self._model.wv.most_similar(positive=myWords, topn=100)
+        similarTerms = self._model.wv.most_similar(positive=myWords, topn=300)
         return similarTerms
         
         

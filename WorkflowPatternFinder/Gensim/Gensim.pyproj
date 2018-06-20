@@ -12,7 +12,7 @@
     <Name>Gensim</Name>
     <RootNamespace>Gensim</RootNamespace>
     <IsWindowsApplication>False</IsWindowsApplication>
-    <InterpreterId>Global|PythonCore|3.4</InterpreterId>
+    <InterpreterId>Global|PythonCore|3.6</InterpreterId>
     <LaunchProvider>Standard Python launcher</LaunchProvider>
     <CommandLineArguments>"C:\Thesis\Profit analyses\04-04-2018\trained.gz" "goedkeuren"</CommandLineArguments>
     <EnableNativeCodeDebugging>False</EnableNativeCodeDebugging>
@@ -73,8 +73,6 @@
     <Compile Include="TrainWord2VecModel.py" />
   </ItemGroup>
   <ItemGroup>
-    <InterpreterReference Include="Global|PythonCore|2.7" />
-    <InterpreterReference Include="Global|PythonCore|3.4" />
     <InterpreterReference Include="Global|PythonCore|3.6" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />

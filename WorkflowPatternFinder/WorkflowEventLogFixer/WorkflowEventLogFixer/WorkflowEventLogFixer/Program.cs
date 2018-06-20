@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -13,6 +14,8 @@ namespace WorkflowEventLogFixer
   public static class Program
   {
     private static string _baseDirectory = "";
+    public static string _basePromPath = GetProMBasePath();
+    public static string _baseToolPath = GetToolBasePath();
     private static string _baseCsvFileDirectory = Path.Combine(_baseDirectory, "csv");
     private static string _baseXesFileDirectory = Path.Combine(_baseDirectory, "xes");
     private static string _basePtmlFileDirectory = Path.Combine(_baseDirectory, "ptml");
@@ -21,12 +24,14 @@ namespace WorkflowEventLogFixer
     private static string _PTQualityOutputFile = Path.Combine(_baseDirectory, "PTQ_output.txt");
     private static string _pythonExe = "";
     private static string _javaExe = "";
-    private static string _word2VecScriptFile = @"C:\Users\dst\Source\Repos\WorkflowPatternFinder\WorkflowPatternFinder\Gensim\TrainWord2VecModel.py";
-    private static string _processTreeScriptFile = @"C:\Users\dst\eclipse-workspace\ProM\ProcessTreeMiner.txt";
-    private static string _petriNetScriptFile = @"C:\Users\dst\eclipse-workspace\ProM\PetriNetMiner.txt";
-    private static string _etmScriptFile = @"C:\Users\dst\eclipse-workspace\ProM\EvolutionaryTreeMiner.txt";
-    private static string _PTQualityScriptFile = @"C:\Users\dst\eclipse-workspace\ProM\MinePTQuality.txt";
-    private static string _promCLI = @"C:\Users\dst\eclipse-workspace\ProM\ProM_CLI.bat";
+    private static string _word2VecScriptFile = Path.Combine(_baseToolPath, @"WorkflowPatternFinder\WorkflowPatternFinder\Gensim\TrainWord2VecModel.py");
+    private static string _processTreeScriptFile = Path.Combine(_basePromPath, "ProcessTreeMiner.txt");
+    private static string _petriNetScriptFile = Path.Combine(_basePromPath, "PetriNetMiner.txt");
+    private static string _etmScriptFile = Path.Combine(_basePromPath, "EvolutionaryTreeMiner.txt");
+    private static string _PTQualityScriptFile = Path.Combine(_basePromPath, "MinePTQuality.txt");
+    private static string _promCLI = Path.Combine(_basePromPath, "ProM_CLI.bat");
+    private static string _csvToXesBat = Path.Combine(_baseToolPath,
+      @"WorkflowPatternFinder\WorkflowPatternFinder\WorkflowEventLogFixer\WorkflowEventLogFixer\WorkflowEventLogFixer\CSVtoXES\CsvToXesDirectory.bat");
 
     private static List<string> _modelQualityCache = new List<string>();
 
@@ -34,10 +39,24 @@ namespace WorkflowEventLogFixer
     // 1. A csv-file, which is filtered on workflow instances.
     // 2. A xes-file, which is needed for further workflow analysis.
 
-
     public static void Main(string[] args)
     {
 
+    }
+
+    public static string GetProMBasePath()
+    {
+      return ConfigurationManager.AppSettings["PromBasePath"];
+    }
+
+    public static string GetToolBasePath()
+    {
+      return ConfigurationManager.AppSettings["toolBasePath"];
+    }
+
+    public static string GetDatasetBasePath()
+    {
+      return ConfigurationManager.AppSettings["DatasetBasePath"];
     }
 
     public static void PreProcessingPhase(string importDir, string promScript, string noiseThreshold)
@@ -70,7 +89,7 @@ namespace WorkflowEventLogFixer
         WriteWorkflowNamesToFile(workflowNames, workflowNameFile);
 
         //Apply word2vec throughout the workflow logs and give similar events similar names.
-        ApplyWord2VecThroughGensimScript(_baseCsvFileDirectory);
+        //ApplyWord2VecThroughGensimScript(_baseCsvFileDirectory);
 
         //Console.WriteLine("Creating XES files...");
         ConvertCsvToXesFiles();
@@ -85,7 +104,7 @@ namespace WorkflowEventLogFixer
         // CreatePtmlFilesWithETM();
 
         // Compute quality dimensions
-        MineProcessTreeQuality();
+        //MineProcessTreeQuality();
       }
     }
 
@@ -259,7 +278,7 @@ namespace WorkflowEventLogFixer
       else
       {
         MessageBox.Show("Python is not installed.");
-        return false;
+        //return false;
       }
       cmd.StartInfo.Arguments = "/C where java";
       cmd.Start();
@@ -372,6 +391,10 @@ namespace WorkflowEventLogFixer
 
     private static void WriteWorkflowNamesToFile(Dictionary<string, string> workflowNames, string workflowNameFile)
     {
+      if(File.Exists(workflowNameFile))
+      {
+        File.Delete(workflowNameFile);
+      }
       using(var writer = new StreamWriter(workflowNameFile))
       {
         foreach(var name in workflowNames)
@@ -380,7 +403,6 @@ namespace WorkflowEventLogFixer
           writer.WriteLine(row);
         }
       }
-      File.SetAttributes(workflowNameFile, FileAttributes.ReadOnly);
     }
 
     static List<Event> GetEvents(string excelFile)
@@ -425,13 +447,14 @@ namespace WorkflowEventLogFixer
 
     private static void ConvertCsvToXesFiles()
     {
+      var jarFile = Path.Combine(_baseToolPath, @"WorkflowPatternFinder\WorkflowPatternFinder\WorkflowEventLogFixer\WorkflowEventLogFixer\WorkflowEventLogFixer\CSVtoXES\CSVtoXESDir.jar");
       var startInfo = new ProcessStartInfo
       {
         WindowStyle = ProcessWindowStyle.Maximized,
         UseShellExecute = false,
-        FileName = @"C:\Users\dst\Source\Repos\WorkflowPatternFinder\WorkflowPatternFinder\WorkflowEventLogFixer\WorkflowEventLogFixer\WorkflowEventLogFixer\CSVtoXES\CsvToXesDirectory.bat",
-        Arguments = $"\"{_javaExe}\" \"{_baseCsvFileDirectory}\" \"{_baseXesFileDirectory}\"",
-        WorkingDirectory = @"C:\Users\dst\Source\Repos\WorkflowPatternFinder\WorkflowPatternFinder\WorkflowEventLogFixer\WorkflowEventLogFixer\WorkflowEventLogFixer\CSVtoXES"
+        FileName = _csvToXesBat,
+        Arguments = $"\"{_javaExe}\" \"{jarFile}\" \"{_baseCsvFileDirectory}\" \"{_baseXesFileDirectory}\"",
+        WorkingDirectory = Path.GetDirectoryName(_csvToXesBat) ?? throw new InvalidOperationException()
       };
 
       Process process = new Process { StartInfo = startInfo };
@@ -754,7 +777,7 @@ namespace WorkflowEventLogFixer
       }
     }
 
-    
+
 
     public static string GetPythonExe()
     {

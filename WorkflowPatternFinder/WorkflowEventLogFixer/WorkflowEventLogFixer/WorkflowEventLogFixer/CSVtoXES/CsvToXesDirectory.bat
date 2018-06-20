@@ -2,5 +2,6 @@
 set arg1=%1
 set arg2=%2
 set arg3=%3
+set arg4=%4
 
-%arg1% -jar C:\Users\dst\Source\Repos\WorkflowPatternFinder\WorkflowPatternFinder\WorkflowEventLogFixer\WorkflowEventLogFixer\WorkflowEventLogFixer\CSVtoXES\CSVtoXESDir.jar -i %arg2% -o %arg3%
+%arg1% -jar %arg2% -i %arg3% -o %arg4%
