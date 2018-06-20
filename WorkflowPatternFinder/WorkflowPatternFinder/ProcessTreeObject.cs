@@ -18,12 +18,12 @@ namespace WorkflowPatternFinder
     public ProcessTreeObject(string filePath)
     {
       TreePath = filePath;
-      DatabaseName = Path.GetFileNameWithoutExtension(filePath).Split('-')[0];
+      DatabaseName = Path.GetFileNameWithoutExtension(filePath)?.Split('-')[0];
       WorkflowName = GetWorkflowName(filePath);
       TreeSummary = $"{DatabaseName}-{WorkflowName}";
     }
 
-    private string GetWorkflowName(string filePath)
+    public string GetWorkflowName(string filePath)
     {
       try
       {

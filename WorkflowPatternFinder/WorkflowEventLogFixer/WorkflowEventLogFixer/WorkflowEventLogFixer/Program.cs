@@ -98,7 +98,7 @@ namespace WorkflowEventLogFixer
         CreatePtmlFilesWithImi(noiseThreshold);
 
         // Create pnml files
-        CreatePnmlFiles();
+        //CreatePnmlFiles();
 
         // Create ptml files with Evolutionary Tree Miner
         // CreatePtmlFilesWithETM();
@@ -134,13 +134,13 @@ namespace WorkflowEventLogFixer
       CreatePtmlFilesWithImi(noiseThreshold);
 
       // Create pnml files
-      CreatePnmlFiles();
+      //CreatePnmlFiles();
 
       //Create ptml files with the evolutionary tree miner
-      CreatePtmlFilesWithETM();
+      //CreatePtmlFilesWithETM();
 
       // Compute quality dimensions
-      MineProcessTreeQuality();
+      //MineProcessTreeQuality();
     }
 
     private static void CreatePtmlFilesWithETM()

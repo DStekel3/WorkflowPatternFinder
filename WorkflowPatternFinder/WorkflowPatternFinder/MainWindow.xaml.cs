@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -10,7 +11,6 @@ using System.Windows.Controls;
 using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Media;
-using IronPython.Hosting;
 using WorkflowEventLogFixer;
 using OpenFileDialog = System.Windows.Forms.OpenFileDialog;
 using Button = System.Windows.Controls.Button;
@@ -18,6 +18,7 @@ using DataFormats = System.Windows.Forms.DataFormats;
 using Timer = System.Windows.Forms.Timer;
 using IronPython.Runtime.Operations;
 using System.Globalization;
+using WorkflowPatternFinder.Properties;
 
 namespace WorkflowPatternFinder
 {
@@ -37,6 +38,7 @@ namespace WorkflowPatternFinder
     private string _missingScriptFile = "Missing ProM scripts!";
     private List<PatternObject> _foundPatterns = new List<PatternObject>();
     private Window tFinder;
+    private string savedStateFile = "SavedState.txt";
 
     public MainWindow()
     {
@@ -79,7 +81,7 @@ namespace WorkflowPatternFinder
     {
       FolderBrowserDialog fbd = new FolderBrowserDialog();
       fbd.Description = "Select a directory that contains .ptml files.";
-      fbd.SelectedPath = Path.Combine(Program.GetDatasetBasePath(), @"testmap\ptml");
+      fbd.SelectedPath = Properties.Settings.Default.TreeFolder;
       DialogResult result = fbd.ShowDialog();
       if(result == System.Windows.Forms.DialogResult.OK)
       {
@@ -89,6 +91,8 @@ namespace WorkflowPatternFinder
           var possibleModelFile = Path.Combine(Path.GetDirectoryName(fbd.SelectedPath), "trained.gz");
           if(File.Exists(possibleModelFile))
           {
+            Properties.Settings.Default.TreeFolder = fbd.SelectedPath;
+            Properties.Settings.Default.Save();
             ModelPathLabel.Content = possibleModelFile;
           }
         }
@@ -104,13 +108,20 @@ namespace WorkflowPatternFinder
       OpenFileDialog ofd = new OpenFileDialog();
       ofd.DefaultExt = ".ptml";
       ofd.Title = "Select a file containing your process tree pattern (.ptml format).";
-      ofd.FileName = Path.Combine(Program.GetToolBasePath(), @"WorkflowPatternFinder\WorkflowPatternFinder\WorkflowPatternFinder\Example Patterns\accordeer1.ptml");
+      ofd.FileName = Settings.Default.PatternFile;
+      ofd.Filter = "Ptml files |*.ptml";
+      if(!File.Exists(ofd.FileName))
+      {
+        ofd.FileName = Path.Combine(Program.GetToolBasePath(), @"WorkflowPatternFinder\WorkflowPatternFinder\WorkflowPatternFinder\Example Patterns\accordeer1.ptml");
+      }
       DialogResult result = ofd.ShowDialog();
       if(result == System.Windows.Forms.DialogResult.OK)
       {
         if(ofd.FileName.EndsWith(".ptml"))
         {
           ImportPatternLabel.Content = ofd.FileName;
+          Settings.Default.PatternFile = ofd.FileName;
+          Settings.Default.Save();
         }
         else
         {
@@ -122,19 +133,7 @@ namespace WorkflowPatternFinder
     private void StartTreeButton_Click(object sender, RoutedEventArgs e)
     {
       ClearValidOccurencesView();
-      if(!PathsExists() || !double.TryParse(SimTresholdValue.Text, NumberStyles.Any, CultureInfo.InvariantCulture, out double threshold))
-      {
-        UpdateButtonText(TreeStartButton, "Incorrect inputs!");
-        return;
-      }
-      TreeStartButton.Content = "Busy...";
-      ChangeEnabledTreeButtons(false);
-      ((GridView)ValidOccurencesView.View).Columns[1].Header = _countNumberOfPatternsWithinModel ? "# of Occurrences" : "Similarity Score";
-      TreeProgressBar.IsIndeterminate = true;
-
-      var induced = _treatAsInducedSubTree;
-      string similarityVariant = ((System.Windows.Controls.Label)SimilarityVariantComboBox.SelectedItem).Content.ToString();
-
+      
       // update the python .exe path
       if(string.IsNullOrEmpty(SubTreeFinder._pythonExe))
       {
@@ -143,32 +142,73 @@ namespace WorkflowPatternFinder
           SubTreeFinder.SetPythonExe(Program.GetPythonExe());
         }
       }
-      var validSubTrees = CallGensim(induced, threshold, similarityVariant);
-      ResultDebug.Content = $"Found {validSubTrees.Count} model(s) that contain the given pattern.";
-
-      TreeStartButton.Content = "Start mining...";
-      UpdateButtonText(TreeStartButton, "Done!");
-      ChangeEnabledTreeButtons(true);
-      TreeProgressBar.IsIndeterminate = false;
+      SearchPatternOccurences();
     }
 
-    private List<PatternObject> CallGensim(bool induced, double simThreshold, string similarityVariant)
+    private void SearchPatternOccurences()
     {
-      var treeBasePath = ImportTreeLabel.Content.ToString();
-      var patternPath = ImportPatternLabel.Content.ToString();
-      var modelPath = Path.Combine(Directory.GetParent(ImportTreeLabel.Content.ToString()).FullName, "trained.gz");
-      var scriptPath = Path.Combine(Program.GetToolBasePath(), @"WorkflowPatternFinder\WorkflowPatternFinder\Gensim\Gensim.py");
+      // UI-linked code needs to be executed before new Thread is started.
+      if(!PathsExists() || !double.TryParse(SimTresholdValue.Text, NumberStyles.Any, CultureInfo.InvariantCulture, out double threshold))
+      {
+        UpdateButtonText(TreeStartButton, "Incorrect inputs!");
+        return;
+      }
+      TreeStartButton.Content = "Searching for this pattern...";
+      ChangeEnabledTreeButtons(false);
+      ((GridView)ValidOccurencesView.View).Columns[1].Header = _countNumberOfPatternsWithinModel ? "# of Occurrences" : "Similarity Score";
+      TreeProgressBar.IsIndeterminate = true;
+      _simThresholdCache = threshold;
+      _inducedCache = _treatAsInducedSubTree;
+      _similarityVariantCache = ((System.Windows.Controls.Label)SimilarityVariantComboBox.SelectedItem).Content.ToString();
+
+
+      _treeBasePathCache = ImportTreeLabel.Content.ToString();
+      _patternPathCache = ImportPatternLabel.Content.ToString();
+      _modelPathCache = Path.Combine(Directory.GetParent(ImportTreeLabel.Content.ToString()).FullName, "trained.gz");
+      _scriptPathCache = Path.Combine(Program.GetToolBasePath(), @"WorkflowPatternFinder\WorkflowPatternFinder\Gensim\Gensim.py");
+
+      // Start new thread which calls the Python-gensim script.
+      Task DoWork()
+      {
+        var tasks = new List<Task>
+        {
+          Task.Run((Action)UseGensimScript)
+        };
+        return Task.WhenAll(tasks);
+      }
+      StartGensimTask(DoWork);
+    }
+
+    private void StartGensimTask(Func<Task> task, Action completedTask = null)
+    {
+      TreeProgressBar.IsIndeterminate = true;
+      ChangeEnabledTreeButtons(false);
+
+      var scheduler = TaskScheduler.FromCurrentSynchronizationContext();
+
+      Task.Factory
+        .StartNew(() =>
+          task()
+            .ContinueWith(async t =>
+            {
+              await FinishGensimScriptTask(t.Exception);
+              completedTask?.Invoke();
+            }, scheduler));
+    }
+
+    void UseGensimScript()
+    {
+      ProcessStartInfo start = new ProcessStartInfo
+      {
+        FileName = Program.GetPythonExe(),
+        Arguments = $"\"{_scriptPathCache}\" \"{_modelPathCache}\" \"{_treeBasePathCache}\" \"{_patternPathCache}\" \"{_inducedCache}\" \"{_simThresholdCache.ToString(CultureInfo.InvariantCulture)}\" \"{_countNumberOfPatternsWithinModel}\" \"{_similarityVariantCache}\"",
+        UseShellExecute = false,
+        RedirectStandardOutput = true
+      };
 
       var timer = new Stopwatch();
       timer.Start();
 
-      ProcessStartInfo start = new ProcessStartInfo
-      {
-        FileName = Program.GetPythonExe(),
-        Arguments = $"\"{scriptPath}\" \"{modelPath}\" \"{treeBasePath}\" \"{patternPath}\" \"{induced}\" \"{simThreshold.ToString().Replace(",", ".")}\" \"{_countNumberOfPatternsWithinModel}\" \"{similarityVariant}\"",
-        UseShellExecute = false,
-        RedirectStandardOutput = true
-      };
       //cmd is full path to python.exe
       //args is path to .py file and any cmd line args
       using(Process process = Process.Start(start))
@@ -184,7 +224,7 @@ namespace WorkflowPatternFinder
           }
 
           var validSubTrees = lines.SkipWhile(c => !c.StartsWith("Valid trees:")).Skip(1);
-          var validOutput = new Dictionary<string, double>();
+          _validOutputCache = new Dictionary<string, double>();
           foreach(string validTree in validSubTrees)
           {
             if(!string.IsNullOrEmpty(validTree))
@@ -205,22 +245,14 @@ namespace WorkflowPatternFinder
                 var newPattern = new PatternObject(treePath, score, kvps);
                 _foundPatterns.Add(newPattern);
                 //validOutput.Add(treePath, double.Parse(score, CultureInfo.InvariantCulture));
-                validOutput.Add($"{newPattern.DatabaseName}-{newPattern.WorkflowName}", newPattern.Score);
+                _validOutputCache.Add($"{newPattern.DatabaseName}-{newPattern.WorkflowName}", newPattern.Score);
                 Debug.WriteLine($"{treePath} is a subtree!");
               }
             }
           }
           Debug.WriteLine($"The process took {timer.Elapsed.Seconds} seconds!");
-          foreach(var kvp in validOutput.OrderByDescending(c => c.Value))
-          {
-            var path = kvp.Key;
-            var score = Math.Round(kvp.Value, 2);
-
-            ValidOccurencesView.Items.Add(new ValidOccurencesViewObject(path) {SimilarityScore = score });
-          }
         }
       }
-      return _foundPatterns;
     }
 
     public static string RemoveSpecialCharacters(string str)
@@ -265,7 +297,7 @@ namespace WorkflowPatternFinder
         return;
       }
 
-      
+
       if(selectedPattern != null || selectedTree != null)
       {
         var patternMembers = "";
@@ -325,7 +357,6 @@ namespace WorkflowPatternFinder
       StartPreprocessingTask(DoWork);
     }
 
-
     void StartPreprocessing()
     {
       Program.PreProcessingPhase(_importExcelDir, _promBasePath, _noiseThreshold);
@@ -348,13 +379,39 @@ namespace WorkflowPatternFinder
             }, scheduler));
     }
 
-    private async Task FinishPreprocessingTask(Exception ex)
+    private async Task FinishUIupdateTask(Exception ex)
     {
+      foreach(var obj in _processtreeFolderCache)
+      {
+        ProcessTreeView.Items.Add(obj);
+      }
+      ProcessTreeViewLabel.Content = $"Process trees created \t{_processtreeFolderCache.Count} models loaded";
+
       UpdateButtonText(PreProcessingButton, "Done!");
-      TryToUpdateProcessTreeView();
       ConsoleLabel.Content = "Start...";
       ChangeEnabledPreProcessingButtons(true);
       PreProgress.IsIndeterminate = false;
+    }
+
+    private async Task FinishGensimScriptTask(Exception ex)
+    {
+      foreach(var kvp in _validOutputCache.OrderByDescending(c => c.Value))
+      {
+        var path = kvp.Key;
+        var score = Math.Round(kvp.Value, 2);
+
+        ValidOccurencesView.Items.Add(new ValidOccurencesViewObject(path) { SimilarityScore = score });
+      }
+      ResultDebug.Content = $"Found {_validOutputCache.Count} model(s) that contain the given pattern.";
+      TreeStartButton.Content = "Start searching...";
+      UpdateButtonText(TreeStartButton, "Done!");
+      ChangeEnabledTreeButtons(true);
+      TreeProgressBar.IsIndeterminate = false;
+    }
+
+    private async Task FinishPreprocessingTask(Exception ex)
+    {
+      TryToUpdateUI();
     }
 
     private void ImportExcelDirectoryLabel_DoubleClick(object sender, MouseButtonEventArgs e)
@@ -367,46 +424,105 @@ namespace WorkflowPatternFinder
     {
       FolderBrowserDialog fbd = new FolderBrowserDialog();
       fbd.Description = "Select a directory that contains workflow logs in .xlsx format.";
-      fbd.SelectedPath = Path.Combine(Program.GetDatasetBasePath(), @"testmap");
+      if(Directory.Exists(Settings.Default.DataFolder))
+      {
+        fbd.SelectedPath = Settings.Default.DataFolder;
+      }
+      else
+      {
+        fbd.SelectedPath = Path.Combine(Program.GetDatasetBasePath());
+      }
       DialogResult result = fbd.ShowDialog();
       if(result == System.Windows.Forms.DialogResult.OK)
       {
         UpdateExcelDirectoryUI(fbd.SelectedPath);
         var t = new Stopwatch();
         t.Start();
-        TryToUpdateProcessTreeView();
+        TryToUpdateUI();
         t.Stop();
+        Settings.Default.DataFolder = fbd.SelectedPath;
+        Settings.Default.Save();
       }
+    }
+
+    public string _processTreeDirectoryCache { get; set; }
+    public List<ProcessTreeObject> _processtreeFolderCache = new List<ProcessTreeObject>();
+    private string _treeBasePathCache;
+    private string _patternPathCache;
+    private string _modelPathCache;
+    private string _scriptPathCache;
+    private bool _inducedCache;
+    private string _similarityVariantCache;
+    private double _simThresholdCache;
+    private Dictionary<string, double> _validOutputCache;
+
+    private void TryToUpdateUI()
+    {
+      ProcessTreeView.Items.Clear();
+      _processtreeFolderCache.Clear();
+      _processTreeDirectoryCache = Path.Combine(ImportExcelDirectoryLabel.Content.ToString(), "ptml");
+      Task DoWork()
+      {
+        var tasks = new List<Task>
+        {
+          Task.Run((Action)StartUpdatingUI)
+        };
+        return Task.WhenAll(tasks);
+      }
+      StartUpdateUITask(DoWork);
+    }
+    
+    private void StartUpdateUITask(Func<Task> task, Action completedTask = null)
+    {
+      ConsoleLabel.Content = "Loading Trees...";
+      PreProgress.IsIndeterminate = true;
+      ChangeEnabledPreProcessingButtons(false);
+
+      var scheduler = TaskScheduler.FromCurrentSynchronizationContext();
+
+      Task.Factory
+        .StartNew(() =>
+          task()
+            .ContinueWith(async t =>
+            {
+              await FinishUIupdateTask(t.Exception);
+              completedTask?.Invoke();
+            }, scheduler));
+    }
+
+    void StartUpdatingUI()
+    {
+      TryToUpdateProcessTreeView();
     }
 
     private void TryToUpdateProcessTreeView()
     {
-      ProcessTreeView.Items.Clear();
-      var processTreeDirectory = Path.Combine(ImportExcelDirectoryLabel.Content.ToString(), "ptml");
-
-      if(Directory.Exists(processTreeDirectory))
+      if(Directory.Exists(_processTreeDirectoryCache))
       {
-        var allFiles = Directory.GetFiles(processTreeDirectory);
-        if(Program.DoesProcessTreeQualityFileExist())
-        {
-          foreach(string path in allFiles)
-          {
-            var ptQuality = Program.GetProcessTreeQuality(path);
-            ProcessTreeView.Items.Add(new ProcessTreeObject(path) {Quality = ptQuality });
-          }
-        }
-        else
-        {
-          foreach(string path in allFiles)
-          {
-            ProcessTreeView.Items.Add(new ProcessTreeObject(path) {Quality = "-" });
-          }
-        }
+        var allFiles = Directory.GetFiles(_processTreeDirectoryCache);
 
-        ProcessTreeViewLabel.Content = $"Process trees created (file path)\t{allFiles.Count()} models loaded";
+        // Code for loading in the quality of process trees. Since the quality computation is incorrect, we disable this code for now.
+        //if(Program.DoesProcessTreeQualityFileExist())
+        //{
+        //  foreach(string path in allFiles)
+        //  {
+        //    var ptQuality = Program.GetProcessTreeQuality(path);
+        //    ProcessTreeView.Items.Add(new ProcessTreeObject(path) { Quality = ptQuality });
+        //  }
+        //}
+        //else
+        //{
+        
+        foreach(string path in allFiles)
+        {
+          //ProcessTreeView.Items.Add(new ProcessTreeObject(path) { Quality = "-" });
+          _processtreeFolderCache.Add(new ProcessTreeObject(path));
+        }
+        //}
+
+        //ProcessTreeViewLabel.Content = $"Process trees created \t{allFiles.Count()} models loaded";
       }
     }
-    
 
     private void UpdateExcelDirectoryUI(string path)
     {
@@ -432,7 +548,13 @@ namespace WorkflowPatternFinder
     {
       var scriptFiles = PromCustomFileNames.GetAllNames();
       FolderBrowserDialog ofd = new FolderBrowserDialog();
+
       var standardPath = Program.GetProMBasePath();
+      if(File.Exists(Settings.Default.PromFolder))
+      {
+        standardPath = Settings.Default.PromFolder;
+      }
+
       if(Directory.Exists(standardPath))
       {
         ofd.SelectedPath = standardPath;
@@ -454,6 +576,8 @@ namespace WorkflowPatternFinder
           _promBasePath = ofd.SelectedPath;
           PromLabel.Content = _promBasePath;
           Program.UpdateScriptFilePaths(_promBasePath);
+          Settings.Default.PromFolder = ofd.SelectedPath;
+          Settings.Default.Save();
         }
         else
         {
@@ -464,10 +588,12 @@ namespace WorkflowPatternFinder
 
     private void ChangeEnabledPreProcessingButtons(bool isEnabled)
     {
-      // pre processing buttons
+      // change state of buttons in Pre-Processing Tab
       PreProcessingButton.IsEnabled = isEnabled;
       ImportExcelDirectoryButton.IsEnabled = isEnabled;
       PromButton.IsEnabled = isEnabled;
+      RemakeProcessTreesButton.IsEnabled = isEnabled;
+      InductiveMinerNoiseThresholdTextBox.IsEnabled = isEnabled;
     }
 
     private void ChangeEnabledTreeButtons(bool isEnabled)
@@ -478,6 +604,8 @@ namespace WorkflowPatternFinder
       ImportTreeButton.IsEnabled = isEnabled;
       InducedCheckBox.IsEnabled = isEnabled;
       CountCheckBox.IsEnabled = isEnabled;
+      SimilarityVariantComboBox.IsEnabled = isEnabled;
+      SimTresholdValue.IsEnabled = isEnabled;
     }
 
     private void ClearValidOccurencesView()
@@ -516,12 +644,12 @@ namespace WorkflowPatternFinder
       timer.Tick += (s, f) =>
       {
         button.Content = normal;
-        button.Foreground = Brushes.Black;
+        button.Foreground = Brushes.White;
         timer.Stop();
       };
       timer.Start();
       button.Content = message;
-      button.Foreground = new SolidColorBrush(Color.FromArgb(255, 255, 0, 0));
+      button.Foreground = new SolidColorBrush(Color.FromArgb(255, 255, 50, 50));
     }
 
     private void OpenFileInNotePad(string filePath)
@@ -584,7 +712,15 @@ namespace WorkflowPatternFinder
       OpenFileDialog ofd = new OpenFileDialog();
       ofd.DefaultExt = ".gz";
       ofd.Title = "Select a word2vec model.";
-      ofd.FileName = Path.Combine(Program.GetDatasetBasePath(), @"testmap\trained.gz");
+      ofd.Filter = "Word2Vec model | *.gz";
+      if(File.Exists(Settings.Default.Word2VecFile))
+      {
+        ofd.FileName = Settings.Default.Word2VecFile;
+      }
+      else
+      {
+        ofd.FileName = Path.Combine(Program.GetDatasetBasePath(), @"trained.gz");
+      }
       DialogResult result = ofd.ShowDialog();
       if(result == System.Windows.Forms.DialogResult.OK)
       {
