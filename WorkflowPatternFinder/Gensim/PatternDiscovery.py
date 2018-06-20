@@ -33,7 +33,8 @@ class PatternDiscovery(object):
       allPatterns = []
       allSelections = []
       for t in treeNodes:
-        if True: #tNode.GetId() not in [i[0] for i in allPatterns] and tNode.GetId() not in self._dict:
+        if True: #tNode.GetId() not in [i[0] for i in allPatterns] and tNode.GetId() not in
+                 #self._dict:
           result = (True, [])
           while result[0]:
             if isInduced:
@@ -43,7 +44,8 @@ class PatternDiscovery(object):
             if result[0]:
               newPattern = False
               for member in result[1]:
-                #print("matching: member = ", str(member), "pattern members = ", str(result[1]))
+                #print("matching: member = ", str(member), "pattern members =
+                #", str(result[1]))
                 if member not in allPatterns:
                   newPattern = True
               if newPattern:
@@ -76,12 +78,13 @@ class PatternDiscovery(object):
           result = self.GetSubsumedMatch(t, p)
         if result[0]:
           selection = []
+          print(result)
           for selectedNode in [i[0] for i in result[1]]:
             selection.append(T.GetNode(selectedNode).GetNumber())
           return result
     return (False, [])
 
-  def GetSubsumedMatchOld(self, t, p, selectedNodes = []):
+  def GetSubsumedMatchOld(self, t, p, selectedNodes=[]):
     # check whether the given nodes are similar
     equal = self.AreSimilar(t, p)
     rootScore = equal[1]
@@ -134,20 +137,30 @@ class PatternDiscovery(object):
         return match
 
       matches = [(t.GetId(), p.GetId(), rootMatch[1], self.GetPatternWord(rootMatch))]
-      for pc in p.GetChildren():
-        for tc in t.GetChildren():
-          if tc.GetId() not in [i[0] for i in matches] and self.AreSimilar(tc, pc):
-            match = self.GetSubsumedMatchOrdered(tc,pc)
-            if match[0]:
-              matches.extend(match[1])
-              break
+      #for pc in p.GetChildren():
+      #  for tc in t.GetChildren():
+      #    if tc.GetId() not in [i[0] for i in matches] and self.AreSimilar(tc,
+      #    pc):
+      #      match = self.GetSubsumedMatchOrdered(tc,pc)
+      #      if match[0]:
+      #        matches.extend(match[1])
+      #        break
+      for pc in pChildren:
+          bestMatch = (None, 0.0)
+          for tc in tChildren[startIndex:len(tChildren) - (len(pChildren) - pChildren.index(pc) - 1)]:
+              if tc.GetId() not in [i[0] for i in matches]:
+                      match = self.GetSubsumedMatch(tc,pc)
+                      if(match[0]):
+                          rootScore = match[1][0][2]
+                          bestMatch = (match[1], rootScore)
+          if bestMatch[0] != None:
+              matches.extend(bestMatch[0])
 
       if len(matches) == p.GetSubtreeSize():
         return (True, matches)
 
-    if not p.IsRoot:
+    if not p.IsRoot():
         for tc in t.GetChildren():
-          if self.AreSimilar(tc, p)[0]:
             match = self.GetSubsumedMatchOrdered(tc,p)
             if match[0]:
               return match
@@ -164,20 +177,20 @@ class PatternDiscovery(object):
 
       matches = [(t.GetId(), p.GetId(), rootMatch[1], self.GetPatternWord(rootMatch))]
       for pc in p.GetChildren():
+        bestMatch = (None, 0.0)
         for tc in t.GetChildren():
-          if tc.GetId() not in [i[0] for i in matches] and self.AreSimilar(tc, pc):
-            # try to find the node in the subtree with tc as root node
-            match = self.GetSubsumedMatchOrdered(tc,pc)
-            if match[0]:
-              matches.extend(match[1])
-              break
-
+              if tc.GetId() not in [i[0] for i in matches]:
+                      match = self.GetSubsumedMatch(tc,pc)
+                      if(match[0]):
+                          bestMatch = (match[1], match[1][0][2])
+                          print('best match:', bestMatch)
+        if bestMatch[0] != None:
+            matches.extend(bestMatch[0])
       if len(matches) == p.GetSubtreeSize():
         return (True, matches)
 
-    if not p.IsRoot:
+    if not p.IsRoot():
         for tc in t.GetChildren():
-          if self.AreSimilar(tc, p)[0]:
             match = self.GetSubsumedMatchUnordered(tc,p)
             if match[0]:
               return match
@@ -194,16 +207,29 @@ class PatternDiscovery(object):
       if (len(pChildren) == 0):
         return (True, matches)
       startIndex = 0
+      #for pc in pChildren:
+      #    for tc in tChildren[startIndex:len(tChildren)]:
+      #        if self.AreSimilar(tc, pc)[0]:
+      #            match = self.GetInducedMatch(tc, pc)
+      #            if match[0]:
+      #                matches.extend(match[1])
+      #                startIndex = tChildren.index(tc)
+      #                break
       for pc in pChildren:
-          for tc in tChildren[startIndex:len(tChildren)]:
-              if self.AreSimilar(tc, pc)[0]:
-                  match = self.GetInducedMatch(tc, pc)
-                  if match[0]:
-                      matches.extend(match[1])
-                      startIndex = tChildren.index(tc)
-                      break
+          bestMatch = (None, 0.0)
+          for tc in tChildren[startIndex:len(tChildren) - (len(pChildren) - pChildren.index(pc) - 1)]:
+              if tc.GetId() not in [i[0] for i in matches]:
+                  score = self.AreSimilar(tc, pc)
+                  if(score[0] and score[1] > bestMatch[1]):
+                      match = self.GetInducedMatch(tc,pc)
+                      if(match[0]):
+                          bestMatch = (match[1], score[1])
+          if bestMatch[0] != None:
+              matches.extend(bestMatch[0])
       if len(matches) == p.GetSubtreeSize():
             return (True, matches)
+
+      
     return (False, [])
 
   def GetInducedMatchUnordered(self, t, p):
@@ -217,13 +243,16 @@ class PatternDiscovery(object):
       if (len(pChildren) == 0):
         return (True, matches)
       for pc in pChildren:
+          bestMatch = (None, 0.0)
           for tc in tChildren:
               if tc.GetId() not in [i[0] for i in matches]:
-                  if(self.AreSimilar(tc, pc)):
+                  score = self.AreSimilar(tc, pc)
+                  if(score[0] and score[1] > bestMatch[1]):
                       match = self.GetInducedMatch(tc,pc)
                       if(match[0]):
-                          matches.extend(match[1])
-                          break
+                          bestMatch = (match[1], score[1])
+          if bestMatch[0] != None:
+              matches.extend(bestMatch[0])
       if len(matches) == p.GetSubtreeSize():
             return (True, matches)
     return (False, [])

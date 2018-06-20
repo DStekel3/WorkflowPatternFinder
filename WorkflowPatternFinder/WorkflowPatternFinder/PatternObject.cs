@@ -1,17 +1,16 @@
 ﻿using System.Collections.Generic;
+using System.Globalization;
 
 namespace WorkflowPatternFinder
 {
-  public class PatternObject
+  public class PatternObject : ProcessTreeObject
   {
-    public string FilePath = "";
-    public double Score = 0.0;
+    public double Score;
     public List<KeyValuePair<string, string>> Ids = new List<KeyValuePair<string, string>>();
 
-    public PatternObject(string filePath, string score, List<KeyValuePair<string, string>> ids)
+    public PatternObject(string filePath, string score, List<KeyValuePair<string, string>> ids) : base (filePath)
     {
-      FilePath = filePath;
-      Score = double.Parse(score);
+      Score = double.Parse(score, CultureInfo.InvariantCulture);
       Ids = ids;
     }
   }

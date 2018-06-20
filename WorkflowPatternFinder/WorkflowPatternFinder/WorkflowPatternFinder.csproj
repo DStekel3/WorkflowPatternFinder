@@ -129,9 +129,11 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="ProcessTreeObject.cs" />
     <Compile Include="TermFinder.xaml.cs">
       <DependentUpon>TermFinder.xaml</DependentUpon>
     </Compile>
+    <Compile Include="ValidOccurencesViewObject.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
