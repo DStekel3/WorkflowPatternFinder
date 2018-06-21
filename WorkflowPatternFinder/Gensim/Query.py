@@ -22,21 +22,21 @@ class Query(object):
         self._synonyms = {}
         self._antonyms = {}
         self._xmlParser = XmlParser()
-        training_corpus = alp.tagged_sents()
+        #training_corpus = alp.tagged_sents()
 
         curTime = time.time()
         # PerceptronTagger (takes very long to train)
         
-        try:
-            f = open('tagger.pckl', 'rb')
-            self._tagger = pickle.load(f)
-            f.close()
-        except:
-            self._tagger = PerceptronTagger(load=True)
-            self._tagger.train(list(training_corpus))
-            f = open('tagger.pckl', 'wb')
-            pickle.dump(self._tagger, f)
-            f.close()
+        #try:
+        #    f = open('tagger.pckl', 'rb')
+        #    self._tagger = pickle.load(f)
+        #    f.close()
+        #except:
+        #    self._tagger = PerceptronTagger(load=True)
+        #    self._tagger.train(list(training_corpus))
+        #    f = open('tagger.pckl', 'wb')
+        #    pickle.dump(self._tagger, f)
+        #    f.close()
         
         print((time.time()-curTime))
         self._stemmer = SnowballStemmer("dutch")
