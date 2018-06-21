@@ -46,7 +46,7 @@ class Query(object):
         self._model = Doc2Vec.load(path_to_model, mmap=None)
         # print('loaded model')
 
-    def LoadBinModel(self, path_to_model = r"C:\Users\AFAS\WorkflowPatternFinder\WorkflowPatternFinder\Gensim\datasets\wikipedia-160.bin"):
+    def LoadBinModel(self, path_to_model = r"C:\Users\dst\Source\Repos\WorkflowPatternFinder\WorkflowPatternFinder\Gensim\datasets\wikipedia-160.bin"):
         self._model = KeyedVectors.load(path_to_model, mmap='r')
 
     def FindSynonyms(self, word):
