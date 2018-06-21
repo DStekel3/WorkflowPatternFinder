@@ -88,13 +88,13 @@ namespace WorkflowPatternFinder
         if(Directory.EnumerateFiles(fbd.SelectedPath).Any(file => file.EndsWith(".ptml")))
         {
           ImportTreeLabel.Content = fbd.SelectedPath;
-          var possibleModelFile = Path.Combine(Path.GetDirectoryName(fbd.SelectedPath), "trained.gz");
-          if(File.Exists(possibleModelFile))
-          {
+          //var possibleModelFile = Path.Combine(Path.GetDirectoryName(fbd.SelectedPath), "trained.gz");
+          //if(File.Exists(possibleModelFile))
+          //{
             Properties.Settings.Default.TreeFolder = fbd.SelectedPath;
             Properties.Settings.Default.Save();
-            ModelPathLabel.Content = possibleModelFile;
-          }
+            //ModelPathLabel.Content = possibleModelFile;
+          //}
         }
         else
         {
@@ -133,7 +133,7 @@ namespace WorkflowPatternFinder
     private void StartTreeButton_Click(object sender, RoutedEventArgs e)
     {
       ClearValidOccurencesView();
-      
+
       // update the python .exe path
       if(string.IsNullOrEmpty(SubTreeFinder._pythonExe))
       {
@@ -153,7 +153,7 @@ namespace WorkflowPatternFinder
         UpdateButtonText(TreeStartButton, "Incorrect inputs!");
         return;
       }
-      TreeStartButton.Content = "Searching for this pattern...";
+      ResultDebug.Content = "Searching for this pattern...";
       ChangeEnabledTreeButtons(false);
       ((GridView)ValidOccurencesView.View).Columns[1].Header = _countNumberOfPatternsWithinModel ? "# of Occurrences" : "Similarity Score";
       TreeProgressBar.IsIndeterminate = true;
@@ -164,7 +164,15 @@ namespace WorkflowPatternFinder
 
       _treeBasePathCache = ImportTreeLabel.Content.ToString();
       _patternPathCache = ImportPatternLabel.Content.ToString();
-      _modelPathCache = Path.Combine(Directory.GetParent(ImportTreeLabel.Content.ToString()).FullName, "trained.gz");
+      if(File.Exists(ModelPathLabel.Content.ToString()))
+      {
+        _modelPathCache = ModelPathLabel.Content.ToString();
+      }
+      else
+      {
+        _modelPathCache = Path.Combine(Program.GetDatasetBasePath(), @"wikipedia-160.bin");
+        ModelPathLabel.Content = _modelPathCache;
+      }
       _scriptPathCache = Path.Combine(Program.GetToolBasePath(), @"WorkflowPatternFinder\WorkflowPatternFinder\Gensim\Gensim.py");
 
       // Start new thread which calls the Python-gensim script.
@@ -203,7 +211,9 @@ namespace WorkflowPatternFinder
         FileName = Program.GetPythonExe(),
         Arguments = $"\"{_scriptPathCache}\" \"{_modelPathCache}\" \"{_treeBasePathCache}\" \"{_patternPathCache}\" \"{_inducedCache}\" \"{_simThresholdCache.ToString(CultureInfo.InvariantCulture)}\" \"{_countNumberOfPatternsWithinModel}\" \"{_similarityVariantCache}\"",
         UseShellExecute = false,
-        RedirectStandardOutput = true
+        RedirectStandardOutput = true,
+        WindowStyle = ProcessWindowStyle.Hidden,
+        CreateNoWindow = true
       };
 
       var timer = new Stopwatch();
@@ -224,30 +234,38 @@ namespace WorkflowPatternFinder
           }
 
           var validSubTrees = lines.SkipWhile(c => !c.StartsWith("Valid trees:")).Skip(1);
-          _validOutputCache = new Dictionary<string, double>();
+          //_validOutputCache = new Dictionary<string, double>();
           foreach(string validTree in validSubTrees)
           {
-            if(!string.IsNullOrEmpty(validTree))
+            if (!string.IsNullOrEmpty(validTree))
             {
               var splittedResult = validTree.Split(';');
               var treePath = splittedResult[0];
               var score = splittedResult[1];
               var patternMembers = splittedResult.Skip(2).ToList();
 
-              if(File.Exists(treePath))
+              if (File.Exists(treePath))
               {
-                var kvps = new List<KeyValuePair<string, string>>();
-                foreach(var str in patternMembers)
+                var nodeMatches = new List<KeyValuePair<string, string>>();
+                foreach (var nodeMatch in patternMembers)
                 {
-                  var filtered = RemoveSpecialCharacters(str).Split(' ').ToList();
-                  kvps.Add(new KeyValuePair<string, string>(filtered[0], $"{filtered[1]}:{filtered[3]}"));
+                  var nodeMatchParts = RemoveSpecialCharacters(nodeMatch).Split(' ').ToList();
+                  var treeNode = nodeMatchParts[0];
+                  var patternNode = nodeMatchParts[1];
+                  var matchScore = nodeMatchParts[2];
+                  var matchWord = nodeMatchParts[3];
+                  nodeMatches.Add(new KeyValuePair<string, string>(treeNode, $"{patternNode}:{matchWord}"));
                 }
-                var newPattern = new PatternObject(treePath, score, kvps);
+                var newPattern = new PatternObject(treePath, score, nodeMatches);
                 _foundPatterns.Add(newPattern);
                 //validOutput.Add(treePath, double.Parse(score, CultureInfo.InvariantCulture));
-                _validOutputCache.Add($"{newPattern.DatabaseName}-{newPattern.WorkflowName}", newPattern.Score);
+                //_validOutputCache.Add($"{newPattern.DatabaseName}", newPattern.Score);
                 Debug.WriteLine($"{treePath} is a subtree!");
               }
+            }
+            else
+            {
+              throw new Exception("Incorrect file path given!");
             }
           }
           Debug.WriteLine($"The process took {timer.Elapsed.Seconds} seconds!");
@@ -288,7 +306,7 @@ namespace WorkflowPatternFinder
       {
         if(ValidOccurencesView.SelectedItem != null)
         {
-          var patternSummary = ((ValidOccurencesViewObject)ValidOccurencesView.SelectedItem).TreePath;
+          var patternSummary = ((ValidOccurencesViewObject)ValidOccurencesView.SelectedItem).TreeSummary;
           selectedPattern = _foundPatterns.Single(p => p.TreeSummary == patternSummary);
         }
       }
@@ -395,15 +413,14 @@ namespace WorkflowPatternFinder
 
     private async Task FinishGensimScriptTask(Exception ex)
     {
-      foreach(var kvp in _validOutputCache.OrderByDescending(c => c.Value))
+      foreach(var pattern in _foundPatterns.OrderByDescending(c => c.Score))
       {
-        var path = kvp.Key;
-        var score = Math.Round(kvp.Value, 2);
+        var path = pattern.TreePath;
+        var score = Math.Round(pattern.Score, 3);
 
         ValidOccurencesView.Items.Add(new ValidOccurencesViewObject(path) { SimilarityScore = score });
       }
-      ResultDebug.Content = $"Found {_validOutputCache.Count} model(s) that contain the given pattern.";
-      TreeStartButton.Content = "Start searching...";
+      ResultDebug.Content = $"Found {_foundPatterns.Count} model(s) that contain the given pattern.";
       UpdateButtonText(TreeStartButton, "Done!");
       ChangeEnabledTreeButtons(true);
       TreeProgressBar.IsIndeterminate = false;
@@ -471,7 +488,7 @@ namespace WorkflowPatternFinder
       }
       StartUpdateUITask(DoWork);
     }
-    
+
     private void StartUpdateUITask(Func<Task> task, Action completedTask = null)
     {
       ConsoleLabel.Content = "Loading Trees...";
@@ -512,7 +529,7 @@ namespace WorkflowPatternFinder
         //}
         //else
         //{
-        
+
         foreach(string path in allFiles)
         {
           //ProcessTreeView.Items.Add(new ProcessTreeObject(path) { Quality = "-" });
@@ -710,21 +727,21 @@ namespace WorkflowPatternFinder
     private void ChangeModelButton_Click(object sender, RoutedEventArgs e)
     {
       OpenFileDialog ofd = new OpenFileDialog();
-      ofd.DefaultExt = ".gz";
+      ofd.DefaultExt = ".bin";
       ofd.Title = "Select a word2vec model.";
-      ofd.Filter = "Word2Vec model | *.gz";
+      ofd.Filter = "Word2Vec model | *.bin";
       if(File.Exists(Settings.Default.Word2VecFile))
       {
         ofd.FileName = Settings.Default.Word2VecFile;
       }
       else
       {
-        ofd.FileName = Path.Combine(Program.GetDatasetBasePath(), @"trained.gz");
+        ofd.FileName = Path.Combine(Program.GetDatasetBasePath(), @"wikipedia-160.bin");
       }
       DialogResult result = ofd.ShowDialog();
       if(result == System.Windows.Forms.DialogResult.OK)
       {
-        if(ofd.FileName.EndsWith(".gz"))
+        if(ofd.FileName.EndsWith(".bin"))
         {
           ModelPathLabel.Content = ofd.FileName;
         }
@@ -735,8 +752,14 @@ namespace WorkflowPatternFinder
       }
     }
 
+    /// <summary>
+    /// This function retrains a word2vec model, but is not used right now since we study other word2vec models which are not trained on our dataset.
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
     private void TrainModelButton_Click(object sender, RoutedEventArgs e)
     {
+      return;
       if(Program.CheckIfPythonAndJavaAreInstalled())
       {
         var csvBaseDirectory = Path.Combine(Path.GetDirectoryName(ModelPathLabel.Content.ToString()), "csv");
@@ -828,8 +851,7 @@ namespace WorkflowPatternFinder
         if(File.Exists(modelpath))
         {
           var currentTerm = TermQueryTextBox.Text;
-          var scriptPath = Path.Combine(Program.GetToolBasePath(), @"WorkflowPatternFinder\WorkflowPatternFinder\Gensim\TermSimilarityQuery.py");
-          var output = Program.GetSimilarTerms(scriptPath, modelpath, currentTerm).SkipWhile(l => !l.Contains("Similar terms:")).ToList();
+          var output = Program.GetSimilarTerms(modelpath, currentTerm).SkipWhile(l => !l.Contains("Similar terms:")).ToList();
           foreach(var line in output.Skip(1))
           {
             if(!string.IsNullOrEmpty(line))
