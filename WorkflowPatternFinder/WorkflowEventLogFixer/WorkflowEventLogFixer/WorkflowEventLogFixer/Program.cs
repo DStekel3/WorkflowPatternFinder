@@ -304,12 +304,6 @@ namespace WorkflowEventLogFixer
       return Directory.EnumerateFiles(basePtmlFileDirectory).Select(file => ProcessTreeLoader.LoadTree(file)).ToList();
     }
 
-    private static ProcessTree LoadSingleTree(string filePath)
-    {
-      return ProcessTreeLoader.LoadTree(filePath);
-    }
-
-
     private static void CheckExistanceOfScriptFiles()
     {
       if(!File.Exists(_pythonExe))
@@ -367,7 +361,8 @@ namespace WorkflowEventLogFixer
         CreateNoWindow = true,
         WorkingDirectory = Path.GetDirectoryName(_processTreeScriptFile) ?? throw new InvalidOperationException(),
         FileName = "ProM_CLI.bat",
-        Arguments = $"-f {Path.GetFileName(_processTreeScriptFile)}"
+        Arguments = $"-f {Path.GetFileName(_processTreeScriptFile)}",
+        WindowStyle = ProcessWindowStyle.Hidden
       };
       process.StartInfo = startInfo;
       process.Start();
@@ -450,7 +445,7 @@ namespace WorkflowEventLogFixer
       var jarFile = Path.Combine(_baseToolPath, @"WorkflowPatternFinder\WorkflowPatternFinder\WorkflowEventLogFixer\WorkflowEventLogFixer\WorkflowEventLogFixer\CSVtoXES\CSVtoXESDir.jar");
       var startInfo = new ProcessStartInfo
       {
-        WindowStyle = ProcessWindowStyle.Maximized,
+        WindowStyle = ProcessWindowStyle.Hidden,
         UseShellExecute = false,
         FileName = _csvToXesBat,
         Arguments = $"\"{_javaExe}\" \"{jarFile}\" \"{_baseCsvFileDirectory}\" \"{_baseXesFileDirectory}\"",
@@ -654,7 +649,7 @@ namespace WorkflowEventLogFixer
         FileName = _pythonExe,
         Arguments = $"\"{scriptFile}\" \"{csvDirectory}\" \"{windowSize}\" \"{minCount}\" \"{epochs}\"",
         UseShellExecute = false,
-        WindowStyle = ProcessWindowStyle.Maximized
+        WindowStyle = ProcessWindowStyle.Hidden
       };
       var process = Process.Start(start);
       process.WaitForExit();
@@ -737,7 +732,6 @@ namespace WorkflowEventLogFixer
       }
     }
 
-
     private static void UpdatePathsInMinePTQualityScript(string scriptFile, string xesDirectoryPath, string ptmlDirectoryPath)
     {
       // new path lines in script
@@ -777,55 +771,50 @@ namespace WorkflowEventLogFixer
       }
     }
 
-
-
     public static string GetPythonExe()
     {
       return _pythonExe;
     }
 
-    public static List<string> GetSimilarTerms(string scriptPath, string modelpath, string currentTerm)
+    public static List<string> GetSimilarTerms(string modelpath, string currentTerm)
     {
-      ProcessStartInfo start = new ProcessStartInfo
+      var scriptPath = Path.Combine(GetToolBasePath(), @"WorkflowPatternFinder\WorkflowPatternFinder\Gensim\TermSimilarityQuery.py");
+
+      var process = new Process
       {
-        FileName = _pythonExe,
-        Arguments = $"\"{scriptPath}\" \"{modelpath}\" \"{currentTerm}\"",
-        UseShellExecute = false,
-        WindowStyle = ProcessWindowStyle.Maximized,
-        RedirectStandardOutput = true
-      };
-      //cmd is full path to python.exe
-      //args is path to .py file and any cmd line args
-      using(var process = Process.Start(start))
-      {
-        using(StreamReader reader = process?.StandardOutput)
+        StartInfo =
         {
-          var output = reader?.ReadToEnd().Replace("\r\n", "|").Split('|').ToList();
-          return output;
-        }
-      }
+          FileName = _pythonExe,
+          CreateNoWindow = true,
+          Arguments = $"\"{scriptPath}\" \"{modelpath}\" \"{currentTerm}\"",
+          UseShellExecute = false,
+          WindowStyle = ProcessWindowStyle.Hidden,
+          RedirectStandardOutput = true,
+          }
+      };
+      process.Start();
+      var output = process.StandardOutput.ReadToEnd().Replace("\r\n", "|").Split('|').ToList();
+      return output;
     }
 
     public static List<string> GetSentences(string scriptPath, string modelpath, string currentTerm)
     {
-      ProcessStartInfo start = new ProcessStartInfo
+      var process = new Process
       {
-        FileName = _pythonExe,
-        Arguments = $"\"{scriptPath}\" \"{modelpath}\" \"{currentTerm}\"",
-        UseShellExecute = false,
-        WindowStyle = ProcessWindowStyle.Maximized,
-        RedirectStandardOutput = true
-      };
-      //cmd is full path to python.exe
-      //args is path to .py file and any cmd line args
-      using(var process = Process.Start(start))
-      {
-        using(StreamReader reader = process?.StandardOutput)
+        StartInfo =
         {
-          var output = reader?.ReadToEnd().Replace("\r\n", "|").Split('|').ToList();
-          return output;
+          FileName = _pythonExe,
+          Arguments = $"\"{scriptPath}\" \"{modelpath}\" \"{currentTerm}\"",
+          UseShellExecute = false,
+          CreateNoWindow = true,
+          WindowStyle = ProcessWindowStyle.Hidden,
+          RedirectStandardOutput = true
         }
-      }
+      };
+
+      process.Start();
+        var output = process.StandardOutput.ReadToEnd().Replace("\r\n", "|").Split('|').ToList();
+        return output;
     }
   }
 }

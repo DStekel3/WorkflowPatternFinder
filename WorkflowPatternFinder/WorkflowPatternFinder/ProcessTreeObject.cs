@@ -17,10 +17,17 @@ namespace WorkflowPatternFinder
 
     public ProcessTreeObject(string filePath)
     {
-      TreePath = filePath;
-      DatabaseName = Path.GetFileNameWithoutExtension(filePath)?.Split('-')[0];
-      WorkflowName = GetWorkflowName(filePath);
-      TreeSummary = $"{DatabaseName}-{WorkflowName}";
+      if (File.Exists(filePath))
+      {
+        TreePath = filePath;
+        DatabaseName = Path.GetFileNameWithoutExtension(filePath)?.Split('-')[0];
+        WorkflowName = GetWorkflowName(filePath);
+        TreeSummary = $"{DatabaseName}-{WorkflowName}";
+      }
+      else
+      {
+        throw new Exception("incorrect file path given.");
+      }
     }
 
     public string GetWorkflowName(string filePath)

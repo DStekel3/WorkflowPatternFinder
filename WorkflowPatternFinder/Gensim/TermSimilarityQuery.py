@@ -22,7 +22,7 @@ if len(args) == 3:
   myTerm = args[2]
   query = Query()
   # query.LoadModel(modelpath)
-  query.LoadBinModel()
+  query.LoadBinModel(modelpath)
   similarTerms = query.GetMostSimilarTerms(myTerm)
 
   parser = XmlParser()
@@ -35,4 +35,7 @@ if len(args) == 3:
   for synonym in synonyms:
     print(synonym+":1")
   for term in similarTerms:
-    print(str(term[0])+":"+str(term[1]))
+    try:
+      print(str(term[0])+":"+str(term[1]))
+    except:
+      {}

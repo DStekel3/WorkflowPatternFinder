@@ -80,6 +80,8 @@ class Query(object):
                       score = 0
                   elif treeWord in self._model.wv.vocab and patternWord in self._model.wv.vocab:
                       score = self._model.wv.similarity(patternWord, treeWord)
+                  if score > 1:
+                      score = 1
                   if score > result[0]:
                       # print('found (' + str(score) + "," + treeWord + ')')
                       result = (score, treeWord)
