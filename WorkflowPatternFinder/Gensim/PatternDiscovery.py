@@ -21,7 +21,7 @@ class PatternDiscovery(object):
   def LoadWord2VecModel(self):
     if self._word2VecTrainedModelPath is not None:
       self._query = Query()
-      self._query.LoadBinModel()
+      self._query.LoadBinModel(self._word2VecTrainedModelPath)
     else:
       raise ValueError('The path to model is not set yet.')
 

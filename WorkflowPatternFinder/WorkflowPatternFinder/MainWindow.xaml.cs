@@ -262,10 +262,10 @@ namespace WorkflowPatternFinder
                 //_validOutputCache.Add($"{newPattern.DatabaseName}", newPattern.Score);
                 Debug.WriteLine($"{treePath} is a subtree!");
               }
-            }
             else
             {
               throw new Exception("Incorrect file path given!");
+            }
             }
           }
           Debug.WriteLine($"The process took {timer.Elapsed.Seconds} seconds!");
