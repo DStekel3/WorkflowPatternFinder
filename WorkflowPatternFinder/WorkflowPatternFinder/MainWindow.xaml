@@ -120,7 +120,7 @@
             </ListView.Effect>
             <ListView.View>
               <GridView>
-                <GridViewColumn Header="Patterns" DisplayMemberBinding="{Binding TreeSummary}" Width="560"/>
+                <GridViewColumn Header="Pattern found in" DisplayMemberBinding="{Binding TreeSummary}" Width="560"/>
                 <GridViewColumn Header="Similarity Score" DisplayMemberBinding="{Binding SimilarityScore}" Width="240"/>
               </GridView>
             </ListView.View>

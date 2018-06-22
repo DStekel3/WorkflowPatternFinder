@@ -7,6 +7,7 @@ using System.Reflection;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
+using IronPython.Modules;
 using OfficeOpenXml;
 
 namespace WorkflowEventLogFixer
@@ -51,12 +52,17 @@ namespace WorkflowEventLogFixer
 
     public static string GetToolBasePath()
     {
-      return ConfigurationManager.AppSettings["toolBasePath"];
+      return ConfigurationManager.AppSettings["ToolBasePath"];
     }
 
     public static string GetDatasetBasePath()
     {
       return ConfigurationManager.AppSettings["DatasetBasePath"];
+    }
+
+    public static string GetWord2VecBasePath()
+    {
+      return Path.Combine(GetToolBasePath(), @"WorkflowPatternFinder\WorkflowPatternFinder\Gensim\datasets\");
     }
 
     public static void PreProcessingPhase(string importDir, string promScript, string noiseThreshold)
