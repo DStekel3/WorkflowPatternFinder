@@ -170,7 +170,7 @@ namespace WorkflowPatternFinder
       }
       else
       {
-        _modelPathCache = Path.Combine(Program.GetDatasetBasePath(), @"wikipedia-160.bin");
+        _modelPathCache = Path.Combine(Program.GetWord2VecBasePath(), @"wikipedia-160.bin");
         ModelPathLabel.Content = _modelPathCache;
       }
       _scriptPathCache = Path.Combine(Program.GetToolBasePath(), @"WorkflowPatternFinder\WorkflowPatternFinder\Gensim\Gensim.py");
@@ -736,7 +736,7 @@ namespace WorkflowPatternFinder
       }
       else
       {
-        ofd.FileName = Path.Combine(Program.GetDatasetBasePath(), @"wikipedia-160.bin");
+        ofd.FileName = Path.Combine(Program.GetWord2VecBasePath(), @"wikipedia-160.bin");
       }
       DialogResult result = ofd.ShowDialog();
       if(result == System.Windows.Forms.DialogResult.OK)
