@@ -38,7 +38,6 @@ namespace WorkflowPatternFinder
     private string _missingScriptFile = "Missing ProM scripts!";
     private List<PatternObject> _foundPatterns = new List<PatternObject>();
     private Window tFinder;
-    private string savedStateFile = "SavedState.txt";
 
     public MainWindow()
     {
@@ -382,7 +381,8 @@ namespace WorkflowPatternFinder
 
     private void StartPreprocessingTask(Func<Task> task, Action completedTask = null)
     {
-      ConsoleLabel.Content = "Busy...";
+      ProcessTreeView.Items.Clear();
+      ConsoleLabel.Content = "Processing...";
       PreProgress.IsIndeterminate = true;
 
       var scheduler = TaskScheduler.FromCurrentSynchronizationContext();
