@@ -70,15 +70,15 @@ An example is given below, and is called the 'Approval' pattern ('accordeer patr
 <ptml>
 <processTree id="1488d49a-26a2-48a2-bf03-04abe8a6b317" name="test" root="f5e48d37-e0d4-4d12-92b7-4876e19c6ef3">
 <xor id="f5e48d37-e0d4-4d12-92b7-4876e19c6ef3" name=""/>
+<manualTask id="aee0310f-4f87-429c-abd4-b416e4ed24a3" name="goedkeuren"/>
 <manualTask id="fee0310f-4f87-429c-abd4-b416e4ed24a3" name="afkeuren"/>
-  <manualTask id="aee0310f-4f87-429c-abd4-b416e4ed24a3" name="goedkeuren"/>
 <parentsNode id="adf11c87-1cc1-46da-8590-a38296b0c2f7" sourceId="f5e48d37-e0d4-4d12-92b7-4876e19c6ef3" targetId="fee0310f-4f87-429c-abd4-b416e4ed24a3"/>
 <parentsNode id="aef11c87-1cc1-46da-8590-a38296b0c2f7" sourceId="f5e48d37-e0d4-4d12-92b7-4876e19c6ef3" targetId="aee0310f-4f87-429c-abd4-b416e4ed24a3"/>
 </processTree>
 </ptml>
 ```
 
-The ```<ptml>``` element consists of a ```<processTree>``` element, a set of nodes and a set of ```<parentsNode>```. Node that all elements have an ```id``` property. 
+The ```<ptml>``` element consists of a ```<processTree>``` element, a set of nodes and a set of ```<parentsNode>```. Node that all elements have an ```id``` property and must have a GUID as value. 
 1. ```<processTree>``` needs a ```root``` property, with the ```id``` value of the root node.
 2. The set of nodes consists of ```xor, sequence, and, xorLoop, sequenceLoop, andLoop``` and ```manualTask``` elements. Each element needs an ```id``` property and a ```name``` property. However, the value of ```name``` is only relevant for ```manualTask``` elements.
 3. At last, you need to define the parent-child relationships between the given nodes. Use ```<parentsNode id='' sourceId='' targetId=''/>```. ```sourceId``` refers to the parent node and ```targetId``` refers to the child node. 
