@@ -63,7 +63,9 @@ The program basically consists of three tabs.
 
 <h1>Creating Patterns</h1>
 For process tree patterns, you need to define a process tree yourself. 
-An example is given below, and is called the 'Approval' pattern ('accordeer patroon' in dutch). Finally, save it as a .ptml file. 
+An example is given below, and is called the 'Approval' pattern ('accordeer patroon' in dutch). 
+
+![figure_accordeerpatroon](https://github.com/DStekel3/WorkflowPatternFinder/blob/master/accordeerpatroon.png)
 
 ```xml
 <?xml version="1.0" encoding="ISO-8859-1"?>
@@ -83,7 +85,7 @@ The ```<ptml>``` element consists of a ```<processTree>``` element, a set of nod
 2. The set of nodes consists of ```xor, sequence, and, xorLoop, sequenceLoop, andLoop``` and ```manualTask``` elements. Each element needs an ```id``` property and a ```name``` property. However, the value of ```name``` is only relevant for ```manualTask``` elements.
 3. At last, you need to define the parent-child relationships between the given nodes. Use ```<parentsNode id='' sourceId='' targetId=''/>```. ```sourceId``` refers to the parent node and ```targetId``` refers to the child node. 
 
-
+Finally, save it as a .ptml file.
 
 <h1>References:</h1>
 
