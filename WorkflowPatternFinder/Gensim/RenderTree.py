@@ -29,7 +29,7 @@ if len(sys.argv) == 4:
   myGraph = Digraph()
   root = tree.GetRoot()
   nodelist = [root]
-  number = 0
+  number = 1
   while any(nodelist):
     currentNode = nodelist.pop(0)
     print('get event: ',currentNode.GetEvent())

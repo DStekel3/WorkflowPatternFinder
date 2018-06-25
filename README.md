@@ -23,3 +23,71 @@ Requirements:
     4. graphviz       (pip install graphviz)
     5. BeautifulSoup4 (pip install bs4)
 - Java JDK 8 or higher (http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html)
+
+<h1>User Manual</h1>
+The program basically consists of three tabs. 
+
+<h3>The first tab is used for the pre-processing phase.</h3>
+
+![Picture of Tab1](https://github.com/DStekel3/WorkflowPatternFinder/blob/master/Tab1_EDIT.png)
+1. Select the directory which contains .xlsx files.
+2. Select the directory where ProM is installed.
+3. Specify a noise threshold (range: 0-1) for the Inductive Miner infrequent algorithm. This algorithm converts your data into process trees. This threshold is used for filtering out infrequent workflow events. For instance, if your threshold is 0.2, then the events that occur in less than 20% of the workflow traces will be removed.
+4. When the previous actions are completed, you can start the pre-processing phase here.
+5. Resulting process trees are shown in this table. Whenever the program already finds process trees after you execute step 1, this table also gets updated.
+6. If you want to run the Inductive Miner again, use this button. This skips a lot of other pre-processing functions.
+
+<h3>The second tab is for finding a pattern in your processed process trees.</h3>
+
+![Picture of Tab2](https://github.com/DStekel3/WorkflowPatternFinder/blob/master/Tab2_EDIT.png)
+1. Select a directory which contains process trees (.ptml files). This directory can be found within the (.xlsx) directory you have selected during the pre-processing phase.
+2. Select a process tree file (.ptml) which you want to use as workflow pattern. Example patterns are given [here](https://github.com/DStekel3/WorkflowPatternFinder/tree/master/WorkflowPatternFinder/WorkflowPatternFinder/Example%20Patterns).
+3. Set a checkmark here if you want to search for induced matches only, otherwise leave it open to search for subsumed matches.
+4. Set a checkmark here if you want to retrieve possibly multiple matches within a tree, otherwise leave it open to return after one match is found.
+5. Set a similarity threshold (range: 0-1), used to determine whether terms match or not.
+6. Select a similarity variant. The max variant only considers the best match between terms, whereas the average variant considers the average over all matches between terms. 
+7. When the previous steps are completed, you can start searching for your given pattern (see step 2) in the given set of process trees  (see step 3).
+8. Found matches are shown in this table.
+
+
+<h3>The third tab is the place where you can experiment with word2vec models.</h3>
+
+![Picture of Tab3](https://github.com/DStekel3/WorkflowPatternFinder/blob/master/Tab3_EDIT.png)
+
+1. Select a word2vec model (.bin file). These models should be put in the "datasets" directory [here](https://github.com/DStekel3/WorkflowPatternFinder/tree/master/WorkflowPatternFinder/Gensim/datasets). Because of their large size, I have not included the actual files in this repository.
+2. You can plot the selected model here.
+3. Type a word in this textbox...
+4. ... and press this button to get the most similar terms, given by the word2vec model but also by [mijnwoordenboek.nl/synoniemen](http://www.mijnwoordenboek.nl/synoniem.php).
+5. The result gets displayed here.
+
+
+<h1>Creating Patterns</h1>
+For process tree patterns, you need to define a process tree yourself. 
+An example is given below, and is called the 'Approval' pattern ('accordeer patroon' in dutch). 
+
+![figure_accordeerpatroon](https://github.com/DStekel3/WorkflowPatternFinder/blob/master/accordeerpatroon.png)
+
+```xml
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<ptml>
+<processTree id="1488d49a-26a2-48a2-bf03-04abe8a6b317" name="test" root="f5e48d37-e0d4-4d12-92b7-4876e19c6ef3">
+<xor id="f5e48d37-e0d4-4d12-92b7-4876e19c6ef3" name=""/>
+<manualTask id="fee0310f-4f87-429c-abd4-b416e4ed24a3" name="afkeuren"/>
+<manualTask id="aee0310f-4f87-429c-abd4-b416e4ed24a3" name="goedkeuren"/>
+<parentsNode id="adf11c87-1cc1-46da-8590-a38296b0c2f7" sourceId="f5e48d37-e0d4-4d12-92b7-4876e19c6ef3" targetId="fee0310f-4f87-429c-abd4-b416e4ed24a3"/>
+<parentsNode id="aef11c87-1cc1-46da-8590-a38296b0c2f7" sourceId="f5e48d37-e0d4-4d12-92b7-4876e19c6ef3" targetId="aee0310f-4f87-429c-abd4-b416e4ed24a3"/>
+</processTree>
+</ptml>
+```
+
+The ```<ptml>``` element consists of a ```<processTree>``` element, a set of nodes and a set of ```<parentsNode>```. Node that all elements have an ```id``` property and must have a GUID as value. 
+1. ```<processTree>``` needs a ```root``` property, with the ```id``` value of the root node.
+2. The set of nodes consists of ```xor, sequence, and, xorLoop, sequenceLoop, andLoop``` and ```manualTask``` elements. Each element needs an ```id``` property and a ```name``` property. However, the value of ```name``` is only relevant for ```manualTask``` elements.
+3. At last, you need to define the parent-child relationships between the given nodes. Use ```<parentsNode id='' sourceId='' targetId=''/>```. ```sourceId``` refers to the parent node and ```targetId``` refers to the child node. 
+
+Finally, save it as a .ptml file.
+
+<h1>References:</h1>
+
+1. [Dutch word embeddings datasets](https://github.com/clips/dutchembeddings).
+More will follow....
