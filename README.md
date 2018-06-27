@@ -29,7 +29,7 @@ The program basically consists of three tabs.
 
 Some files can be viewed in Notepad or a PDF viewer. A field where such actions are enabled contains the following codes:
 - <b>(PDF)</b> : Opens process tree in a PDF viewer when <b>double left-click</b> on process tree.
-- <b>(N)</b>   :   Opens file in Notepad(++) when <b>double right-click</b> file path.
+- <b>(N)</b>   :   Opens file in Notepad(++) when <b>double right-click</b> file path or process tree.
 - <b>(D)</b>   :   Opens directory in system explorer when <b>double left-click</b> on directory path.
 
 <h3>The first tab is used for the pre-processing phase.</h3>
