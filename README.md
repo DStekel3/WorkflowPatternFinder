@@ -17,11 +17,11 @@ In short, The Workflow PatternFinder applies the following steps:
 Requirements:
 - ProM (http://www.promtools.org/doku.php). Be sure to install all packages needed for the Inductive Miner.
 - Python 3.4 or higher (https://www.python.org/downloads/) with the following modules:
-    1. gensim         (pip install gensim)
-    2. nltk           (pip install nltk)
-    3. enums          (pip install enums)
-    4. graphviz       (pip install graphviz)
-    5. BeautifulSoup4 (pip install bs4)
+    1. gensim         (```pip install gensim```)
+    2. nltk           (```pip install nltk```)
+    3. enums          (```pip install enums```)
+    4. graphviz       (```pip install graphviz```)
+    5. BeautifulSoup4 (```pip install bs4```)
 - Java JDK 8 or higher (http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html)
 
 <h1>User Manual</h1>
