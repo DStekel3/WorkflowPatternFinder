@@ -22,7 +22,14 @@ namespace WorkflowPatternFinder
         TreePath = filePath;
         DatabaseName = Path.GetFileNameWithoutExtension(filePath)?.Split('-')[0];
         WorkflowName = GetWorkflowName(filePath);
-        TreeSummary = $"{DatabaseName}-{WorkflowName}";
+        if (WorkflowName != null)
+        {
+          TreeSummary = $"{DatabaseName}-{WorkflowName}";
+        }
+        else
+        {
+          TreeSummary = DatabaseName;
+        }
       }
       else
       {
@@ -42,7 +49,7 @@ namespace WorkflowPatternFinder
       }
       catch
       {
-        return Guid.NewGuid().ToString();
+        return null;
       }
     }
   }
