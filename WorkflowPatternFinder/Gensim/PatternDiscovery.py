@@ -15,7 +15,7 @@ class PatternDiscovery(object):
   _word2VecTrainedModelPath = None
   _query = None
   _dict = []
-  _orderedTypes = ["sequence", "xorLoop", "sequenceLoop", "andLoop"]
+  _orderedTypes = ["Sequence", "XorLoop", "SequenceLoop", "AndLoop"]
   _similarityVariant = "max"
 
   def LoadWord2VecModel(self):
@@ -23,7 +23,9 @@ class PatternDiscovery(object):
       self._query = Query()
       self._query.LoadBinModel(self._word2VecTrainedModelPath)
     else:
-      raise ValueError('The path to model is not set yet.')
+      self._word2VecTrainedModelPath = r'C:\Users\dst\Source\Repos\WorkflowPatternFinder\WorkflowPatternFinder\Gensim\datasets\wikipedia-160.bin'
+      # raise ValueError('The path to model is not set yet.')
+      self.LoadWord2VecModel()
 
   def GetValidSubTrees(self, T, P, isInduced=False):
       self._dict = []
@@ -78,7 +80,6 @@ class PatternDiscovery(object):
           result = self.GetSubsumedMatch(t, p)
         if result[0]:
           selection = []
-          print(result)
           for selectedNode in [i[0] for i in result[1]]:
             selection.append(T.GetNode(selectedNode).GetNumber())
           return result
@@ -111,28 +112,30 @@ class PatternDiscovery(object):
             return ans
     return (False, [])
 
-  def GetSubsumedMatch(self, t, p):
+  def GetSubsumedMatch(self, t, p, allMatches=[]):
     # search for a node similar as pNode
     if p.GetType() in self._orderedTypes:
-      return self.GetSubsumedMatchOrdered(t, p)
+      return self.GetSubsumedMatchOrdered(t, p, allMatches)
     else:
-      return self.GetSubsumedMatchUnordered(t, p)
+      return self.GetSubsumedMatchUnordered(t, p, allMatches)
     return (False, [])
 
-  def GetInducedMatch(self, t, p):
+  def GetInducedMatch(self, t, p, allMatches = []):
     # search for a node similar as pNode
     if p.GetType() in self._orderedTypes:
-      return self.GetInducedMatchOrdered(t, p)
+      return self.GetInducedMatchOrdered(t, p, allMatches)
     else:
-      return self.GetInducedMatchUnordered(t, p)
+      return self.GetInducedMatchUnordered(t, p, allMatches)
     return (False, [])
 
-  def GetSubsumedMatchOrdered(self, t, p):
+  def GetSubsumedMatchOrdered(self, t, p, allMatches=[]):
     rootMatch = self.AreSimilar(t,p)
     rootScore = rootMatch[1]
     if rootMatch[0]:
+      pChildren = p.GetChildren()
+      tChildren = t.GetChildren()
       # first try to find an induced match
-      match = self.GetInducedMatchOrdered(t,p)
+      match = self.GetInducedMatchOrdered(t,p, allMatches)
       if match[0]:
         return match
 
@@ -145,33 +148,37 @@ class PatternDiscovery(object):
       #      if match[0]:
       #        matches.extend(match[1])
       #        break
+      startIndex = 0
       for pc in pChildren:
           bestMatch = (None, 0.0)
           for tc in tChildren[startIndex:len(tChildren) - (len(pChildren) - pChildren.index(pc) - 1)]:
-              if tc.GetId() not in [i[0] for i in matches]:
-                      match = self.GetSubsumedMatch(tc,pc)
+              if tc.GetId() not in [i[0] for i in (allMatches + matches)]:
+                      match = self.GetSubsumedMatch(tc,pc, allMatches + matches)
                       if(match[0]):
                           rootScore = match[1][0][2]
                           bestMatch = (match[1], rootScore)
           if bestMatch[0] != None:
               matches.extend(bestMatch[0])
+              if tc.GetId() in [i[0] for i in matches]:
+                startIndex = tChildren.index(tc)
 
       if len(matches) == p.GetSubtreeSize():
         return (True, matches)
 
     if not p.IsRoot():
         for tc in t.GetChildren():
-            match = self.GetSubsumedMatchOrdered(tc,p)
-            if match[0]:
-              return match
+            if tc.GetId() not in [i[0] for i in allMatches]:
+              match = self.GetSubsumedMatchOrdered(tc,p, allMatches)
+              if match[0]:
+                return match
     return (False, [])
 
-  def GetSubsumedMatchUnordered(self, t, p):
+  def GetSubsumedMatchUnordered(self, t, p, allMatches):
     rootMatch = self.AreSimilar(t,p)
     rootScore = rootMatch[1]
     if rootMatch[0]:
       # first try to find an induced match
-      match = self.GetInducedMatchUnordered(t,p)
+      match = self.GetInducedMatchUnordered(t,p, allMatches)
       if match[0]:
         return match
 
@@ -179,8 +186,8 @@ class PatternDiscovery(object):
       for pc in p.GetChildren():
         bestMatch = (None, 0.0)
         for tc in t.GetChildren():
-              if tc.GetId() not in [i[0] for i in matches]:
-                      match = self.GetSubsumedMatch(tc,pc)
+              if tc.GetId() not in [i[0] for i in (allMatches + matches)]:
+                      match = self.GetSubsumedMatch(tc,pc, allMatches + matches)
                       if(match[0]):
                           bestMatch = (match[1], match[1][0][2])
                           print('best match:', bestMatch)
@@ -191,12 +198,13 @@ class PatternDiscovery(object):
 
     if not p.IsRoot():
         for tc in t.GetChildren():
-            match = self.GetSubsumedMatchUnordered(tc,p)
-            if match[0]:
-              return match
+            if tc.GetId() not in [i[0] for i in allMatches]:
+              match = self.GetSubsumedMatchUnordered(tc,p, allMatches)
+              if match[0]:
+                return match
     return (False, [])
 
-  def GetInducedMatchOrdered(self, t, p):
+  def GetInducedMatchOrdered(self, t, p, allMatches):
     # check whether the given nodes are similar
     equal = self.AreSimilar(t, p)
     rootScore = equal[1]
@@ -218,7 +226,7 @@ class PatternDiscovery(object):
       for pc in pChildren:
           bestMatch = (None, 0.0)
           for tc in tChildren[startIndex:len(tChildren) - (len(pChildren) - pChildren.index(pc) - 1)]:
-              if tc.GetId() not in [i[0] for i in matches]:
+              if tc.GetId() not in [i[0] for i in (allMatches + matches)]:
                   score = self.AreSimilar(tc, pc)
                   if(score[0] and score[1] > bestMatch[1]):
                       match = self.GetInducedMatch(tc,pc)
@@ -226,13 +234,12 @@ class PatternDiscovery(object):
                           bestMatch = (match[1], score[1])
           if bestMatch[0] != None:
               matches.extend(bestMatch[0])
+              startIndex = tChildren.index(tc) + 1
       if len(matches) == p.GetSubtreeSize():
             return (True, matches)
-
-      
     return (False, [])
 
-  def GetInducedMatchUnordered(self, t, p):
+  def GetInducedMatchUnordered(self, t, p, allMatches):
     # check whether the given nodes are similar
     equal = self.AreSimilar(t, p)
     rootScore = equal[1]
@@ -245,10 +252,10 @@ class PatternDiscovery(object):
       for pc in pChildren:
           bestMatch = (None, 0.0)
           for tc in tChildren:
-              if tc.GetId() not in [i[0] for i in matches]:
+              if tc.GetId() not in [i[0] for i in allMatches + matches]:
                   score = self.AreSimilar(tc, pc)
                   if(score[0] and score[1] > bestMatch[1]):
-                      match = self.GetInducedMatch(tc,pc)
+                      match = self.GetInducedMatch(tc,pc, allMatches)
                       if(match[0]):
                           bestMatch = (match[1], score[1])
           if bestMatch[0] != None:

@@ -14,6 +14,7 @@ from nltk.stem.snowball import SnowballStemmer
 from gensim.parsing.preprocessing import strip_short, strip_numeric, strip_punctuation
 import time
 import pickle
+import spacy
 
 class Query(object):
     
@@ -37,8 +38,9 @@ class Query(object):
         #    f = open('tagger.pckl', 'wb')
         #    pickle.dump(self._tagger, f)
         #    f.close()
-        
-        print((time.time()-curTime))
+
+        # spaCy tokenizer, tagger
+        self._tagger = spacy.load('nl')         
         self._stemmer = SnowballStemmer("dutch")
 
     def LoadModel(self, path_to_model):
@@ -46,7 +48,7 @@ class Query(object):
         self._model = Doc2Vec.load(path_to_model, mmap=None)
         # print('loaded model')
 
-    def LoadBinModel(self, path_to_model = r"C:\Users\dst\Source\Repos\WorkflowPatternFinder\WorkflowPatternFinder\Gensim\datasets\wikipedia-160.bin"):
+    def LoadBinModel(self, path_to_model=r"C:\Users\dst\Source\Repos\WorkflowPatternFinder\WorkflowPatternFinder\Gensim\datasets\wikipedia-160.bin"):
         self._model = KeyedVectors.load(path_to_model, mmap='r')
 
     def FindSynonyms(self, word):
@@ -57,11 +59,61 @@ class Query(object):
         antonyms = self._xmlParser.WoordenboekGetAntonyms(word)
         self._antonyms[word] = antonyms
 
+    def WordsHaveSameType(self, patternWord, treeWord):
+        pTag = self._tagger(patternWord)
+        tTag = self._tagger(treeWord)
+        if [(w.text, w.pos_) for w in pTag][0][1] == [(w.text, w.pos_) for w in tTag][0][1]:
+          return True
+        return False
+
+    def WordsHaveSameStem(self, patternWord, treeWord):
+        patternStem = self._stemmer.stem(patternWord)
+        treeStem = self._stemmer.stem(treeWord)
+
+        if patternStem == treeStem:
+          return True
+        return False
+
     def GetSentenceSimilarityMaxVariant(self, treeSentence, patternSentence):
         if self._model is None:
             raise ValueError('The model is not loaded yet.')
         result = (0.0, '')
-        filteredPatternSentence = strip_numeric(strip_punctuation(patternSentence.lower())).split();        
+        filteredPatternSentence = strip_numeric(strip_punctuation(patternSentence.lower())).split()        
+        filteredTreeSentence = strip_numeric(strip_punctuation(treeSentence.lower())).split()
+
+        for patternWord in filteredPatternSentence:
+            if patternWord not in self._synonyms:
+                self.FindSynonyms(patternWord)
+            if patternWord not in self._antonyms:
+                self.FindAntonyms(patternWord)
+            synonyms = self._synonyms[patternWord]
+            antonyms = self._antonyms[patternWord]
+            for treeWord in filteredTreeSentence:
+                  score = -1
+                  # uncomment line to add lemmatization check! (Matching on verbs/nouns etc. only)
+                  #if self.WordsHaveSameType(patternWord, treeWord):
+                  if self.WordsHaveSameStem(patternWord, treeWord):
+                    score = 1
+                  elif treeWord in synonyms:
+                      score = 1
+                  elif treeWord in antonyms:
+                      score = 0
+                  elif treeWord in self._model.wv.vocab and patternWord in self._model.wv.vocab:
+                      score = self._model.wv.similarity(patternWord, treeWord)
+                  if score > 1:
+                      score = 1
+                  if score > result[0]:
+                      # print('found (' + str(score) + "," + treeWord + ')')
+                      result = (score, treeWord)
+        # print('returning: ' +str(result))
+        return result
+
+    def GetSentenceSimilarityAllAverageVariant(self, treeSentence, patternSentence):
+        if self._model is None:
+            raise ValueError('The model is not loaded yet.')
+
+        result = (0.0, '')
+        filteredPatternSentence = strip_numeric(strip_punctuation(patternSentence.lower())).split()        
         filteredTreeSentence = strip_numeric(strip_punctuation(treeSentence.lower())).split()
 
         for patternWord in filteredPatternSentence:
@@ -88,15 +140,6 @@ class Query(object):
         # print('returning: ' +str(result))
         return result
 
-    def WordsHaveSameType(self, patternWord, treeWord):
-        patternStem = self._stemmer.stem(patternWord)
-        treeStem = self._stemmer.stem(treeWord)
-
-        if patternStem == treeStem:
-          return True
-
-        return True
-
     def GetSentenceSimilarityAverageVariant(self, treeSentence, patternSentence):
         if self._model is None:
             raise ValueError('The model is not loaded yet.')
@@ -113,7 +156,7 @@ class Query(object):
                     # print('found (' + str(score) + "," + treeWord + ')')
         # print('returning: ' +str(result))
         if len(scores) > 0:
-          result = (sum(scores)/float(len(scores)), bestWord)
+          result = (sum(scores) / float(len(scores)), bestWord)
         return result
 
     def GetMostSimilarTerms(self, term):

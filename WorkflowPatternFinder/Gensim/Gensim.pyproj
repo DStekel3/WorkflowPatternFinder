@@ -4,7 +4,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>44ea4a09-4254-4601-acb2-be3e847d45c4</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>DataSetConverter.py</StartupFile>
+    <StartupFile>PatternDiscoveryScript.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
@@ -12,7 +12,7 @@
     <Name>Gensim</Name>
     <RootNamespace>Gensim</RootNamespace>
     <IsWindowsApplication>False</IsWindowsApplication>
-    <InterpreterId>Global|PythonCore|3.6</InterpreterId>
+    <InterpreterId>Global|PythonCore|3.4</InterpreterId>
     <LaunchProvider>Standard Python launcher</LaunchProvider>
     <CommandLineArguments>"C:\Thesis\Profit analyses\04-04-2018\trained.gz" "goedkeuren"</CommandLineArguments>
     <EnableNativeCodeDebugging>False</EnableNativeCodeDebugging>
@@ -31,6 +31,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Gensim.py" />
+    <Compile Include="QueryTester.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="SynoniemenDotNet.py">
       <SubType>Code</SubType>
     </Compile>
@@ -73,7 +76,7 @@
     <Compile Include="TrainWord2VecModel.py" />
   </ItemGroup>
   <ItemGroup>
-    <InterpreterReference Include="Global|PythonCore|3.6" />
+    <InterpreterReference Include="Global|PythonCore|3.4" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
   <!-- Uncomment the CoreCompile target to enable the Build command in
