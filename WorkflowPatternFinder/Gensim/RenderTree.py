@@ -12,12 +12,13 @@ from SubTreeFinder import *
 from os import listdir
 from os.path import isfile, join
 
+
 if len(sys.argv) == 4:
   tree = ProcessTreeLoader.LoadTree(sys.argv[1])
   patternMembers = []
   if any(sys.argv[2]):
     patternMembers = sys.argv[2].split(',')
-  print('pattern members: ',patternMembers)
+  # print('pattern members: ',patternMembers)
   
   patternIds = {}
   for pattern in patternMembers:
@@ -32,13 +33,13 @@ if len(sys.argv) == 4:
   number = 1
   while any(nodelist):
     currentNode = nodelist.pop(0)
-    print('get event: ',currentNode.GetEvent())
+    # print('get event: ',currentNode.GetEvent())
     myColor = 'black'
     nodeLabel = currentNode.GetEvent()
     if currentNode.GetId() in patternIds.keys():
       myColor = 'red'
       specialWord = patternIds[currentNode.GetId()]
-      print('special word: ' + specialWord)
+      # print('special word: ' + specialWord)
       if(specialWord != ""):
         pat = re.compile(specialWord, re.IGNORECASE)
         nodeLabel = "<" + pat.sub("<u>" + specialWord + "</u>", currentNode.GetEvent()).replace("\n", "<br/>") + ">"
@@ -50,7 +51,10 @@ if len(sys.argv) == 4:
       nodelist.append(child)
     number += 1
     
-  print(myGraph.source)
+  # try:
+      # print(myGraph.source)
+  # except:
+      # print("something went wrong when printing the graph to console.")
   myGraph.render(''.join(e for e in workflowName if e.isalnum()) + str(random.randint(1,100001)) + ".gv", view=True)
   
 exit

@@ -18,6 +18,7 @@ using DataFormats = System.Windows.Forms.DataFormats;
 using Timer = System.Windows.Forms.Timer;
 using IronPython.Runtime.Operations;
 using System.Globalization;
+using System.Threading;
 using WorkflowPatternFinder.Properties;
 
 namespace WorkflowPatternFinder
@@ -325,7 +326,7 @@ namespace WorkflowPatternFinder
         }
         if(e.ChangedButton == MouseButton.Left)
         {
-          RenderTreeInPython(selectedItem.TreePath, patternMembers, selectedItem.WorkflowName);
+          RenderTreeInPython(selectedItem.TreePath, patternMembers, selectedItem.TreeSummary);
         }
         else if(e.ChangedButton == MouseButton.Right)
         {
@@ -347,7 +348,7 @@ namespace WorkflowPatternFinder
       {
         if(e.ChangedButton == MouseButton.Left)
         {
-          RenderTreeInPython(selectedFile);
+          RenderTreeInPython(selectedFile, "", Path.GetFileNameWithoutExtension(selectedFile));
         }
         else if(e.ChangedButton == MouseButton.Right)
         {
@@ -778,24 +779,23 @@ namespace WorkflowPatternFinder
       }
     }
 
-    private void RenderTreeInPython(string filePath, string patternMembers = "", string workflowName = "")
+    private void RenderTreeInPython(string filePath, string patternMembers = "", string treeSummary = "")
     {
       var scriptPath = Path.Combine(Program.GetToolBasePath(), @"WorkflowPatternFinder\WorkflowPatternFinder\Gensim\RenderTree.py");
 
       ProcessStartInfo start = new ProcessStartInfo
       {
         FileName = Program.GetPythonExe(),
-        Arguments = $"\"{scriptPath}\" \"{filePath}\" \"{patternMembers}\" \"{workflowName}\"",
+        Arguments = $"\"{scriptPath}\" \"{filePath}\" \"{patternMembers}\" \"{treeSummary}\"",
         UseShellExecute = false,
-        RedirectStandardOutput = true
+        RedirectStandardOutput = true,
+        CreateNoWindow = true,
+        WindowStyle = ProcessWindowStyle.Hidden
       };
-      using(var process = Process.Start(start))
-      {
-        using(StreamReader reader = process?.StandardOutput)
-        {
-          Console.Write(reader.ReadToEnd());
-        }
-      }
+
+      ThreadStart ths = () => Process.Start(start);
+      Thread th = new Thread(ths);
+      th.Start();
 
       Activate();
     }
