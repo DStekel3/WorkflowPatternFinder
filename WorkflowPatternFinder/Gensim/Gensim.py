@@ -44,7 +44,8 @@ if len(sys.argv) == 8:
               print('\t found pattern in this tree.')
               validTrees.append((treePath, result[1]))
         else:
-          result = finder.GetValidSubTrees(tree, pattern, induced)
+          #result = finder.GetValidSubTrees(tree, pattern, induced)
+          result = finder.GetMatches(tree, pattern, induced)
           if any(result):
             validTrees.append((treePath, len(result)/pattern.GetTreeSize(), result))
           

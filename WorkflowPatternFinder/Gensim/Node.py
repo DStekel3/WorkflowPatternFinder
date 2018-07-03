@@ -12,7 +12,6 @@ class Node(object):
         self._children = [] 
         self._isVisited = False
         self._number = -1
-        self._treeSize = 1
 
         if name != None:
           self._name = self.EscapeCharacters(name)
@@ -87,7 +86,10 @@ class Node(object):
 
     def AddChild(self, child):
         self._children.append(child)
-        self._treeSize = self._treeSize + 1
+
+    def RemoveChild(self, child):
+        self._children.remove(child)
+    
 
     def SetRoot(self, isRoot):
         self._isRoot = isRoot
@@ -99,4 +101,12 @@ class Node(object):
         self._number = number
 
     def GetSubtreeSize(self):
-        return self._treeSize
+        return len(self.GetAllDescendants()) + 1
+
+    def GetAllDescendants(self):
+        descendants = []
+        for child in self.GetChildren():
+          descendants.append(child)
+          subnodes = child.GetAllDescendants()
+          descendants.extend(subnodes)
+        return descendants
