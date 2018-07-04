@@ -171,7 +171,9 @@ class Query(object):
         for word in terms:
           if word in self._model.wv.vocab:
             myWords.append(word)
-        similarTerms = self._model.wv.most_similar(positive=myWords, topn=300)
-        return similarTerms
+        if any(myWords):
+          similarTerms = self._model.wv.most_similar(positive=myWords, topn=300)
+          return similarTerms
+        return []
         
         
