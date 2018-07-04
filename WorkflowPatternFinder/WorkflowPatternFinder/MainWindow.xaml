@@ -80,22 +80,22 @@
               <DropShadowEffect Opacity="0.7" ShadowDepth="3"/>
             </Button.Effect>
           </Button>
-          <Label x:Name="ImportPatternLabel" Content="Pattern file..." HorizontalAlignment="Left" Margin="10,193,0,0" VerticalAlignment="Top" Width="667" MouseDoubleClick="ImportPatternLabel_DoubleClick" Grid.ColumnSpan="2" Background="#FFB6B6B6" Foreground="White" Height="42"/>
-          <Button x:Name="ImportPatternButton" Content="Select pattern file" HorizontalAlignment="Left" Margin="10,240,0,0" VerticalAlignment="Top" Width="270" Click="ImportPatternButton_Click" Height="38" Grid.ColumnSpan="2" Background="#FF818181" Foreground="White" Cursor="Hand">
+          <Label x:Name="ImportPatternLabel" Content="Pattern file..." HorizontalAlignment="Left" Margin="10,264,0,0" VerticalAlignment="Top" Width="667" MouseDoubleClick="ImportPatternLabel_DoubleClick" Grid.ColumnSpan="2" Background="#FFB6B6B6" Foreground="White" Height="42"/>
+          <Button x:Name="ImportPatternButton" Content="Select pattern file" HorizontalAlignment="Left" Margin="10,311,0,0" VerticalAlignment="Top" Width="270" Click="ImportPatternButton_Click" Height="38" Grid.ColumnSpan="2" Background="#FF818181" Foreground="White" Cursor="Hand">
             <Button.Effect>
               <DropShadowEffect Opacity="0.7" ShadowDepth="3"/>
             </Button.Effect>
           </Button>
-          <CheckBox x:Name="InducedCheckBox" Content="Treat as induced subtree" HorizontalAlignment="Left" Margin="10,316,0,0" VerticalAlignment="Top" Click="InducedCheckBox_Click" RenderTransformOrigin="0.493,3.452" Height="31" Width="287" Grid.ColumnSpan="2" Foreground="White" Cursor="Hand"/>
-          <CheckBox x:Name="CountCheckBox" Content="Count number of subtrees in model" HorizontalAlignment="Left" Margin="10,360,0,0" VerticalAlignment="Top" Click="CountCheckBox_Click" Grid.ColumnSpan="2" Foreground="White" Cursor="Hand" Height="31" Width="398"/>
-          <Label x:Name="SimThresholdLabel" Content="w2v Similarity Threshold:" HorizontalAlignment="Left" Margin="25,396,0,0" VerticalAlignment="Top" Foreground="White" Grid.ColumnSpan="2" Height="42" Width="272"/>
-          <TextBox x:Name="SimTresholdValue" HorizontalAlignment="Left" Height="42" Margin="187,396,0,0" TextWrapping="Wrap" Text="0.8" VerticalAlignment="Top" Width="110" FontSize="24" SpellCheck.IsEnabled="True" PreviewTextInput="CheckThresholdInput" RenderTransformOrigin="1.828,-0.713" Grid.Column="1">
+          <CheckBox x:Name="InducedCheckBox" Content="Treat as induced subtree" HorizontalAlignment="Left" Margin="10,369,0,0" VerticalAlignment="Top" Click="InducedCheckBox_Click" RenderTransformOrigin="0.493,3.452" Height="31" Width="287" Grid.ColumnSpan="2" Foreground="White" Cursor="Hand"/>
+          <CheckBox x:Name="CountCheckBox" Content="Count number of subtrees in model" HorizontalAlignment="Left" Margin="10,405,0,0" VerticalAlignment="Top" Click="CountCheckBox_Click" Grid.ColumnSpan="2" Foreground="White" Cursor="Hand" Height="31" Width="398"/>
+          <Label x:Name="SimThresholdLabel" Content="w2v Similarity Threshold:" HorizontalAlignment="Left" Margin="25,441,0,0" VerticalAlignment="Top" Foreground="White" Grid.ColumnSpan="2" Height="42" Width="272"/>
+          <TextBox x:Name="SimTresholdValue" HorizontalAlignment="Left" Height="42" Margin="187,441,0,0" TextWrapping="Wrap" Text="0.8" VerticalAlignment="Top" Width="110" FontSize="24" SpellCheck.IsEnabled="True" PreviewTextInput="CheckThresholdInput" RenderTransformOrigin="1.828,-0.713" Grid.Column="1">
             <TextBox.Effect>
               <DropShadowEffect Opacity="0.7" ShadowDepth="3"/>
             </TextBox.Effect>
           </TextBox>
-          <Label x:Name="SimVariantLabel" Content="w2v Similarity Variant:" HorizontalAlignment="Left" Margin="25,447,0,0" VerticalAlignment="Top" Foreground="White" Grid.ColumnSpan="2" Height="42" Width="241"/>
-          <ComboBox x:Name="SimilarityVariantComboBox" Grid.Column="1" HorizontalAlignment="Left" Margin="187,447,0,0" VerticalAlignment="Top" Width="110" SelectedIndex="0" Foreground="Black" BorderBrush="White" Height="38">
+          <Label x:Name="SimVariantLabel" Content="w2v Similarity Variant:" HorizontalAlignment="Left" Margin="25,501,0,0" VerticalAlignment="Top" Foreground="White" Grid.ColumnSpan="2" Height="42" Width="241"/>
+          <ComboBox x:Name="SimilarityVariantComboBox" Grid.Column="1" HorizontalAlignment="Left" Margin="187,503,0,0" VerticalAlignment="Top" Width="110" SelectedIndex="0" Foreground="Black" BorderBrush="White" Height="38">
             <ComboBox.Background>
               <LinearGradientBrush EndPoint="0,1" StartPoint="0,0">
                 <GradientStop Color="#FFF0F0F0" Offset="0"/>
@@ -108,7 +108,7 @@
               <DropShadowEffect Opacity="0.7" ShadowDepth="3"/>
             </ComboBox.Effect>
           </ComboBox>
-          <Button x:Name="TreeStartButton" Content="Search My Pattern" HorizontalAlignment="Left" Margin="72,507,0,147" Width="356" Click="StartTreeButton_Click" Foreground="White" FontSize="36" Grid.ColumnSpan="2" Background="#FF535353" Cursor="Hand">
+          <Button x:Name="TreeStartButton" Content="Search My Pattern" HorizontalAlignment="Left" Margin="72,563,0,91" Width="356" Click="StartTreeButton_Click" Foreground="White" FontSize="36" Grid.ColumnSpan="2" Background="#FF535353" Cursor="Hand">
             <Button.Effect>
               <DropShadowEffect Opacity="0.7" ShadowDepth="3"/>
             </Button.Effect>
@@ -125,12 +125,14 @@
               </GridView>
             </ListView.View>
           </ListView>
-          <Label x:Name="ResultDebug" Content="" HorizontalAlignment="Left" Margin="10,0,0,63" VerticalAlignment="Bottom" Height="57" Width="558" Grid.ColumnSpan="2" Foreground="White"/>
+          <Label x:Name="ResultDebug" Content="" HorizontalAlignment="Left" Margin="10,0,0,24" VerticalAlignment="Bottom" Height="57" Width="558" Grid.ColumnSpan="2" Foreground="White"/>
           <ProgressBar x:Name="TreeProgressBar" HorizontalAlignment="Left" Height="65" Margin="68,549,0,0" VerticalAlignment="Top" Width="672" LargeChange="0" UseLayoutRounding="True" SmallChange="1" Value="-1" IsIndeterminate="False" Grid.Column="2" Background="#FFB6B6B6">
             <ProgressBar.Effect>
               <DropShadowEffect Opacity="0.7" ShadowDepth="3"/>
             </ProgressBar.Effect>
           </ProgressBar>
+          <Label x:Name="label" Content="Only use models containing:" HorizontalAlignment="Left" Margin="10,185,0,0" VerticalAlignment="Top" Grid.ColumnSpan="2" Width="324" Foreground="White"/>
+          <TextBox x:Name="FilterModelBox" Grid.Column="1" HorizontalAlignment="Left" Height="45" Margin="208,185,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="338"/>
         </Grid>
       </TabItem>
       <TabItem Header="Word2Vec" Margin="30,0,-34,-2" FontSize="24" Background="#FF6A6A6A" Cursor="Hand" BorderBrush="Black">
@@ -157,7 +159,7 @@
               <DropShadowEffect Opacity="0.7" ShadowDepth="3"/>
             </TextBox.Effect>
           </TextBox>
-          <Label x:Name="ModelPathLabel" Content="Model not found..." HorizontalAlignment="Left" Margin="10,256,0,0" VerticalAlignment="Top" Grid.ColumnSpan="2" Width="687" Background="#FFB6B6B6" Foreground="White"/>
+          <Label x:Name="ModelPathLabel" Content="Model not found..." HorizontalAlignment="Left" Margin="10,256,0,0" VerticalAlignment="Top" Grid.ColumnSpan="2" Width="687" Background="#FFB6B6B6" Foreground="White" FontSize="12"/>
           <Button x:Name="ChangeModelButton" Content="Select model" HorizontalAlignment="Left" Margin="10,303,0,0" VerticalAlignment="Top" Width="246" Height="54" Click="ChangeModelButton_Click" Grid.ColumnSpan="2" Foreground="White" Background="#FF818181">
             <Button.Effect>
               <DropShadowEffect Opacity="0.7" ShadowDepth="3"/>
@@ -194,8 +196,8 @@
             </ListView.Effect>
             <ListView.View>
               <GridView>
-                <GridViewColumn Header="Term" DisplayMemberBinding="{Binding Term}" Width="700"/>
-                <GridViewColumn Header="Score" DisplayMemberBinding="{Binding Score}" Width="116"/>
+                <GridViewColumn Header="Term" DisplayMemberBinding="{Binding Term}" Width="640"/>
+                <GridViewColumn Header="Score" DisplayMemberBinding="{Binding Score}" Width="140"/>
               </GridView>
             </ListView.View>
           </ListView>

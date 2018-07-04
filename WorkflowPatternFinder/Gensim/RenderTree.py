@@ -12,20 +12,26 @@ from SubTreeFinder import *
 from os import listdir
 from os.path import isfile, join
 
+myColors = ['red', 'green', 'lightblue', 'brown', 'pink', 'orange']
+matchSize = 1
 
-if len(sys.argv) == 4:
+def GetNextColor(matchIndex):
+  return myColors[int(matchIndex / matchSize) % len(myColors)]
+
+if len(sys.argv) == 5:
   tree = ProcessTreeLoader.LoadTree(sys.argv[1])
   patternMembers = []
   if any(sys.argv[2]):
     patternMembers = sys.argv[2].split(',')
   # print('pattern members: ',patternMembers)
   
-  patternIds = {}
+  patternIds = []
   for pattern in patternMembers:
     patternParts = pattern.split(':')
-    patternIds[patternParts[0]] = patternParts[2]
+    patternIds.append((patternParts[0], patternParts[2]))
   workflowName = sys.argv[3]
-
+  matchSize = int(sys.argv[4])
+  # print("match size:",matchSize)
   
   myGraph = Digraph()
   root = tree.GetRoot()
@@ -34,16 +40,17 @@ if len(sys.argv) == 4:
   while any(nodelist):
     currentNode = nodelist.pop(0)
     # print('get event: ',currentNode.GetEvent())
-    myColor = 'black'
     nodeLabel = currentNode.GetEvent()
-    if currentNode.GetId() in patternIds.keys():
-      myColor = 'red'
-      specialWord = patternIds[currentNode.GetId()]
+    if currentNode.GetId() in [f[0] for f in patternIds]:
+      myColor = GetNextColor(([f[0] for f in patternIds]).index(currentNode.GetId()))
+      specialWord = [f[1] for f in patternIds if f[0] == currentNode.GetId()][0]
       # print('special word: ' + specialWord)
       if(specialWord != ""):
         pat = re.compile(specialWord, re.IGNORECASE)
         nodeLabel = "<" + pat.sub("<u>" + specialWord + "</u>", currentNode.GetEvent()).replace("\n", "<br/>") + ">"
-    myGraph.node(currentNode.GetId(), nodeLabel, color = myColor, xlabel= str(number))
+      myGraph.node(currentNode.GetId(), nodeLabel, style='filled', color = myColor, xlabel= str(number))
+    else:
+      myGraph.node(currentNode.GetId(), nodeLabel, color = 'black', xlabel= str(number))
     parent = currentNode.GetParent()
     if parent:
       myGraph.edge(parent.GetId(), currentNode.GetId())

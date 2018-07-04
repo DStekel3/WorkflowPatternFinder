@@ -18,6 +18,7 @@ using DataFormats = System.Windows.Forms.DataFormats;
 using Timer = System.Windows.Forms.Timer;
 using IronPython.Runtime.Operations;
 using System.Globalization;
+using System.Text;
 using System.Threading;
 using WorkflowPatternFinder.Properties;
 
@@ -174,6 +175,7 @@ namespace WorkflowPatternFinder
         ModelPathLabel.Content = _modelPathCache;
       }
       _scriptPathCache = Path.Combine(Program.GetToolBasePath(), @"WorkflowPatternFinder\WorkflowPatternFinder\Gensim\Gensim.py");
+      _filterModelCache = StripPunctuation(FilterModelBox.Text).Trim();
 
       // Start new thread which calls the Python-gensim script.
       Task DoWork()
@@ -209,7 +211,7 @@ namespace WorkflowPatternFinder
       ProcessStartInfo start = new ProcessStartInfo
       {
         FileName = Program.GetPythonExe(),
-        Arguments = $"\"{_scriptPathCache}\" \"{_modelPathCache}\" \"{_treeBasePathCache}\" \"{_patternPathCache}\" \"{_inducedCache}\" \"{_simThresholdCache.ToString(CultureInfo.InvariantCulture)}\" \"{_countNumberOfPatternsWithinModel}\" \"{_similarityVariantCache}\"",
+        Arguments = $"\"{_scriptPathCache}\" \"{_modelPathCache}\" \"{_treeBasePathCache}\" \"{_patternPathCache}\" \"{_inducedCache}\" \"{_simThresholdCache.ToString(CultureInfo.InvariantCulture)}\" \"{_countNumberOfPatternsWithinModel}\" \"{_similarityVariantCache}\" \"{_filterModelCache}\"",
         UseShellExecute = false,
         RedirectStandardOutput = true,
         WindowStyle = ProcessWindowStyle.Hidden,
@@ -232,10 +234,11 @@ namespace WorkflowPatternFinder
           {
             Debug.WriteLine(line);
           }
-
-          var validSubTrees = lines.SkipWhile(c => !c.StartsWith("Valid trees:")).Skip(1);
-          //_validOutputCache = new Dictionary<string, double>();
-          foreach(string validTree in validSubTrees)
+          var resultingOutput = lines.SkipWhile(c => !c.StartsWith("Results coming up!")).Skip(1);
+          var splitReaction = resultingOutput.First().Split()[0].Split('/');
+          _matchRatio = new Tuple<string,string>(splitReaction[0], splitReaction[1]);
+          var validSubtrees = resultingOutput.SkipWhile(c => !c.StartsWith("Valid trees:")).Skip(1);
+          foreach(string validTree in validSubtrees)
           {
             if (!string.IsNullOrEmpty(validTree))
             {
@@ -320,13 +323,22 @@ namespace WorkflowPatternFinder
       {
         var patternMembers = "";
         var selectedItem = selectedPattern ?? selectedTree;
+        var patternSize = 1;
         if(listName == "ValidOccurencesView")
         {
           patternMembers = string.Join(",", selectedPattern.Ids.Select(t => $"{t.Key}:{t.Value}"));
+          if ((int) selectedPattern.Score > 0)
+          {
+            patternSize = selectedPattern.Ids.Count / (int) selectedPattern.Score;
+          }
+          else
+          {
+            patternSize = int.MaxValue;
+          }
         }
         if(e.ChangedButton == MouseButton.Left)
         {
-          RenderTreeInPython(selectedItem.TreePath, patternMembers, selectedItem.TreeSummary);
+          RenderTreeInPython(selectedItem.TreePath, patternMembers, selectedItem.TreeSummary, patternSize);
         }
         else if(e.ChangedButton == MouseButton.Right)
         {
@@ -421,7 +433,7 @@ namespace WorkflowPatternFinder
 
         ValidOccurencesView.Items.Add(new ValidOccurencesViewObject(path) { SimilarityScore = score });
       }
-      ResultDebug.Content = $"Found {_foundPatterns.Count} model(s) that contain the given pattern.";
+      ResultDebug.Content = $"Found {_matchRatio.Item1} matches in {_matchRatio.Item2} models.";
       UpdateButtonText(TreeStartButton, "Done!");
       ChangeEnabledTreeButtons(true);
       TreeProgressBar.IsIndeterminate = false;
@@ -473,6 +485,8 @@ namespace WorkflowPatternFinder
     private string _similarityVariantCache;
     private double _simThresholdCache;
     private Dictionary<string, double> _validOutputCache;
+    private string _filterModelCache;
+    private Tuple<string,string> _matchRatio;
 
     private void TryToUpdateUI()
     {
@@ -606,7 +620,7 @@ namespace WorkflowPatternFinder
 
     private void ChangeEnabledPreProcessingButtons(bool isEnabled)
     {
-      // change state of buttons in Pre-Processing Tab
+      // Change state of controls in Pre-Processing tab.
       PreProcessingButton.IsEnabled = isEnabled;
       ImportExcelDirectoryButton.IsEnabled = isEnabled;
       PromButton.IsEnabled = isEnabled;
@@ -616,7 +630,7 @@ namespace WorkflowPatternFinder
 
     private void ChangeEnabledTreeButtons(bool isEnabled)
     {
-      //tree finder buttons
+      // Change ability to use controls controls on Tree Pattern tab.
       TreeStartButton.IsEnabled = isEnabled;
       ImportPatternButton.IsEnabled = isEnabled;
       ImportTreeButton.IsEnabled = isEnabled;
@@ -624,6 +638,7 @@ namespace WorkflowPatternFinder
       CountCheckBox.IsEnabled = isEnabled;
       SimilarityVariantComboBox.IsEnabled = isEnabled;
       SimTresholdValue.IsEnabled = isEnabled;
+      FilterModelBox.IsEnabled = isEnabled;
     }
 
     private void ClearValidOccurencesView()
@@ -779,14 +794,14 @@ namespace WorkflowPatternFinder
       }
     }
 
-    private void RenderTreeInPython(string filePath, string patternMembers = "", string treeSummary = "")
+    private void RenderTreeInPython(string filePath, string patternMembers = "", string treeSummary = "", int patternSize = 1)
     {
       var scriptPath = Path.Combine(Program.GetToolBasePath(), @"WorkflowPatternFinder\WorkflowPatternFinder\Gensim\RenderTree.py");
 
       ProcessStartInfo start = new ProcessStartInfo
       {
         FileName = Program.GetPythonExe(),
-        Arguments = $"\"{scriptPath}\" \"{filePath}\" \"{patternMembers}\" \"{treeSummary}\"",
+        Arguments = $"\"{scriptPath}\" \"{filePath}\" \"{patternMembers}\" \"{treeSummary}\" \"{patternSize}\"",
         UseShellExecute = false,
         RedirectStandardOutput = true,
         CreateNoWindow = true,
@@ -911,7 +926,7 @@ namespace WorkflowPatternFinder
     {
       if(Keyboard.IsKeyDown(Key.LeftCtrl) && Keyboard.IsKeyDown(Key.F))
       {
-        if(!((TabItem)TabControl.SelectedValue).Header.ToString().Contains("word2vec"))
+        if(!((TabItem)TabControl.SelectedValue).Header.ToString().Contains("Word2Vec"))
         {
           return;
         }
@@ -920,6 +935,17 @@ namespace WorkflowPatternFinder
         tFinder.Show();
         tFinder.Activate();
       }
+    }
+
+    public static string StripPunctuation(string s)
+    {
+      var sb = new StringBuilder();
+      foreach(char c in s)
+      {
+        if(!char.IsPunctuation(c))
+          sb.Append(c);
+      }
+      return sb.ToString();
     }
   }
 }
