@@ -54,32 +54,35 @@ class XmlParser:
   def WoordenboekGetAntonyms(self, word):
     antonyms = []
     zoekTerm = word
-    htmlFile = urlopen(self._woordenboekAntonymsUrl + zoekTerm)
-    content = htmlFile.read()
-    htmlFile.close()
-    soup = BeautifulSoup(content, "lxml")
-    tabel = soup.find("ul", attrs={'class':'icons-ul'})
-    if tabel != None:
-      for item in tabel:
-        if hasattr(item, 'children'):
-          for child in list(item.children):
-            if child.name == 'a':
-              print(child.text)
-              if len(child.text.split()) <= 1 :
-                antonyms.append(child.text)
-                itsSynonyms = self.WoordenboekGetSynonyms(child.text)
-                antonyms.extend(itsSynonyms)
-    return antonyms
+    try:
+      htmlFile = urlopen(self._woordenboekAntonymsUrl + zoekTerm)
+      content = htmlFile.read()
+      htmlFile.close()
+      soup = BeautifulSoup(content, "lxml")
+      tabel = soup.find("ul", attrs={'class':'icons-ul'})
+      if tabel != None:
+        for item in tabel:
+          if hasattr(item, 'children'):
+            for child in list(item.children):
+              if child.name == 'a':
+                print(child.text)
+                if len(child.text.split()) <= 1 :
+                  antonyms.append(child.text)
+                  itsSynonyms = self.WoordenboekGetSynonyms(child.text)
+                  antonyms.extend(itsSynonyms)
+      return antonyms
+    except:
+      return []
 
   def WoordenboekGetSynonyms(self, word):
     synonyms = []
     zoekTerm = word
-    htmlFile = urlopen(self._woordenboekSynonymsUrl + zoekTerm)
-    content = htmlFile.read()
-    htmlFile.close()
-    soup = BeautifulSoup(content, "lxml")
-    tabel = soup.find("ul", attrs={'class':'icons-ul'})
     try:
+      htmlFile = urlopen(self._woordenboekSynonymsUrl + zoekTerm)
+      content = htmlFile.read()
+      htmlFile.close()
+      soup = BeautifulSoup(content, "lxml")
+      tabel = soup.find("ul", attrs={'class':'icons-ul'})
       for item in tabel:
         if hasattr(item, 'children'):
           for child in list(item.children):

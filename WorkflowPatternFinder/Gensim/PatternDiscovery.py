@@ -84,6 +84,7 @@ class PatternDiscovery(object):
   def GetMatch(self, T, P, isInduced):
     # walk through tree nodes, using breadth first traversal
     self._dict = []
+    self._dataTree = T
     p = P.GetRoot()
     nodelist = [T.GetRoot()]
     while len(nodelist) > 0:
@@ -96,7 +97,7 @@ class PatternDiscovery(object):
         if isInduced:
           result = self.GetInducedMatch(t, p)
         else:
-          result = self.GetEmbeddedMatchDFS(t, p)
+          result = self.GetEmbeddedMatch(t, p)
         if result[0]:
           return result
     return (False, [])
@@ -109,67 +110,82 @@ class PatternDiscovery(object):
       return self.GetInducedUn(t, p, allMatches)
     return (False, [])
 
-  def GetEmbeddedMatchDFS(self, t, p, allMatches=[]):
-    # search for a node similar as pNode
-    if p.GetType() in self._orderedTypes:
-      return self.GetEmbeddedOrDFS(t, p, allMatches)
-    else:
-      return self.GetEmbeddedUnDFS(t, p, allMatches)
-    return (False, [])
+  #def GetEmbeddedMatchDFS(self, t, p, allMatches=[]):
+  #  # search for a node similar as pNode
+  #  if False:#p.GetType() in self._orderedTypes:
+  #    return self.GetEmbeddedOrDFS(t, p, allMatches)
+  #  else:
+  #    return self.GetEmbeddedUnDFS(t, p, allMatches)
+  #  return (False, [])
 
-  def GetEmbeddedOrDFS(self, t, p, allMatches):
+  #def GetEmbeddedOrDFS(self, t, p, allMatches):
+  #  rootMatch = self.AreSimilar(t,p)
+  #  rootScore = rootMatch[1]
+  #  if rootMatch[0]:
+  #    pChildren = p.GetChildren()
+  #    tDescendants = t.GetAllDescendants()
+  #    # first try to find an induced match
+  #    match = self.GetInducedOr(t,p, allMatches)
+  #    if match[0]:
+  #      return match
+
+  #    matches = [(t.GetId(), p.GetId(), rootMatch[1], self.GetPatternWord(rootMatch))]
+  #    startIndex = 0
+  #    for pc in pChildren:
+  #        bestMatch = (None, 0.0)
+  #        for tc in tDescendants[startIndex:len(tDescendants) - (len(pChildren) - pChildren.index(pc) - 1)]:
+  #            if tc.GetId() not in [i[0] for i in (allMatches + matches)]:
+  #                    match = self.GetEmbeddedMatchDFS(tc,pc, allMatches + matches)
+  #                    if(match[0]):
+  #                        rootScore = match[1][0][2]
+  #                        bestMatch = (match[1], rootScore)
+  #        if bestMatch[0] != None:
+  #            matches.extend(bestMatch[0])
+  #            tNodeId = bestMatch[0][0][0]
+  #            startIndex = tDescendants.index([i for i in tDescendants if i.GetId() == tNodeId][0])+1
+
+  #    if len(matches) == p.GetSubtreeSize():
+  #      return (True, matches)
+  #  return (False, [])
+
+  def GetEmbeddedMatch(self, t, p, allMatches = []):
     rootMatch = self.AreSimilar(t,p)
     rootScore = rootMatch[1]
-    if rootMatch[0]:
-      pChildren = p.GetChildren()
-      tDescendants = t.GetAllDescendants()
-      # first try to find an induced match
-      match = self.GetInducedOr(t,p, allMatches)
-      if match[0]:
-        return match
-
-      matches = [(t.GetId(), p.GetId(), rootMatch[1], self.GetPatternWord(rootMatch))]
-      startIndex = 0
-      for pc in pChildren:
-          bestMatch = (None, 0.0)
-          for tc in tDescendants[startIndex:len(tDescendants) - (len(pChildren) - pChildren.index(pc) - 1)]:
-              if tc.GetId() not in [i[0] for i in (allMatches + matches)]:
-                      match = self.GetEmbeddedMatchDFS(tc,pc, allMatches + matches)
-                      if(match[0]):
-                          rootScore = match[1][0][2]
-                          bestMatch = (match[1], rootScore)
-          if bestMatch[0] != None:
-              matches.extend(bestMatch[0])
-              tNodeId = bestMatch[0][0][0]
-              startIndex = tDescendants.index([i for i in tDescendants if i.GetId() == tNodeId][0])+1
-
-      if len(matches) == p.GetSubtreeSize():
-        return (True, matches)
-    return (False, [])
-
-  def GetEmbeddedUnDFS(self, t, p, allMatches):
-    rootMatch = self.AreSimilar(t,p)
-    rootScore = rootMatch[1]
-    if rootMatch[0]:
+    if rootMatch[0] and not self.IsAscendantOfMatches(t, allMatches):
       # first try to find an induced match
       match = self.GetInducedUn(t,p, allMatches)
       if match[0]:
         return match
-
       matches = [(t.GetId(), p.GetId(), rootMatch[1], self.GetPatternWord(rootMatch))]
       for pc in p.GetChildren():
         bestMatch = (None, 0.0)
-        for tc in t.GetAllDescendants():
+        for tc in t.GetChildren():
               if tc.GetId() not in [i[0] for i in (allMatches + matches)]:
-                      match = self.GetEmbeddedMatchDFS(tc,pc, allMatches + matches)
-                      if(match[0]):
+                      match = self.GetEmbeddedUnDFS(tc, pc, allMatches + matches)
+                      score = self.GetAvgScoreOfMatches(match[1])
+                      if(match[0] and score > bestMatch[1]):
                           bestMatch = (match[1], match[1][0][2])
                           print('best match:', bestMatch)
         if bestMatch[0] != None:
             matches.extend(bestMatch[0])
       if len(matches) == p.GetSubtreeSize():
         return (True, matches)
+
+    if not p.IsRoot():
+      for td in [tc for tc in t.GetChildren() if tc.GetId() not in [i[0] for i in allMatches]]:
+          match = self.GetEmbeddedMatch(td, p, allMatches)
+          if match[0]:
+            return match
     return (False, [])
+
+  def IsAscendantOfMatches(self, tc, allMatches):
+    matchIds = [i[0] for i in allMatches]
+    for matchId in matchIds: 
+      node = self._dataTree.GetNode(matchId)
+      desc = node.GetAscendants()
+      if tc.GetId() in [i.GetId() for i in desc]:
+        return True
+    return False
 
   def GetInducedOr(self, t, p, allMatches):
     # check whether the given nodes are similar
@@ -182,14 +198,6 @@ class PatternDiscovery(object):
       if (len(pChildren) == 0):
         return (True, matches)
       startIndex = 0
-      #for pc in pChildren:
-      #    for tc in tChildren[startIndex:len(tChildren)]:
-      #        if self.AreSimilar(tc, pc)[0]:
-      #            match = self.GetInducedMatch(tc, pc)
-      #            if match[0]:
-      #                matches.extend(match[1])
-      #                startIndex = tChildren.index(tc)
-      #                break
       for pc in pChildren:
           bestMatch = (None, 0.0)
           for tc in tChildren[startIndex:len(tChildren) - (len(pChildren) - pChildren.index(pc) - 1)]:
@@ -220,11 +228,10 @@ class PatternDiscovery(object):
           bestMatch = (None, 0.0)
           for tc in tChildren:
               if tc.GetId() not in [i[0] for i in allMatches + matches]:
-                  score = self.AreSimilar(tc, pc)
-                  if(score[0] and score[1] > bestMatch[1]):
-                      match = self.GetInducedMatch(tc,pc, allMatches)
-                      if(match[0]):
-                          bestMatch = (match[1], score[1])
+                  match = self.GetInducedMatch(tc,pc, allMatches)   
+                  score = self.GetAvgScoreOfMatches(match[1]) 
+                  if(match[0] and score > bestMatch[1]):
+                    bestMatch = (match[1], score)
           if bestMatch[0] != None:
               matches.extend(bestMatch[0])
       if len(matches) == p.GetSubtreeSize():
@@ -288,4 +295,10 @@ class PatternDiscovery(object):
 
   def SetSimilarityVariant(self, similarityVariant):
     self._similarityVariant = similarityVariant
-    
+
+  def GetAvgScoreOfMatches(self, matches):
+    if(any(matches)):
+      numOfMatches = len(matches)
+      scores = [i[2] for i in matches]
+      return sum(scores)/numOfMatches   
+    return 0
