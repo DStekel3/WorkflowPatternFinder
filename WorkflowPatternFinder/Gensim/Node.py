@@ -110,3 +110,13 @@ class Node(object):
           subnodes = child.GetAllDescendants()
           descendants.extend(subnodes)
         return descendants
+
+    def GetAscendants(self):
+        ascendants = []
+        p = self.GetParent()
+        if p == None:
+          return []
+        while(p.GetParent() != None):
+          ascendants.append(p)
+          p = p.GetParent()
+        return ascendants
