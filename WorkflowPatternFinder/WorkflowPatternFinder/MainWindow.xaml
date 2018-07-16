@@ -175,7 +175,7 @@
               <DropShadowEffect Opacity="0.7" ShadowDepth="3"/>
             </Button.Effect>
           </Button>
-          <TextBox x:Name="TermQueryTextBox" HorizontalAlignment="Left" Height="148" Margin="10,500,0,0" TextWrapping="Wrap" Text="Fill in term..." VerticalAlignment="Top" Width="276" Grid.ColumnSpan="2" Background="White">
+          <TextBox x:Name="TermQueryTextBox" HorizontalAlignment="Left" Height="148" Margin="10,500,0,0" TextWrapping="Wrap" Text="Fill in term..." VerticalAlignment="Top" Width="276" Grid.ColumnSpan="2" Background="White" GotFocus="TermQueryTextBox_GotFocus" LostFocus="TermQueryTextBox_LostFocus">
             <TextBox.Effect>
               <DropShadowEffect Opacity="0.7" ShadowDepth="3"/>
             </TextBox.Effect>
