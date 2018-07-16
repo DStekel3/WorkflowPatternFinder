@@ -10,7 +10,6 @@ import nltk
 from SynoniemenDotNet import XmlParser
 from nltk.tag import UnigramTagger, BigramTagger, PerceptronTagger
 from nltk.corpus import alpino as alp
-from nltk.stem.snowball import SnowballStemmer
 from gensim.parsing.preprocessing import strip_short, strip_numeric, strip_punctuation
 import time
 import pickle
@@ -40,8 +39,7 @@ class Query(object):
         #    f.close()
 
         # spaCy tokenizer, tagger
-        self._tagger = spacy.load('nl')         
-        self._stemmer = SnowballStemmer("dutch")
+        self._tagger = spacy.load('nl')        
 
     def LoadModel(self, path_to_model):
         # print('loading model')
@@ -74,14 +72,6 @@ class Query(object):
           return True
         return False
 
-    def WordsHaveSameStem(self, patternWord, treeWord):
-        patternStem = self._stemmer.stem(patternWord)
-        treeStem = self._stemmer.stem(treeWord)
-
-        if patternStem == treeStem:
-          return True
-        return False
-
     def GetSentenceSimilarityMaxVariant(self, treeSentence, patternSentence):
         if self._model is None:
             raise ValueError('The model is not loaded yet.')
@@ -100,9 +90,7 @@ class Query(object):
                   score = -1
                   # uncomment line to add lemmatization check! (Matching on verbs/nouns etc. only)
                   #if self.WordsHaveSameType(patternWord, treeWord):
-                  if self.WordsHaveSameStem(patternWord, treeWord):
-                    score = 1
-                  elif treeWord in synonyms:
+                  if treeWord in synonyms:
                       score = 1
                   elif treeWord in antonyms:
                       score = 0
