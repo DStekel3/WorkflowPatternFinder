@@ -65,7 +65,6 @@ class XmlParser:
           if hasattr(item, 'children'):
             for child in list(item.children):
               if child.name == 'a':
-                print(child.text)
                 if len(child.text.split()) <= 1 :
                   antonyms.append(child.text)
                   itsSynonyms = self.WoordenboekGetSynonyms(child.text)
@@ -87,7 +86,6 @@ class XmlParser:
         if hasattr(item, 'children'):
           for child in list(item.children):
             if child.name == 'a':
-              print(child.text)  
               if len(child.text.split()) <= 1 :
                 synonyms.append(child.text)
     except: return []

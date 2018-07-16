@@ -48,16 +48,24 @@ class Query(object):
         self._model = Doc2Vec.load(path_to_model, mmap=None)
         # print('loaded model')
 
-    def LoadBinModel(self, path_to_model=r"C:\Users\dst\Source\Repos\WorkflowPatternFinder\WorkflowPatternFinder\Gensim\datasets\wikipedia-160.bin"):
+    def LoadBinModel(self, path_to_model=r"C:\Users\dst\Source\Repos\WorkflowPatternFinder\WorkflowPatternFinder\Gensim\datasets\sonar-320.bin"):
         self._model = KeyedVectors.load(path_to_model, mmap='r')
 
     def FindSynonyms(self, word):
         synonyms = self._xmlParser.WoordenboekGetSynonyms(word)
         self._synonyms[word] = synonyms
+        return list(set(synonyms))
 
     def FindAntonyms(self, word):
         antonyms = self._xmlParser.WoordenboekGetAntonyms(word)
+        theirSynonyms = []
+        for antonym in antonyms:
+          theirSynonyms.extend(self._xmlParser.WoordenboekGetSynonyms(antonym))
+        for syn in theirSynonyms:
+          if syn not in antonyms:
+            antonyms.extend(syn)
         self._antonyms[word] = antonyms
+        return list(set(antonyms))
 
     def WordsHaveSameType(self, patternWord, treeWord):
         pTag = self._tagger(patternWord)

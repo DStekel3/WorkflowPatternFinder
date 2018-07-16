@@ -21,6 +21,7 @@ using System.Globalization;
 using System.Text;
 using System.Threading;
 using WorkflowPatternFinder.Properties;
+using TextBox = System.Windows.Controls.TextBox;
 
 namespace WorkflowPatternFinder
 {
@@ -38,6 +39,7 @@ namespace WorkflowPatternFinder
     private string _incorrectDir = "Incorrect directory!";
     private string _incorrectFile = "Incorrect file!";
     private string _missingScriptFile = "Missing ProM scripts!";
+    private string _helpText = "Fill in term...";
     private List<PatternObject> _foundPatterns = new List<PatternObject>();
     private Window tFinder;
 
@@ -171,7 +173,7 @@ namespace WorkflowPatternFinder
       }
       else
       {
-        _modelPathCache = Path.Combine(Program.GetWord2VecBasePath(), @"wikipedia-160.bin");
+        _modelPathCache = Path.Combine(Program.GetWord2VecBasePath(), @"sonar-320.bin");
         ModelPathLabel.Content = _modelPathCache;
       }
       _scriptPathCache = Path.Combine(Program.GetToolBasePath(), @"WorkflowPatternFinder\WorkflowPatternFinder\Gensim\Gensim.py");
@@ -317,7 +319,6 @@ namespace WorkflowPatternFinder
       {
         return;
       }
-
 
       if(selectedPattern != null || selectedTree != null)
       {
@@ -752,7 +753,7 @@ namespace WorkflowPatternFinder
       }
       else
       {
-        ofd.FileName = Path.Combine(Program.GetWord2VecBasePath(), @"wikipedia-160.bin");
+        ofd.FileName = Path.Combine(Program.GetWord2VecBasePath(), @"sonar-320.bin");
       }
       DialogResult result = ofd.ShowDialog();
       if(result == System.Windows.Forms.DialogResult.OK)
@@ -946,6 +947,26 @@ namespace WorkflowPatternFinder
           sb.Append(c);
       }
       return sb.ToString();
+    }
+
+    private void TermQueryTextBox_LostFocus(object sender, RoutedEventArgs e)
+    {
+      if(sender is TextBox)
+      {
+        if(((TextBox)sender).Text.Replace(" ", "").Length == 0)
+          //If nothing has been entered yet.
+          ((TextBox)sender).Text = _helpText;
+      }
+    }
+
+    private void TermQueryTextBox_GotFocus(object sender, RoutedEventArgs e)
+    {
+      if(sender is TextBox)
+      {
+        if(((TextBox)sender).Text == _helpText)
+          //If nothing has been entered yet.
+          ((TextBox)sender).Text = "";
+      }
     }
   }
 }

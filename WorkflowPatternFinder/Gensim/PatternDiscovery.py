@@ -23,7 +23,7 @@ class PatternDiscovery(object):
       self._query = Query()
       self._query.LoadBinModel(self._word2VecTrainedModelPath)
     else:
-      self._word2VecTrainedModelPath = r'C:\Users\dst\Source\Repos\WorkflowPatternFinder\WorkflowPatternFinder\Gensim\datasets\wikipedia-160.bin'
+      self._word2VecTrainedModelPath = r'C:\Users\dst\Source\Repos\WorkflowPatternFinder\WorkflowPatternFinder\Gensim\datasets\sonar-320.bin'
       # raise ValueError('The path to model is not set yet.')
       self.LoadWord2VecModel()
 
@@ -161,7 +161,7 @@ class PatternDiscovery(object):
         bestMatch = (None, 0.0)
         for tc in t.GetChildren():
               if tc.GetId() not in [i[0] for i in (allMatches + matches)]:
-                      match = self.GetEmbeddedUnDFS(tc, pc, allMatches + matches)
+                      match = self.GetEmbeddedMatch(tc, pc, allMatches + matches)
                       score = self.GetAvgScoreOfMatches(match[1])
                       if(match[0] and score > bestMatch[1]):
                           bestMatch = (match[1], match[1][0][2])

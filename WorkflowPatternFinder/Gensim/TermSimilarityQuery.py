@@ -9,10 +9,14 @@ from gensim.models import Doc2Vec
 import nltk
 from Query import *
 from SynoniemenDotNet import *
-
+from nltk.stem.snowball import SnowballStemmer
+import spacy
+import unidecode
 
 args = sys.argv
 print(len(args))
+_stemmer = SnowballStemmer("dutch")
+_tagger = spacy.load('nl')         
 
 for arg in args:
   print('arg: '+arg)
@@ -26,15 +30,34 @@ if len(args) == 3:
   similarTerms = query.GetMostSimilarTerms(myTerm)
 
   parser = XmlParser()
-  synonyms = parser.WoordenboekGetSynonyms(myTerm)
-  antonyms = parser.WoordenboekGetAntonyms(myTerm)
+  synonyms = query.FindSynonyms(myTerm)
+  antonyms = query.FindAntonyms(myTerm)
+  
+  if any(similarTerms):
+    similarTerms = list(filter(lambda x: x[0] not in antonyms and _stemmer.stem(x[0]) not in antonyms, similarTerms))
 
-  similarTerms = list(filter(lambda x: x[0] not in antonyms, similarTerms))
+  acceptedTypeOfWords = []
+  pTag = _tagger(unidecode.unidecode(myTerm))
+  for i in range(0,len(myTerm.split(' '))):
+    pos = pTag[i].pos_
+    if pos not in acceptedTypeOfWords:
+      acceptedTypeOfWords.append(pos)
+
+  filteredTerms = similarTerms.copy()
+
+  for term in similarTerms:
+    word = unidecode.unidecode(term[0])
+    tTag = _tagger(word)
+    for i in range(0,len(word.split(' '))):
+      pos = tTag[i].pos_
+      if pos not in acceptedTypeOfWords:
+        filteredTerms.remove(term)
+    
 
   print("Similar terms:")
   for synonym in synonyms:
     print(synonym+":1")
-  for term in similarTerms:
+  for term in filteredTerms:
     try:
       print(str(term[0])+":"+str(term[1]))
     except:
