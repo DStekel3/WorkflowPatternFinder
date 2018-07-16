@@ -9,13 +9,11 @@ from gensim.models import Doc2Vec
 import nltk
 from Query import *
 from SynoniemenDotNet import *
-from nltk.stem.snowball import SnowballStemmer
 import spacy
 import unidecode
 
 args = sys.argv
 print(len(args))
-_stemmer = SnowballStemmer("dutch")
 _tagger = spacy.load('nl')         
 
 for arg in args:
@@ -34,7 +32,7 @@ if len(args) == 3:
   antonyms = query.FindAntonyms(myTerm)
   
   if any(similarTerms):
-    similarTerms = list(filter(lambda x: x[0] not in antonyms and _stemmer.stem(x[0]) not in antonyms, similarTerms))
+    similarTerms = list(filter(lambda x: x[0] not in antonyms, similarTerms))
 
   acceptedTypeOfWords = []
   pTag = _tagger(unidecode.unidecode(myTerm))
