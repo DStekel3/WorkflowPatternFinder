@@ -58,4 +58,16 @@ class ProcessTree(object):
             parent = node.GetParent()
             parent.RemoveChild(node)
         self._nodes.remove(node)
+
+    def GetPostOrder(self):
+      data = []
+      def recurse(node):
+        children = node.GetChildren()
+        for child in children:
+          recurse(child)
+        data.append(node)
+      recurse(self.GetRoot())
+      return data
+        
+      
                 

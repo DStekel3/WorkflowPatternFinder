@@ -158,7 +158,7 @@ namespace WorkflowPatternFinder
       }
       ResultDebug.Content = "Searching for this pattern...";
       ChangeEnabledTreeButtons(false);
-      ((GridView)ValidOccurencesView.View).Columns[1].Header = _countNumberOfPatternsWithinModel ? "# of Occurrences" : "Similarity Score";
+      ((GridView)ValidOccurencesView.View).Columns[1].Header = _countNumberOfPatternsWithinModel ? "# of Occurrences" : "Similarity Scores";
       TreeProgressBar.IsIndeterminate = true;
       _simThresholdCache = threshold;
       _inducedCache = _treatAsInducedSubTree;
@@ -184,7 +184,7 @@ namespace WorkflowPatternFinder
       {
         var tasks = new List<Task>
         {
-          Task.Run((Action)UseGensimScript)
+          Task.Run((Action)CallGensimScript)
         };
         return Task.WhenAll(tasks);
       }
@@ -208,7 +208,7 @@ namespace WorkflowPatternFinder
             }, scheduler));
     }
 
-    void UseGensimScript()
+    void CallGensimScript()
     {
       ProcessStartInfo start = new ProcessStartInfo
       {
@@ -246,7 +246,7 @@ namespace WorkflowPatternFinder
             {
               var splittedResult = validTree.Split(';');
               var treePath = splittedResult[0];
-              var score = splittedResult[1];
+              var score = splittedResult[1].Split('-').ToList();
               var patternMembers = splittedResult.Skip(2).ToList();
 
               if (File.Exists(treePath))
@@ -257,14 +257,13 @@ namespace WorkflowPatternFinder
                   var nodeMatchParts = RemoveSpecialCharacters(nodeMatch).Split(' ').ToList();
                   var treeNode = nodeMatchParts[0];
                   var patternNode = nodeMatchParts[1];
-                  var matchScore = nodeMatchParts[2];
                   var matchWord = nodeMatchParts[3];
                   nodeMatches.Add(new KeyValuePair<string, string>(treeNode, $"{patternNode}:{matchWord}"));
                 }
                 var newPattern = new PatternObject(treePath, score, nodeMatches);
                 _foundPatterns.Add(newPattern);
                 //validOutput.Add(treePath, double.Parse(score, CultureInfo.InvariantCulture));
-                //_validOutputCache.Add($"{newPattern.DatabaseName}", newPattern.Score);
+                //_validOutputCache.Add($"{newPattern.DatabaseName}", newPattern.Scores);
                 Debug.WriteLine($"{treePath} is a subtree!");
               }
             else
@@ -328,14 +327,7 @@ namespace WorkflowPatternFinder
         if(listName == "ValidOccurencesView")
         {
           patternMembers = string.Join(",", selectedPattern.Ids.Select(t => $"{t.Key}:{t.Value}"));
-          if ((int) selectedPattern.Score > 0)
-          {
-            patternSize = selectedPattern.Ids.Count / (int) selectedPattern.Score;
-          }
-          else
-          {
-            patternSize = int.MaxValue;
-          }
+          patternSize = selectedPattern.Ids.Count / selectedPattern.Scores.Count;
         }
         if(e.ChangedButton == MouseButton.Left)
         {
@@ -427,12 +419,21 @@ namespace WorkflowPatternFinder
 
     private async Task FinishGensimScriptTask(Exception ex)
     {
-      foreach(var pattern in _foundPatterns.OrderByDescending(c => c.Score))
+      foreach(var pattern in _foundPatterns.OrderByDescending(c => c.Scores.Average()).OrderByDescending(c => c.Scores.Count))
       {
         var path = pattern.TreePath;
-        var score = Math.Round(pattern.Score, 3);
+        string scoreBinding;
+        var roundedScores = pattern.Scores.Select(s => Math.Round(s, 3)).ToList();
+        if (pattern.Scores.Count == 1)
+        {
+          scoreBinding = roundedScores.First().ToString(CultureInfo.InvariantCulture);
+        }
+        else
+        {
+          scoreBinding = $"{pattern.Scores.Count} ({string.Join(",", roundedScores)})";
+        }
 
-        ValidOccurencesView.Items.Add(new ValidOccurencesViewObject(path) { SimilarityScore = score });
+        ValidOccurencesView.Items.Add(new ValidOccurencesViewObject(path) { SimilarityScore = scoreBinding });
       }
       ResultDebug.Content = $"Found {_matchRatio.Item1} matches in {_matchRatio.Item2} models.";
       UpdateButtonText(TreeStartButton, "Done!");

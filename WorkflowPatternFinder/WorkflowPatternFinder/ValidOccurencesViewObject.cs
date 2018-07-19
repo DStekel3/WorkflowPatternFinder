@@ -13,6 +13,6 @@ namespace WorkflowPatternFinder
       
     }
 
-    public double SimilarityScore { get; set; }
+    public string SimilarityScore { get; set; }
   }
 }
