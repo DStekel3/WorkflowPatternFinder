@@ -18,9 +18,7 @@ for index in range(0, len(sys.argv)):
     arg = sys.argv[index]
     print('arg['+ str(index) + '] = '+arg)
 if len(sys.argv) == 9:
-    modelPath = sys.argv[1]
-    treeBasePath = sys.argv[2]
-    patternPath = sys.argv[3]
+    modelPath, treeBasePath, patternPath = sys.argv[1], sys.argv[2], sys.argv[3]
     induced = False
     countPatterns = False
     if sys.argv[4] == 'True':
@@ -59,30 +57,22 @@ if len(sys.argv) == 9:
         print('Searching in tree ' + str(allTreePaths.index(treePath) + 1) + ' of ' + str(len(allTreePaths)))
         tree = ProcessTreeLoader.LoadTree(treePath)
         if not countPatterns:
-          result = finder.GetMatch(tree, pattern, induced)
+          #result = finder.GetMatch(tree, pattern, induced)
+          result = finder.GetMatchPostOrder(tree, pattern, induced)
           if result[0]:
               print('\t found pattern in this tree.')
-              validTrees.append((treePath, result[1]))
+              validTrees.append((treePath, result[1], result[0]))
         else:
-          #result = finder.GetValidSubTrees(tree, pattern, induced)
           result = finder.GetMatches(tree, pattern, induced)
           if any(result):
-            validTrees.append((treePath, len(result)/pattern.GetTreeSize(), result))
+            validTrees.append((treePath, "-".join([str(i) for i in result[1]]), result[0]))
      
     print("Results coming up!")
     print(str(len(validTrees)) +"/"+str(len(allTreePaths))+" matches found.")    
     if len(validTrees) > 0:
         print("Valid trees:")
         for tree in validTrees:
-            path = tree[0]
-            score = "0"
-            patternMembers = []
-            if not countPatterns:
-              score = min([i[2] for i in tree[1]])
-              patternMembers = tree[1]
-            else:
-              score = tree[1]
-              patternMembers = tree[2]
+            path, score, patternMembers = tree
             print(path + ";" + str(score) + ";" + ";".join(map(str, patternMembers)))
 
 else:
