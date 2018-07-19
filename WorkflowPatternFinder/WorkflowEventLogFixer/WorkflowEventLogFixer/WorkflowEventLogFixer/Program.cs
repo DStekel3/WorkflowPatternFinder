@@ -20,16 +20,10 @@ namespace WorkflowEventLogFixer
     private static string _baseCsvFileDirectory = Path.Combine(_baseDirectory, "csv");
     private static string _baseXesFileDirectory = Path.Combine(_baseDirectory, "xes");
     private static string _basePtmlFileDirectory = Path.Combine(_baseDirectory, "ptml");
-    private static string _basePnmlFileDirectory = Path.Combine(_baseDirectory, "pnml");
-    private static string _baseEtmDirectory = Path.Combine(_baseDirectory, "etm");
-    private static string _PTQualityOutputFile = Path.Combine(_baseDirectory, "PTQ_output.txt");
     private static string _pythonExe = "";
     private static string _javaExe = "";
     private static string _word2VecScriptFile = Path.Combine(_baseToolPath, @"WorkflowPatternFinder\WorkflowPatternFinder\Gensim\TrainWord2VecModel.py");
     private static string _processTreeScriptFile = Path.Combine(_basePromPath, "ProcessTreeMiner.txt");
-    private static string _petriNetScriptFile = Path.Combine(_basePromPath, "PetriNetMiner.txt");
-    private static string _etmScriptFile = Path.Combine(_basePromPath, "EvolutionaryTreeMiner.txt");
-    private static string _PTQualityScriptFile = Path.Combine(_basePromPath, "MinePTQuality.txt");
     private static string _promCLI = Path.Combine(_basePromPath, "ProM_CLI.bat");
     private static string _csvToXesBat = Path.Combine(_baseToolPath,
       @"WorkflowPatternFinder\WorkflowPatternFinder\WorkflowEventLogFixer\WorkflowEventLogFixer\WorkflowEventLogFixer\CSVtoXES\CsvToXesDirectory.bat");
@@ -126,9 +120,6 @@ namespace WorkflowEventLogFixer
       _baseCsvFileDirectory = Path.Combine(_baseDirectory, "csv");
       _baseXesFileDirectory = Path.Combine(_baseDirectory, "xes");
       _basePtmlFileDirectory = Path.Combine(_baseDirectory, "ptml");
-      _basePnmlFileDirectory = Path.Combine(_baseDirectory, "pnml");
-      _baseEtmDirectory = Path.Combine(_baseDirectory, "etm");
-      _PTQualityOutputFile = Path.Combine(_baseDirectory, "PTQ_output.txt");
       _modelQualityCache.Clear();
     }
 
@@ -148,118 +139,7 @@ namespace WorkflowEventLogFixer
       // Compute quality dimensions
       //MineProcessTreeQuality();
     }
-
-    private static void CreatePtmlFilesWithETM()
-    {
-      UpdatePathsAndNoiseThresholdInEtmScript();
-      Process process = new Process();
-      ProcessStartInfo startInfo = new ProcessStartInfo
-      {
-        CreateNoWindow = true,
-        WorkingDirectory = Path.GetDirectoryName(_etmScriptFile) ?? throw new InvalidOperationException(),
-        FileName = "ProM_CLI.bat",
-        Arguments = $"-f {Path.GetFileName(_etmScriptFile)}"
-      };
-      process.StartInfo = startInfo;
-      process.Start();
-      process.WaitForExit();
-    }
-
-    private static void UpdatePathsAndNoiseThresholdInEtmScript()
-    {
-      // new path lines in script
-      string xesLineToWrite = $"xesDirectoryPath = \"{_baseXesFileDirectory}\\\";".Replace("\\", "\\\\");
-      string etmLineToWrite = $"etmDirectoryPath = \"{_baseEtmDirectory}\\\";".Replace("\\", "\\\\");
-
-      if(File.Exists(_etmScriptFile))
-      {
-        string[] lines = File.ReadAllLines(_etmScriptFile);
-
-        if(lines.Length > 0)
-        {
-          // Write the new file over the old file.
-          using(StreamWriter writer = new StreamWriter(_etmScriptFile))
-          {
-            for(int currentLine = 0; currentLine < lines.Length; currentLine++)
-            {
-              if(lines[currentLine].Contains("xesDirectoryPath ="))
-              {
-                writer.WriteLine(xesLineToWrite);
-              }
-              else if(lines[currentLine].Contains("etmDirectoryPath ="))
-              {
-                writer.WriteLine(etmLineToWrite);
-              }
-              else
-              {
-                writer.WriteLine(lines[currentLine]);
-              }
-            }
-          }
-        }
-        else
-        {
-          throw new Exception("Script is empty.");
-        }
-      }
-    }
-
-    private static void CreatePnmlFiles()
-    {
-      UpdatePathsInPetriNetScript(_petriNetScriptFile, _baseXesFileDirectory, _basePnmlFileDirectory);
-      Process process = new Process();
-      ProcessStartInfo startInfo = new ProcessStartInfo
-      {
-        CreateNoWindow = true,
-        WorkingDirectory = Path.GetDirectoryName(_petriNetScriptFile) ?? throw new InvalidOperationException(),
-        FileName = "ProM_CLI.bat",
-        Arguments = $"-f {Path.GetFileName(_petriNetScriptFile)}"
-      };
-      process.StartInfo = startInfo;
-      process.Start();
-      process.WaitForExit();
-    }
-
-    private static void UpdatePathsInPetriNetScript(string scriptPath, string xesDirectoryPath, string basePnmlFileDirectory)
-    {
-      // new path lines in script
-      string xesLineToWrite = $"xesDirectoryPath = \"{xesDirectoryPath}\\\";".Replace("\\", "\\\\");
-      string ptmlLineToWrite = $"pnmlDirectoryPath = \"{basePnmlFileDirectory}\\\";".Replace("\\", "\\\\");
-
-      if(File.Exists(scriptPath))
-      {
-        string[] lines = File.ReadAllLines(scriptPath);
-
-        if(lines.Length > 0)
-        {
-          // Write the new file over the old file.
-          using(StreamWriter writer = new StreamWriter(scriptPath))
-          {
-            for(int currentLine = 0; currentLine < lines.Length; currentLine++)
-            {
-              if(currentLine == 2)
-              {
-                writer.WriteLine(xesLineToWrite);
-              }
-              else if(currentLine == 3)
-              {
-                writer.WriteLine(ptmlLineToWrite);
-              }
-              else
-              {
-                writer.WriteLine(lines[currentLine]);
-              }
-            }
-          }
-        }
-        else
-        {
-          throw new Exception("Script is empty.");
-        }
-      }
-    }
-
-
+    
     public static bool CheckIfPythonAndJavaAreInstalled()
     {
       ProcessStartInfo info = new ProcessStartInfo
@@ -344,14 +224,6 @@ namespace WorkflowEventLogFixer
       {
         Directory.CreateDirectory(_basePtmlFileDirectory);
       }
-      if(!Directory.Exists(_basePnmlFileDirectory))
-      {
-        Directory.CreateDirectory(_basePnmlFileDirectory);
-      }
-      if(!Directory.Exists(_baseEtmDirectory))
-      {
-        Directory.CreateDirectory(_baseEtmDirectory);
-      }
     }
 
     /// <summary>
@@ -365,8 +237,8 @@ namespace WorkflowEventLogFixer
       ProcessStartInfo startInfo = new ProcessStartInfo
       {
         CreateNoWindow = true,
-        WorkingDirectory = Path.GetDirectoryName(_processTreeScriptFile) ?? throw new InvalidOperationException(),
-        FileName = "ProM_CLI.bat",
+        WorkingDirectory = _basePromPath ?? throw new InvalidOperationException(),
+        FileName = _promCLI,
         Arguments = $"-f {Path.GetFileName(_processTreeScriptFile)}",
         WindowStyle = ProcessWindowStyle.Hidden
       };
@@ -530,9 +402,6 @@ namespace WorkflowEventLogFixer
     public static void UpdateScriptFilePaths(string promBasePath)
     {
       _processTreeScriptFile = Path.Combine(promBasePath, PromCustomFileNames.GetProcessTreeMiner());
-      _petriNetScriptFile = Path.Combine(promBasePath, PromCustomFileNames.GetPetriNetMiner());
-      _etmScriptFile = Path.Combine(promBasePath, PromCustomFileNames.GetEvoluationaryTreeMiner());
-      _PTQualityScriptFile = Path.Combine(promBasePath, PromCustomFileNames.GetPTQualityMiner());
       _promCLI = Path.Combine(promBasePath, PromCustomFileNames.GetCLI());
     }
 
@@ -660,121 +529,6 @@ namespace WorkflowEventLogFixer
       var process = Process.Start(start);
       process.WaitForExit();
       process.Close();
-    }
-
-    public static bool DoesProcessTreeQualityFileExist()
-    {
-      return File.Exists(_PTQualityOutputFile);
-    }
-
-    public static string GetProcessTreeQuality(string ptmlFile)
-    {
-      if(!_modelQualityCache.Any())
-      {
-        _modelQualityCache = File.ReadAllLines(_PTQualityOutputFile).ToList();
-      }
-
-      var resultingLine = _modelQualityCache.SingleOrDefault(f => f.StartsWith(ptmlFile));
-      if(resultingLine != null)
-      {
-        return resultingLine.Split(';')[1].Split(' ')[0];
-      }
-      return "-";
-    }
-
-    public static void MineProcessTreeQuality()
-    {
-      UpdatePathsInMinePTQualityScript(_PTQualityScriptFile, _baseXesFileDirectory, _basePtmlFileDirectory);
-      ProcessStartInfo startInfo = new ProcessStartInfo
-      {
-        WorkingDirectory = Path.GetDirectoryName(_PTQualityScriptFile) ?? throw new InvalidOperationException(),
-        FileName = _promCLI,
-        Arguments = $"-f {Path.GetFileName(_PTQualityScriptFile)}",
-        UseShellExecute = false
-      };
-      //cmd is full path to python.exe
-      //args is path to .py file and any cmd line args
-      var p = Process.Start(startInfo);
-      p.WaitForExit();
-      p.Close();
-    }
-
-    private static void UpdatePathsInPTQualityScript(string scriptPath, string xesPath, string treePath)
-    {
-      // new path lines in script
-      string xesLineToWrite = $"xesPath = \"{xesPath}\";".Replace("\\", "\\\\");
-      string treeLineToWrite = $"treePath = \"{treePath}\";".Replace("\\", "\\\\");
-
-      if(File.Exists(scriptPath))
-      {
-        string[] lines = File.ReadAllLines(scriptPath);
-
-        if(lines.Length > 0)
-        {
-          // Write the new file over the old file.
-          using(StreamWriter writer = new StreamWriter(scriptPath))
-          {
-            for(int currentLine = 0; currentLine < lines.Length; currentLine++)
-            {
-              if(currentLine == 2)
-              {
-                writer.WriteLine(xesLineToWrite);
-              }
-              else if(currentLine == 3)
-              {
-                writer.WriteLine(treeLineToWrite);
-              }
-              else
-              {
-                writer.WriteLine(lines[currentLine]);
-              }
-            }
-          }
-        }
-        else
-        {
-          throw new Exception("Script is empty.");
-        }
-      }
-    }
-
-    private static void UpdatePathsInMinePTQualityScript(string scriptFile, string xesDirectoryPath, string ptmlDirectoryPath)
-    {
-      // new path lines in script
-      string xesLineToWrite = $"xesPath = \"{xesDirectoryPath}\\\";".Replace("\\", "\\\\");
-      string treeLineToWrite = $"treePath = \"{ptmlDirectoryPath}\\\";".Replace("\\", "\\\\");
-
-      if(File.Exists(scriptFile))
-      {
-        string[] lines = File.ReadAllLines(scriptFile);
-
-        if(lines.Length > 0)
-        {
-          // Write the new file over the old file.
-          using(StreamWriter writer = new StreamWriter(scriptFile))
-          {
-            for(int currentLine = 0; currentLine < lines.Length; currentLine++)
-            {
-              if(currentLine == 2)
-              {
-                writer.WriteLine(xesLineToWrite);
-              }
-              else if(currentLine == 3)
-              {
-                writer.WriteLine(treeLineToWrite);
-              }
-              else
-              {
-                writer.WriteLine(lines[currentLine]);
-              }
-            }
-          }
-        }
-        else
-        {
-          throw new Exception("Script is empty.");
-        }
-      }
     }
 
     public static string GetPythonExe()
