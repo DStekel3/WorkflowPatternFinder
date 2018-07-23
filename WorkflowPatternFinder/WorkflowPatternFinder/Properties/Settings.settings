@@ -2,19 +2,19 @@
 <SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="WorkflowPatternFinder.Properties" GeneratedClassName="Settings">
   <Profiles />
   <Settings>
-    <Setting Name="TreeFolder" Type="System.String" Scope="User">
+    <Setting Name="TreeFolder" Type="System.String" Scope="CustomUser">
       <Value Profile="(Default)" />
     </Setting>
-    <Setting Name="DataFolder" Type="System.String" Scope="User">
+    <Setting Name="DataFolder" Type="System.String" Scope="CustomUser">
       <Value Profile="(Default)" />
     </Setting>
-    <Setting Name="PromFolder" Type="System.String" Scope="User">
+    <Setting Name="PromFolder" Type="System.String" Scope="CustomUser">
       <Value Profile="(Default)" />
     </Setting>
-    <Setting Name="PatternFile" Type="System.String" Scope="User">
+    <Setting Name="PatternFile" Type="System.String" Scope="CustomUser">
       <Value Profile="(Default)" />
     </Setting>
-    <Setting Name="Word2VecFile" Type="System.String" Scope="User">
+    <Setting Name="Word2VecFile" Type="System.String" Scope="CustomUser">
       <Value Profile="(Default)" />
     </Setting>
   </Settings>

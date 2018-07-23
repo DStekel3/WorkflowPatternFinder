@@ -21,6 +21,7 @@ using System.Globalization;
 using System.Text;
 using System.Threading;
 using WorkflowPatternFinder.Properties;
+using ComboBox = System.Windows.Controls.ComboBox;
 using TextBox = System.Windows.Controls.TextBox;
 
 namespace WorkflowPatternFinder
@@ -42,6 +43,7 @@ namespace WorkflowPatternFinder
     private string _helpText = "Fill in term...";
     private List<PatternObject> _foundPatterns = new List<PatternObject>();
     private Window tFinder;
+    private Dictionary<string, ModelMatches> _modelMatches = new Dictionary<string, ModelMatches>();
 
     public MainWindow()
     {
@@ -94,9 +96,9 @@ namespace WorkflowPatternFinder
           //var possibleModelFile = Path.Combine(Path.GetDirectoryName(fbd.SelectedPath), "trained.gz");
           //if(File.Exists(possibleModelFile))
           //{
-            Properties.Settings.Default.TreeFolder = fbd.SelectedPath;
-            Properties.Settings.Default.Save();
-            //ModelPathLabel.Content = possibleModelFile;
+          Properties.Settings.Default.TreeFolder = fbd.SelectedPath;
+          Properties.Settings.Default.Save();
+          //ModelPathLabel.Content = possibleModelFile;
           //}
         }
         else
@@ -163,7 +165,8 @@ namespace WorkflowPatternFinder
       _simThresholdCache = threshold;
       _inducedCache = _treatAsInducedSubTree;
       _similarityVariantCache = ((System.Windows.Controls.Label)SimilarityVariantComboBox.SelectedItem).Content.ToString();
-
+      _modelMatches.Clear();
+      OpenVariationViewerButton.Visibility = Visibility.Hidden;
 
       _treeBasePathCache = ImportTreeLabel.Content.ToString();
       _patternPathCache = ImportPatternLabel.Content.ToString();
@@ -236,28 +239,86 @@ namespace WorkflowPatternFinder
           {
             Debug.WriteLine(line);
           }
-          var resultingOutput = lines.SkipWhile(c => !c.StartsWith("Results coming up!")).Skip(1);
-          var splitReaction = resultingOutput.First().Split()[0].Split('/');
-          _matchRatio = new Tuple<string,string>(splitReaction[0], splitReaction[1]);
+          var resultingOutput = lines.SkipWhile(c => !c.StartsWith("Results coming up!")).Skip(1).ToList();
+          var overviewOneLiner = resultingOutput.First().Split('/');
+
+          _matchRatio = new Tuple<string, string, string>(overviewOneLiner[0], overviewOneLiner[1], overviewOneLiner[2]);
+          double.TryParse(overviewOneLiner[3], NumberStyles.Any, CultureInfo.InvariantCulture, out _avgScore);
+          try
+          {
+            var variantLines = resultingOutput.GetRange(1, resultingOutput.IndexOf("Valid trees:") - 1);
+            foreach(var variantLine in variantLines)
+            {
+              var components = variantLine.Split(';');
+              var treePath = components[0];
+              var pTerm = components[1];
+              var tTerm = components[2];
+              var tSentence = components[3];
+              var mScore = components[4];
+              var variantId = components[5];
+
+              if(!_modelMatches.ContainsKey(treePath))
+              {
+                _modelMatches.Add(treePath, new ModelMatches());
+              }
+              if(!_modelMatches[treePath].Variants.ContainsKey(variantId))
+              {
+                _modelMatches[treePath].Variants.Add(variantId, new MatchVariant());
+              }
+              if(!double.TryParse(mScore, out double x))
+              {
+                Debug.Write("Ehm....");
+              }
+
+              var newTermMatch = new TermMatch
+              {
+                PatternTerm = pTerm,
+                TreeTerm = tTerm,
+                Score = mScore,
+                TreeSentence = tSentence
+              };
+
+              _modelMatches[treePath].Variants[variantId].Matches.Add(newTermMatch);
+            }
+          }
+          catch(Exception e)
+          {
+            throw e;
+          }
+
+          foreach(var modelMatch in _modelMatches.Values)
+          {
+            foreach(var variant in modelMatch.Variants.Values)
+            {
+              variant.ComputeOverallScore();
+            }
+          }
+
           var validSubtrees = resultingOutput.SkipWhile(c => !c.StartsWith("Valid trees:")).Skip(1);
           foreach(string validTree in validSubtrees)
           {
-            if (!string.IsNullOrEmpty(validTree))
+            if(!string.IsNullOrEmpty(validTree))
             {
               var splittedResult = validTree.Split(';');
               var treePath = splittedResult[0];
               var score = splittedResult[1].Split('-').ToList();
               var patternMembers = splittedResult.Skip(2).ToList();
 
-              if (File.Exists(treePath))
+              if(File.Exists(treePath))
               {
                 var nodeMatches = new List<KeyValuePair<string, string>>();
-                foreach (var nodeMatch in patternMembers)
+                foreach(var nodeMatch in patternMembers)
                 {
                   var nodeMatchParts = RemoveSpecialCharacters(nodeMatch).Split(' ').ToList();
+                  if(nodeMatchParts.Count > 5)
+                  {
+                    Debug.Write("Eh");
+                  }
                   var treeNode = nodeMatchParts[0];
                   var patternNode = nodeMatchParts[1];
+                  var wordMatchScore = nodeMatchParts[2];
                   var matchWord = nodeMatchParts[3];
+                  var treeSentence = "";
                   nodeMatches.Add(new KeyValuePair<string, string>(treeNode, $"{patternNode}:{matchWord}"));
                 }
                 var newPattern = new PatternObject(treePath, score, nodeMatches);
@@ -266,10 +327,10 @@ namespace WorkflowPatternFinder
                 //_validOutputCache.Add($"{newPattern.DatabaseName}", newPattern.Scores);
                 Debug.WriteLine($"{treePath} is a subtree!");
               }
-            else
-            {
-              throw new Exception("Incorrect file path given!");
-            }
+              else
+              {
+                throw new Exception("Incorrect file path given!");
+              }
             }
           }
           Debug.WriteLine($"The process took {timer.Elapsed.Seconds} seconds!");
@@ -280,17 +341,6 @@ namespace WorkflowPatternFinder
     public static string RemoveSpecialCharacters(string str)
     {
       return Regex.Replace(str, "[',()]+", "", RegexOptions.Compiled);
-    }
-    private void InducedCheckBox_Click(object sender, RoutedEventArgs e)
-    {
-      if(InducedCheckBox.IsChecked == true)
-      {
-        _treatAsInducedSubTree = true;
-      }
-      else
-      {
-        _treatAsInducedSubTree = false;
-      }
     }
 
     private void ListView_DoubleClick(object sender, MouseButtonEventArgs e)
@@ -398,7 +448,7 @@ namespace WorkflowPatternFinder
           task()
             .ContinueWith(async t =>
             {
-              await FinishPreprocessingTask(t.Exception);
+              FinishPreprocessingTask(t.Exception);
               completedTask?.Invoke();
             }, scheduler));
     }
@@ -422,26 +472,19 @@ namespace WorkflowPatternFinder
       foreach(var pattern in _foundPatterns.OrderByDescending(c => c.Scores.Average()).OrderByDescending(c => c.Scores.Count))
       {
         var path = pattern.TreePath;
-        string scoreBinding;
         var roundedScores = pattern.Scores.Select(s => Math.Round(s, 3)).ToList();
-        if (pattern.Scores.Count == 1)
-        {
-          scoreBinding = roundedScores.First().ToString(CultureInfo.InvariantCulture);
-        }
-        else
-        {
-          scoreBinding = $"{pattern.Scores.Count} ({string.Join(",", roundedScores)})";
-        }
+        var scoreBinding = pattern.Scores.Count == 1 ? roundedScores.First().ToString(CultureInfo.InvariantCulture) : $"{pattern.Scores.Count} ({string.Join(",", roundedScores)})";
 
         ValidOccurencesView.Items.Add(new ValidOccurencesViewObject(path) { SimilarityScore = scoreBinding });
       }
-      ResultDebug.Content = $"Found {_matchRatio.Item1} matches in {_matchRatio.Item2} models.";
+      ResultDebug.Content = $"Found {_matchRatio.Item1} matches in {_matchRatio.Item2} out of {_matchRatio.Item3} models.\nThe average overall score is {Math.Round(_avgScore, 3).ToString(CultureInfo.InvariantCulture)}.";
       UpdateButtonText(TreeStartButton, "Done!");
       ChangeEnabledTreeButtons(true);
       TreeProgressBar.IsIndeterminate = false;
+      OpenVariationViewerButton.Visibility = _modelMatches.Any() ? Visibility.Visible : Visibility.Hidden;
     }
 
-    private async Task FinishPreprocessingTask(Exception ex)
+    private void FinishPreprocessingTask(Exception ex)
     {
       TryToUpdateUI();
     }
@@ -488,7 +531,8 @@ namespace WorkflowPatternFinder
     private double _simThresholdCache;
     private Dictionary<string, double> _validOutputCache;
     private string _filterModelCache;
-    private Tuple<string,string> _matchRatio;
+    private Tuple<string, string, string> _matchRatio;
+    private double _avgScore;
 
     private void TryToUpdateUI()
     {
@@ -636,7 +680,7 @@ namespace WorkflowPatternFinder
       TreeStartButton.IsEnabled = isEnabled;
       ImportPatternButton.IsEnabled = isEnabled;
       ImportTreeButton.IsEnabled = isEnabled;
-      InducedCheckBox.IsEnabled = isEnabled;
+      PatternMatchingComboBox.IsEnabled = isEnabled;
       CountCheckBox.IsEnabled = isEnabled;
       SimilarityVariantComboBox.IsEnabled = isEnabled;
       SimTresholdValue.IsEnabled = isEnabled;
@@ -647,17 +691,6 @@ namespace WorkflowPatternFinder
     {
       _foundPatterns.Clear();
       ValidOccurencesView.Items.Clear();
-    }
-
-    private void ClearDebugLabel(int interval = 5000)
-    {
-      var timer = new Timer { Interval = interval };
-      timer.Tick += (s, f) =>
-      {
-        ResultDebug.Content = "";
-        timer.Stop();
-      };
-      timer.Start();
     }
 
     private bool PathsExists()
@@ -932,8 +965,8 @@ namespace WorkflowPatternFinder
         {
           return;
         }
-        tFinder = new TermFinder();
-        tFinder.Owner = this;
+
+        tFinder = new TermFinder {Owner = this};
         tFinder.Show();
         tFinder.Activate();
       }
@@ -968,6 +1001,19 @@ namespace WorkflowPatternFinder
           //If nothing has been entered yet.
           ((TextBox)sender).Text = "";
       }
+    }
+
+    private void OpenVariationViewerButton_Click(object sender, RoutedEventArgs e)
+    {
+      var variationViewer = new VariationViewer(_modelMatches) {Owner = this};
+      variationViewer.Show();
+      variationViewer.Focus();
+    }
+
+    private void PatternMatchingComboBox_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+      var selectedValue = ((ComboBox) sender).SelectedIndex;
+      _treatAsInducedSubTree = selectedValue == 0;
     }
   }
 }
