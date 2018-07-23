@@ -69,5 +69,5 @@ class ProcessTree(object):
       recurse(self.GetRoot())
       return data
         
-      
-                
+    def GetNumberOfManualTasks(self):
+      return len([i for i in self._nodes if i.GetType() == "ManualTask"])

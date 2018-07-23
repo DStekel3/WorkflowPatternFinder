@@ -14,6 +14,22 @@ import csv
 
 flatten = lambda x: [item for sublist in x for item in sublist]
 
+def PrintMatchVariants(validMatches, patternTree):
+  variantSize = patternTree.GetNumberOfManualTasks()
+  for validMatch in validMatches:
+    treePath, overallScore, termMatches = validMatch
+    patternEvents = {}
+    totalNumOfManualTasksFound = 0
+    for termMatch in termMatches:
+      treeId, patternId, score, term = termMatch
+      if term != "":
+        if patternId not in patternEvents:
+          patternEvents[patternId] = patternTree.GetNode(patternId).GetEvent()
+        patternTerm = patternEvents[patternId]
+        treeWord, sentence = term
+        print(treePath+";"+patternTerm+";"+treeWord+";"+sentence.replace(';', '')+";"+str(score)+";"+str(int(totalNumOfManualTasksFound/variantSize)))
+        totalNumOfManualTasksFound = totalNumOfManualTasksFound+1
+
 for index in range(0, len(sys.argv)):
     arg = sys.argv[index]
     print('arg['+ str(index) + '] = '+arg)
@@ -61,14 +77,23 @@ if len(sys.argv) == 9:
           result = finder.GetMatchPostOrder(tree, pattern, induced)
           if result[0]:
               print('\t found pattern in this tree.')
-              validTrees.append((treePath, result[1], result[0]))
+              validTrees.append((treePath, str(result[1]), result[0]))
         else:
           result = finder.GetMatches(tree, pattern, induced)
           if any(result):
             validTrees.append((treePath, "-".join([str(i) for i in result[1]]), result[0]))
      
     print("Results coming up!")
-    print(str(len(validTrees)) +"/"+str(len(allTreePaths))+" matches found.")    
+    # Print an overview of the matches found as a one-liner.
+    numOfMatches = sum([len(i[1].split('-')) for i in validTrees])
+    totalScore = sum([float(s) for sublist in [i[1].split('-') for i in validTrees] for s in sublist])
+    avgScore = totalScore/numOfMatches
+    print(str(numOfMatches)+"/"+str(len(validTrees))+"/"+str(len(allTreePaths))+"/"+str(avgScore))
+
+    # Print all match variants.
+    PrintMatchVariants(validTrees, pattern)
+
+    # Print a complete one-liner per matched model.
     if len(validTrees) > 0:
         print("Valid trees:")
         for tree in validTrees:
