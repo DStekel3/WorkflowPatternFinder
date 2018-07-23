@@ -4,7 +4,7 @@ from copy import copy
 class Node(object):
     """A Node object."""
 
-    def __init__(self, type, id, name=None):
+    def __init__(self, type, id, name=""):
         self._type = type
         self._name = name
         self._id = id
@@ -13,7 +13,7 @@ class Node(object):
         self._isVisited = False
         self._number = -1
 
-        if name != None:
+        if name != "":
           self._name = self.EscapeCharacters(name)
         else:
           typeOfNode = str(type).split('.')[1]

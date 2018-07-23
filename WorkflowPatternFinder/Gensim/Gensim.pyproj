@@ -4,7 +4,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>44ea4a09-4254-4601-acb2-be3e847d45c4</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>PatternDiscoveryScript.py</StartupFile>
+    <StartupFile>Gensim.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
@@ -14,7 +14,7 @@
     <IsWindowsApplication>False</IsWindowsApplication>
     <InterpreterId>Global|PythonCore|3.4</InterpreterId>
     <LaunchProvider>Standard Python launcher</LaunchProvider>
-    <CommandLineArguments>"C:\Users\dst\Source\Repos\WorkflowPatternFinder\WorkflowPatternFinder\Gensim\datasets\sonar-320.bin" "C:\Thesis\Profit analyses\testmap\testje" "C:\Thesis\Profit analyses\testmap\testje\induced.ptml" "False" "0.5" "True" "max" ""</CommandLineArguments>
+    <CommandLineArguments>"C:\Users\dst\Source\Repos\WorkflowPatternFinder\WorkflowPatternFinder\Gensim\datasets\sonar-320.bin" "C:\Thesis\Profit analyses\04-04-2018\ptml" "C:\Users\dst\Source\Repos\WorkflowPatternFinder\WorkflowPatternFinder\WorkflowPatternFinder\Example Patterns\accordeer1.ptml" "False" "0.8" "True" "max" ""</CommandLineArguments>
     <EnableNativeCodeDebugging>False</EnableNativeCodeDebugging>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">

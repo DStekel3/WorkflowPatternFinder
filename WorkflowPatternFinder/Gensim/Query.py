@@ -90,10 +90,10 @@ class Query(object):
                   score = -1
                   # uncomment line to add lemmatization check! (Matching on verbs/nouns etc. only)
                   #if self.WordsHaveSameType(patternWord, treeWord):
-                  if treeWord in synonyms:
+                  if treeWord in antonyms:
+                      return (0.0, '')
+                  elif treeWord in synonyms:
                       score = 1
-                  elif treeWord in antonyms:
-                      score = 0
                   elif treeWord in self._model.wv.vocab and patternWord in self._model.wv.vocab:
                       score = self._model.wv.similarity(patternWord, treeWord)
                   if score > 1:

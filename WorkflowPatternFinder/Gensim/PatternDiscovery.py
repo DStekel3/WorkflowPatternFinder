@@ -203,9 +203,22 @@ class PatternDiscovery(object):
 
   def GetPatternWord(self, tuple):
     try:
-      return tuple[2]
+      if len(tuple) == 3:
+        return tuple[2]
+      elif len(tuple) == 4:
+        return (tuple[2], self.EscapeSpecialChars(tuple[3]))
     except:
       return ""
+
+  def EscapeSpecialChars(self, sentence):
+      result = sentence.replace('\n', '_')
+      result = result.replace('&amp;', '&')
+      result = result.replace('&lt;', '<')
+      result = result.replace('&gt;', '>')
+      result = result.replace('&quot;', '"')
+      result = result.replace('&apos;', '`')
+      result = result.replace('&euml;', 'ë')
+      return result
 
   def AreSimilar(self, tNode, pNode):
     if pNode.GetType() == tNode.GetType():
@@ -222,8 +235,8 @@ class PatternDiscovery(object):
       score = self._query.GetSentenceSimilarityMaxVariant(tNode.GetEvent(), pNode.GetEvent())
     elif self._similarityVariant == "average":
       score = self._query.GetSentenceSimilarityAverageVariant(tNode.GetEvent(), pNode.GetEvent())
-    if score[0] > self._simThreshold:
-      return (score[0], tNode.GetId(), score[1])
+    if score[0] >= self._simThreshold:
+      return (score[0], tNode.GetId(), score[1], tNode.GetEvent().replace(' ', '_'))
     return ()
   
   def SetTrainedModelPath(self, modelPath):
