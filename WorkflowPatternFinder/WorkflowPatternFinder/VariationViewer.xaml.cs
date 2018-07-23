@@ -1,9 +1,11 @@
 ﻿using System;
+using System.CodeDom;
 using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -11,6 +13,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Documents;
+using System.Windows.Forms.VisualStyles;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -167,6 +170,23 @@ namespace WorkflowPatternFinder
       {
         Close();
         Owner.Focus();
+      }
+    }
+
+    private void VariantGrid_OnMouseDoubleClick(object sender, MouseButtonEventArgs e)
+    {
+      var selectedMatch = variantGrid.SelectedItem;
+      if (selectedMatch != null)
+      {
+        var items = ((DataRowView) selectedMatch).Row.ItemArray;
+        foreach (string item in items.OfType<string>())
+        {
+          if (File.Exists(item))
+          {
+            var filePath = item;
+            (Owner as MainWindow)?.RenderTreeFromChildWindow(filePath);
+          }
+        }
       }
     }
   }

@@ -578,27 +578,11 @@ namespace WorkflowPatternFinder
       if(Directory.Exists(_processTreeDirectoryCache))
       {
         var allFiles = Directory.GetFiles(_processTreeDirectoryCache);
-
-        // Code for loading in the quality of process trees. Since the quality computation is incorrect, we disable this code for now.
-        //if(Program.DoesProcessTreeQualityFileExist())
-        //{
-        //  foreach(string path in allFiles)
-        //  {
-        //    var ptQuality = Program.GetProcessTreeQuality(path);
-        //    ProcessTreeView.Items.Add(new ProcessTreeObject(path) { Quality = ptQuality });
-        //  }
-        //}
-        //else
-        //{
-
+        
         foreach(string path in allFiles)
         {
-          //ProcessTreeView.Items.Add(new ProcessTreeObject(path) { Quality = "-" });
           _processtreeFolderCache.Add(new ProcessTreeObject(path));
         }
-        //}
-
-        //ProcessTreeViewLabel.Content = $"Process trees created \t{allFiles.Count()} models loaded";
       }
     }
 
@@ -803,30 +787,14 @@ namespace WorkflowPatternFinder
       }
     }
 
-    /// <summary>
-    /// This function retrains a word2vec model, but is not used right now since we study other word2vec models which are not trained on our dataset.
-    /// </summary>
-    /// <param name="sender"></param>
-    /// <param name="e"></param>
-    private void TrainModelButton_Click(object sender, RoutedEventArgs e)
+    public void RenderTreeFromChildWindow(string filePath)
     {
-      return;
-      if(Program.CheckIfPythonAndJavaAreInstalled())
-      {
-        var csvBaseDirectory = Path.Combine(Path.GetDirectoryName(ModelPathLabel.Content.ToString()), "csv");
-        if(Directory.Exists(csvBaseDirectory))
-        {
-          var windowSize = WindowSizeValue.Text;
-          var minCount = MinCountValue.Text;
-          var epochs = NumberOfEpochsValue.Text;
-          var scriptPath = Path.Combine(Program.GetToolBasePath(), @"WorkflowPatternFinder\WorkflowPatternFinder\Gensim\TrainWord2VecModel.py");
-          Program.TrainWord2VecModel(scriptPath, csvBaseDirectory, windowSize, minCount, epochs);
-        }
-        else
-        {
-          UpdateButtonText(TrainModelButton, _incorrectFile, 3000);
-        }
-      }
+      var selectedPattern = _foundPatterns.Single(p => p.TreePath == filePath);
+      
+      var patternMembers = string.Join(",", selectedPattern.Ids.Select(t => $"{t.Key}:{t.Value}"));
+      var patternSize = selectedPattern.Ids.Count / selectedPattern.Scores.Count;
+      
+      RenderTreeInPython(filePath, patternMembers, Path.GetFileNameWithoutExtension(filePath), patternSize);
     }
 
     private void RenderTreeInPython(string filePath, string patternMembers = "", string treeSummary = "", int patternSize = 1)
