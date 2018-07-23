@@ -10,6 +10,5 @@
     <Label x:Name="FindTermLabel" Content="Search for term:" HorizontalAlignment="Left" Margin="37,20,0,0" VerticalAlignment="Top"/>
     <TextBox x:Name="FindTermTextBox" HorizontalAlignment="Left" Height="23" Margin="37,46,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="167"/>
     <Button x:Name="FindTermButton" Content="Find next" HorizontalAlignment="Left" Margin="37,84,0,0" VerticalAlignment="Top" Width="76" Click="FindTermButton_Click"/>
-
   </Grid>
 </Window>

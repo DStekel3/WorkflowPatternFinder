@@ -19,11 +19,11 @@ namespace WorkflowPatternFinder
   /// <summary>
   /// Interaction logic for TermFinder.xaml
   /// </summary>
-  public partial class TermFinder : Window
+  public partial class TermFinder
   {
-    private string _findTerm = "";
+    private string _findTerm = string.Empty;
     private List<MatchingTerm> _matches = new List<MatchingTerm>();
-    private int _selectedIndex = 0;
+    private int _selectedIndex;
 
     public TermFinder()
     {

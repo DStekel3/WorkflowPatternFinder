@@ -129,11 +129,17 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="MatchVariant.cs" />
+    <Compile Include="ModelMatches.cs" />
     <Compile Include="ProcessTreeObject.cs" />
     <Compile Include="TermFinder.xaml.cs">
       <DependentUpon>TermFinder.xaml</DependentUpon>
     </Compile>
     <Compile Include="ValidOccurencesViewObject.cs" />
+    <Compile Include="TermMatch.cs" />
+    <Compile Include="VariationViewer.xaml.cs">
+      <DependentUpon>VariationViewer.xaml</DependentUpon>
+    </Compile>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -147,6 +153,10 @@
       <SubType>Code</SubType>
     </Compile>
     <Page Include="TermFinder.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="VariationViewer.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
