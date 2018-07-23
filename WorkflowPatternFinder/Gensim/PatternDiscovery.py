@@ -69,32 +69,6 @@ class PatternDiscovery(object):
             break
     return bestMatch
 
-  # this method is deprecated and should be removed!
-  def GetMatch(self, T, P, isInduced=True):
-    # walk through tree nodes, using breadth first traversal
-    self._dict = []
-    self._dataTree = T
-    p = P.GetRoot()
-    nodelist = [T.GetRoot()]
-    bestMatch = ([], 0)
-    while len(nodelist) > 0:
-      # pop first element and add its children to the nodelist
-      t = nodelist.pop(0)
-      for child in t.GetChildren():
-        nodelist.append(child)
-      result = (False, [])
-      if self.AreSimilar(t, p):
-        if isInduced:
-          result = self.GetInducedMatch(t, p)
-        else:
-          result = self.GetEmbeddedMatch(t, p)
-        score = self.GetPatternMatchScore(result)
-        if result and score > bestMatch[1]:
-          bestMatch = (result[1], score)
-          if score == 1:
-            break
-    return bestMatch
-
   def GetPatternMatchScore(self, matches):
     if any(matches):
       return sum([i[2] for i in matches])/len(matches)

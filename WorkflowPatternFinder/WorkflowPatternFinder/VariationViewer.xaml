@@ -14,6 +14,6 @@
     </CheckBox>
     <Label x:Name="Label1" Content="View distinct variants only" Margin="96,10,0,710" HorizontalAlignment="Left" Width="368"/>
     <Label x:Name="Title" Content="Title" Margin="337,30,337,0" HorizontalContentAlignment="Center" Height="51" VerticalAlignment="Top"/>
-    <DataGrid x:Name="variantGrid" Margin="33,86,55,39" ItemsSource="{Binding}" AutoGenerateColumns="True" FontSize="18" IsReadOnly="True" />
+    <DataGrid x:Name="variantGrid" Margin="33,86,55,39" ItemsSource="{Binding}" AutoGenerateColumns="True" FontSize="18" IsReadOnly="True"  MouseDoubleClick="VariantGrid_OnMouseDoubleClick"/>
   </Grid>
 </Window>

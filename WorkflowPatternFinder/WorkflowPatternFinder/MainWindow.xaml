@@ -183,7 +183,7 @@
               <DropShadowEffect Opacity="0.7" ShadowDepth="3"/>
             </Button.Effect>
           </Button>
-          <Button x:Name="TrainModelButton" Content="Train model" HorizontalAlignment="Left" Margin="0,391,0,0" VerticalAlignment="Top" Width="271" RenderTransformOrigin="0.547,1.5" Height="58" Click="TrainModelButton_Click" Grid.Column="1" Foreground="White" Background="#FF818181" IsEnabled="False" Visibility="Hidden">
+          <Button x:Name="TrainModelButton" Content="Train model" HorizontalAlignment="Left" Margin="0,391,0,0" VerticalAlignment="Top" Width="271" RenderTransformOrigin="0.547,1.5" Height="58" Grid.Column="1" Foreground="White" Background="#FF818181" IsEnabled="False" Visibility="Hidden">
             <Button.Effect>
               <DropShadowEffect Opacity="0.7" ShadowDepth="3"/>
             </Button.Effect>

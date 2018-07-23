@@ -93,7 +93,7 @@ if len(sys.argv) == 9:
     # Print all match variants.
     PrintMatchVariants(validTrees, pattern)
 
-    # Print a complete one-liner per matched model.
+    # Print a complete one-liner per model that contains a match.
     if len(validTrees) > 0:
         print("Valid trees:")
         for tree in validTrees:
