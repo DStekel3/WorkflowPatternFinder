@@ -2,15 +2,15 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace WorkflowEventLogFixer
+namespace WorkflowEventLogProcessor
 {
     public class Node
     {
-        private ProcessTreeLoader.NodeType _type;
-        private Guid _id = Guid.Empty;
+        private readonly ProcessTreeLoader.NodeType _type;
+        private readonly Guid _id;
         private Node _parent;
-        private List<Node> _children = new List<Node>();
-        private string _name;
+        private readonly List<Node> _children = new List<Node>();
+        private readonly string _name;
         private bool _isRoot;
 
         public Node(ProcessTreeLoader.NodeType type, string id, string name)

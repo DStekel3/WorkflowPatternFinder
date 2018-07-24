@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace WorkflowEventLogFixer
+namespace WorkflowEventLogProcessor
 {
   public static class PromCustomFileNames
   {
@@ -16,16 +16,8 @@ namespace WorkflowEventLogFixer
     {
       return "EvolutionaryTreeMiner.txt";
     }
-    public static string GetPetriNetMiner()
-    {
-      return "PetriNetMiner.txt";
-    }
-    public static string GetPTQualityMiner()
-    {
-      return "PTQualityMiner.txt";
-    }
 
-    public static string GetCLI()
+    public static string GetCli()
     {
       return "ProM_CLI.bat";
     }
@@ -35,10 +27,8 @@ namespace WorkflowEventLogFixer
       return new List<string>
       {
         GetEvoluationaryTreeMiner(),
-        GetPetriNetMiner(),
         GetProcessTreeMiner(),
-        GetPTQualityMiner(),
-        GetCLI()
+        GetCli()
       };
     }
   }

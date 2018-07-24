@@ -5,15 +5,15 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WorkflowPatternFinder"
         mc:Ignorable="d"
-        Title="VariationViewer" Height="813" Width="1214.75" Background="Gainsboro" FontSize="22" WindowStartupLocation="CenterOwner" KeyDown="KeyIsPressed" MinWidth="500" MinHeight="400">
+        Title="View (distinct) variants found" Height="813" Width="1214.75" Background="Gainsboro" FontSize="22" WindowStartupLocation="CenterOwner" KeyDown="KeyIsPressed" MinWidth="500" MinHeight="600">
   <Grid x:Name="Grid" Margin="0,0,0,18">
     <CheckBox x:Name="ViewDistinctVariantsCheckBox" Margin="48,16,0,0" FontSize="72" Click="ViewDistinctVariantsCheckBox_Changed" HorizontalAlignment="Left" Width="16" Height="16" VerticalAlignment="Top">
       <CheckBox.LayoutTransform>
         <ScaleTransform ScaleX="2" ScaleY="2" />
       </CheckBox.LayoutTransform>
     </CheckBox>
-    <Label x:Name="Label1" Content="View distinct variants only" Margin="96,10,0,710" HorizontalAlignment="Left" Width="368"/>
-    <Label x:Name="Title" Content="Title" Margin="337,30,337,0" HorizontalContentAlignment="Center" Height="51" VerticalAlignment="Top"/>
+    <Label x:Name="Label1" Content="View distinct variants only" Margin="96,10,0,0" Height="44" VerticalAlignment="Top" HorizontalAlignment="Left" Width="368"/>
+    <Label x:Name="Title" Content="Title" Margin="337,40,337,0" HorizontalContentAlignment="Center" Height="51" VerticalAlignment="Top"/>
     <DataGrid x:Name="variantGrid" Margin="33,86,55,39" ItemsSource="{Binding}" AutoGenerateColumns="True" FontSize="18" IsReadOnly="True"  MouseDoubleClick="VariantGrid_OnMouseDoubleClick"/>
   </Grid>
 </Window>

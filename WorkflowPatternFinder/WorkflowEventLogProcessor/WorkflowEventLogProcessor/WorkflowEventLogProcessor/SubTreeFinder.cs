@@ -6,13 +6,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace WorkflowEventLogFixer
+namespace WorkflowEventLogProcessor
 {
     public static class SubTreeFinder
     {
-        public static string _pythonExe;
-        public static string _word2VecQueryFile = Path.Combine(Directory.GetCurrentDirectory(), "Scripts", "query.py");
-        public static string _word2VecTrainedModelPath;
+      public static string PythonExe;
+      private static readonly string Word2VecQueryFile = Path.Combine(Directory.GetCurrentDirectory(), "Scripts", "query.py");
+      private static string _word2VecTrainedModelPath;
 
         public static bool IsValidSubTree(ProcessTree tree, ProcessTree pattern, bool induced)
         {
@@ -90,7 +90,7 @@ namespace WorkflowEventLogFixer
         {
             if(pNode.GetType() == tNode.GetType())
             {
-                if(pNode.GetType() == ProcessTreeLoader.NodeType.manualTask)
+                if(pNode.GetType() == ProcessTreeLoader.NodeType.ManualTask)
                 {
                     return AreSimilarAccordingToDoc2Vec(tNode, pNode);
                 }
@@ -105,8 +105,8 @@ namespace WorkflowEventLogFixer
             var patternSentence = pNode.GetEvent().Replace('|', ' ').ToLower();
             ProcessStartInfo start = new ProcessStartInfo
             {
-                FileName = _pythonExe,
-                Arguments = $"{_word2VecQueryFile} \"{_word2VecTrainedModelPath}\" \"{treeSentence}\" \"{patternSentence}\"",
+                FileName = PythonExe,
+                Arguments = $"{Word2VecQueryFile} \"{_word2VecTrainedModelPath}\" \"{treeSentence}\" \"{patternSentence}\"",
                 UseShellExecute = false,
                 RedirectStandardOutput = true,
                 CreateNoWindow = true
@@ -147,7 +147,7 @@ namespace WorkflowEventLogFixer
 
         public static void SetPythonExe(string pythonExe)
         {
-            _pythonExe = pythonExe;
+            PythonExe = pythonExe;
         }
 
         public static void SetTrainedModelPath(string modelPath)

@@ -179,6 +179,7 @@
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <None Include="Example Patterns\testPattern2.ptml" />
     <None Include="Example Patterns\testPattern3.ptml" />
@@ -193,9 +194,9 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\WorkflowEventLogFixer\WorkflowEventLogFixer\WorkflowEventLogFixer\WorkflowEventLogFixer.csproj">
+    <ProjectReference Include="..\WorkflowEventLogProcessor\WorkflowEventLogProcessor\WorkflowEventLogProcessor\WorkflowEventLogProcessor.csproj">
       <Project>{66c01b7f-bc66-4664-9784-a48bc2205fd1}</Project>
-      <Name>WorkflowEventLogFixer</Name>
+      <Name>WorkflowEventLogProcessor</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

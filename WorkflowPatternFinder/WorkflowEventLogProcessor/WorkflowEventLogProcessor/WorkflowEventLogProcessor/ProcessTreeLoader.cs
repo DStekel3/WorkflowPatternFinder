@@ -1,35 +1,31 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml;
 
-namespace WorkflowEventLogFixer
+namespace WorkflowEventLogProcessor
 {
   public static class ProcessTreeLoader
   {
     public enum NodeType
     {
-      xor,
-      xorLoop,
-      and,
-      andLoop,
-      sequence,
-      sequenceLoop,
-      manualTask,
-      tau
+      Xor,
+      XorLoop,
+      And,
+      AndLoop,
+      Sequence,
+      SequenceLoop,
+      ManualTask,
+      Tau
     };
 
     public static ProcessTree LoadTree(string filePath)
     {
       var sourceFile = filePath;
       ProcessTree tree = null;
-      XmlReaderSettings settings = new XmlReaderSettings
+      var settings = new XmlReaderSettings
       {
         DtdProcessing = DtdProcessing.Parse
       };
-      XmlReader reader = XmlReader.Create(sourceFile, settings);
+      var reader = XmlReader.Create(sourceFile, settings);
       reader.MoveToContent();
       while(reader.Read())
       {
@@ -44,49 +40,49 @@ namespace WorkflowEventLogFixer
               }
             case "xor":
               {
-                tree.AddNode(new Node(NodeType.xor, reader["id"]));
+                tree?.AddNode(new Node(NodeType.Xor, reader["id"]));
                 break;
               }
             case "xorLoop":
               {
-                tree.AddNode(new Node(NodeType.xorLoop, reader["id"]));
+                tree?.AddNode(new Node(NodeType.XorLoop, reader["id"]));
                 break;
               }
             case "and":
               {
-                tree.AddNode(new Node(NodeType.and, reader["id"]));
+                tree?.AddNode(new Node(NodeType.And, reader["id"]));
                 break;
               }
             case "andLoop":
               {
-                tree.AddNode(new Node(NodeType.andLoop, reader["id"]));
+                tree?.AddNode(new Node(NodeType.AndLoop, reader["id"]));
                 break;
               }
             case "sequence":
               {
-                tree.AddNode(new Node(NodeType.sequence, reader["id"]));
+                tree?.AddNode(new Node(NodeType.Sequence, reader["id"]));
                 break;
               }
             case "sequenceLoop":
               {
-                tree.AddNode(new Node(NodeType.sequenceLoop, reader["id"]));
+                tree?.AddNode(new Node(NodeType.SequenceLoop, reader["id"]));
                 break;
               }
             case "manualTask":
               {
-                tree.AddNode(new Node(NodeType.manualTask, reader["id"], reader["name"]));
+                tree?.AddNode(new Node(NodeType.ManualTask, reader["id"], reader["name"]));
                 break;
               }
             case "automaticTask":
               {
-                tree.AddNode(new Node(NodeType.tau, reader["id"]));
+                tree?.AddNode(new Node(NodeType.Tau, reader["id"]));
                 break;
               }
             case "parentsNode":
               {
-                Guid parentId = new Guid(reader["sourceId"] ?? throw new InvalidOperationException());
-                Guid childId = new Guid(reader["targetId"] ?? throw new InvalidOperationException());
-                tree.SetParentalRelation(parentId, childId);
+                var parentId = new Guid(reader["sourceId"] ?? throw new InvalidOperationException());
+                var childId = new Guid(reader["targetId"] ?? throw new InvalidOperationException());
+                tree?.SetParentalRelation(parentId, childId);
                 break;
               }
           }

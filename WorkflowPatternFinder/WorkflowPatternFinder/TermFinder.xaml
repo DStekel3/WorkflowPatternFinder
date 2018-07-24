@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WorkflowPatternFinder"
         mc:Ignorable="d"
-        Title="TermFinder" Height="150" Width="300" MinWidth="0.7" KeyDown="KeyPressed" WindowStyle="ToolWindow" Top="0" Left="0" WindowStartupLocation="CenterOwner">
+        Title="Ctrl-F search" Height="150" Width="300" MinWidth="300" KeyDown="KeyPressed" WindowStyle="ToolWindow" Top="0" Left="0" WindowStartupLocation="CenterOwner" MinHeight="145" ResizeMode="NoResize">
     <Grid x:Name="Finder" Background="Gainsboro">
     <Label x:Name="FindTermLabel" Content="Search for term:" HorizontalAlignment="Left" Margin="37,20,0,0" VerticalAlignment="Top"/>
     <TextBox x:Name="FindTermTextBox" HorizontalAlignment="Left" Height="23" Margin="37,46,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="167"/>
