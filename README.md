@@ -22,6 +22,7 @@ Requirements:
     3. enums          (```pip install enums```)
     4. graphviz       (```pip install graphviz```)
     5. BeautifulSoup4 (```pip install bs4```)
+    6. unidecode      (```pip install unidecode```)
 - Java JDK 8 or higher (http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html)
 - Be sure to set the paths to your Python and Java installation directory as environment variable. The tool uses the command ```where python``` and ```where java``` to find their locations.
 <h1>User Manual</h1>
