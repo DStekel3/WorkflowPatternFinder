@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:WorkflowPatternFinder"
         xmlns:forms="clr-namespace:System.Windows.Forms;assembly=System.Windows.Forms"
         mc:Ignorable="d"
-        Title="WorkflowPatternFinder" Height="802" Width="1600" Background="#FF838383" VerticalAlignment="Stretch" ScrollViewer.HorizontalScrollBarVisibility="Visible" ScrollViewer.CanContentScroll="True" UseLayoutRounding="False" HorizontalContentAlignment="Stretch" KeyDown="KeysDown" WindowStartupLocation="CenterScreen" BorderBrush="Black" WindowStyle="ThreeDBorderWindow">
+        Title="WorkflowPatternFinder" Height="802" Width="1600" Background="#FF838383" VerticalAlignment="Stretch" ScrollViewer.HorizontalScrollBarVisibility="Visible" ScrollViewer.CanContentScroll="True" UseLayoutRounding="False" HorizontalContentAlignment="Stretch" KeyDown="KeysDown" WindowStartupLocation="CenterScreen" BorderBrush="Black" WindowStyle="ThreeDBorderWindow" MinWidth="1000" MinHeight="700">
   <Grid Margin="0,0,0,0">
     <Grid.ColumnDefinitions>
       <ColumnDefinition Width="599*"/>
@@ -14,18 +14,18 @@
     </Grid.ColumnDefinitions>
     <TabControl x:Name="TabControl" VerticalAlignment="Stretch" HorizontalContentAlignment="Stretch" Grid.ColumnSpan="2" Background="Black">
       <TabItem Header="Pre-processing" Margin="10,0,-14,-2" IsSelected ="True" UseLayoutRounding="False" FontSize="24" Background="#FF6A6A6A" Cursor="Hand" BorderBrush="Black" Foreground="Black">
-        <Grid Background="#FF6A6A6A" UseLayoutRounding="False" Cursor="Arrow">
+        <Grid Background="#FF6A6A6A" UseLayoutRounding="False" Cursor="Arrow" Margin="0,0,2,0">
           <Grid.ColumnDefinitions>
             <ColumnDefinition Width="750*"/>
             <ColumnDefinition Width="838*"/>
           </Grid.ColumnDefinitions>
-          <Label x:Name="ImportExcelDirectoryLabel" Content="Log directory..." Margin="10,68,0,0" VerticalAlignment="Top" MouseDoubleClick="ImportExcelDirectoryLabel_DoubleClick" AllowDrop="True" DragDrop.Drop="ExcelDrop" FontSize="24" Background="#FFB6B6B6" Grid.ColumnSpan="2" Height="42" Foreground="White" HorizontalAlignment="Left" Width="666"/>
+          <TextBox x:Name="ImportExcelDirectoryLabel" Cursor="Hand" Text="Log directory..." Margin="10,68,73,0" VerticalAlignment="Top" MouseDoubleClick="ImportExcelDirectoryLabel_DoubleClick" AllowDrop="True" DragDrop.Drop="ExcelDrop" FontSize="24" Background="#FFB6B6B6" Height="42" Foreground="White" IsReadOnly="True"/>
           <Button x:Name="ImportExcelDirectoryButton" Content="Import workflow logs" HorizontalAlignment="Left" Margin="10,115,0,0" VerticalAlignment="Top" Width="270" Click="ImportExcelDirectoryButton_Click" RenderTransformOrigin="0.615,0.6" Height="40" FontSize="24" Grid.ColumnSpan="2" Foreground="White" Background="#FF818181" BorderBrush="{x:Null}" OpacityMask="Black" Cursor="Hand">
             <Button.Effect>
               <DropShadowEffect Opacity="0.69" ShadowDepth="3"/>
             </Button.Effect>
           </Button>
-          <Label x:Name="PromLabel" Content="ProM location..." HorizontalAlignment="Left" Margin="10,193,0,0" VerticalAlignment="Top" Width="666" MouseDoubleClick="PromLabel_DoubleClick" FontSize="24" Background="#FFB6B6B6" Grid.ColumnSpan="2" Height="42" Foreground="White"/>
+          <TextBox x:Name="PromLabel" Text="ProM location..." Cursor="Hand" IsReadOnly="True" Margin="10,193,73,0" VerticalAlignment="Top" MouseDoubleClick="PromLabel_DoubleClick" FontSize="24" Background="#FFB6B6B6" Height="42" Foreground="White"/>
           <Button x:Name="PromButton" Content="Select ProM Location" HorizontalAlignment="Left" Margin="10,240,0,0" VerticalAlignment="Top" Width="270" Click="PromButton_Click" RenderTransformOrigin="0.615,0.6" Height="40" FontSize="24" Grid.ColumnSpan="2" Foreground="White" Background="#FF818181" BorderBrush="{x:Null}" OpacityMask="Black" Cursor="Hand">
             <Button.Effect>
               <DropShadowEffect ShadowDepth="3" Opacity="0.7"/>
@@ -37,7 +37,7 @@
             </TextBox.Effect>
           </TextBox>
           <Label x:Name="InductiveMinerThresholdLabel" Content="Inductive Miner &#xD;&#xA;Noise Threshold:" HorizontalAlignment="Left" Margin="10,368,0,0" VerticalAlignment="Top" Height="84" Width="198" FontSize="24" Foreground="White"/>
-          <Button x:Name="RemakeProcessTreesButton" Content="Remake Process Trees" HorizontalAlignment="Left" Margin="430,381,0,0" VerticalAlignment="Top" Width="246" Height="59" Click="RemakeProcessTreesButton_Click" Foreground="White" FontSize="24" Background="#FF818181" Cursor="Hand">
+          <Button x:Name="RemakeProcessTreesButton" Content="Remake Process Trees" Margin="332,381,73,0" VerticalAlignment="Top" Height="59" Click="RemakeProcessTreesButton_Click" Foreground="White" FontSize="24" Background="#FF818181" Cursor="Hand">
             <Button.Effect>
               <DropShadowEffect Opacity="0.7" ShadowDepth="3"/>
             </Button.Effect>
@@ -48,7 +48,7 @@
             </Button.Effect>
           </Button>
           <Label x:Name="ConsoleLabel" Content="Start..." HorizontalAlignment="Left" Margin="73,596,0,0" VerticalAlignment="Top" Width="485" Height="54" FontSize="24" Grid.ColumnSpan="2" Foreground="White"/>
-          <ProgressBar x:Name="PreProgress" Height="69" Margin="68,566,98,0" VerticalAlignment="Top" IsIndeterminate="False" Grid.Column="1" Background="#FFB6B6B6">
+          <ProgressBar x:Name="PreProgress" Height="68" Margin="68,549,98,0" VerticalAlignment="Top" IsIndeterminate="False" Grid.Column="1" Background="#FFB6B6B6">
             <ProgressBar.Effect>
               <DropShadowEffect Opacity="0.7" ShadowDepth="3"/>
             </ProgressBar.Effect>
@@ -67,18 +67,18 @@
         </Grid>
       </TabItem>
       <TabItem Header="Tree Finder" Margin="20,0,-24,-2" FontSize="24" Background="#FF6A6A6A" Foreground="Black" Cursor="Hand" BorderBrush="Black">
-        <Grid Background="#FF6A6A6A" Margin="0,0,-2,0" Cursor="Arrow">
+        <Grid Background="#FF6A6A6A" Margin="0,0,2,0" Cursor="Arrow">
           <Grid.ColumnDefinitions>
             <ColumnDefinition Width="750*"/>
             <ColumnDefinition Width="838*"/>
           </Grid.ColumnDefinitions>
-          <Label x:Name="ImportTreeLabel" Content="Tree directory..." Margin="10,68,0,0" VerticalAlignment="Top" MouseDoubleClick="ImportTreeLabel_DoubleClick" Background="#FFB6B6B6" Foreground="White" Height="42" HorizontalAlignment="Left" Width="667"/>
+          <TextBox x:Name="ImportTreeLabel" Cursor="Hand" Text="Tree directory..." IsReadOnly="True" HorizontalScrollBarVisibility="Auto" Margin="10,68,73,0" VerticalAlignment="Top" MouseDoubleClick="ImportTreeLabel_DoubleClick" Background="#FFB6B6B6" Foreground="White" Height="42"/>
           <Button x:Name="ImportTreeButton" Content="Import process trees" Margin="10,115,0,0" Click="ImportTreeButton_Click" RenderTransformOrigin="0.615,0.6" Background="#FF818181" Foreground="White" Cursor="Hand" Height="40" VerticalAlignment="Top" HorizontalAlignment="Left" Width="270">
             <Button.Effect>
               <DropShadowEffect Opacity="0.7" ShadowDepth="3"/>
             </Button.Effect>
           </Button>
-          <Label x:Name="ImportPatternLabel" Content="Pattern file..." Margin="10,264,0,0" VerticalAlignment="Top" MouseDoubleClick="ImportPatternLabel_DoubleClick" Grid.ColumnSpan="2" Background="#FFB6B6B6" Foreground="White" Height="42" HorizontalAlignment="Left" Width="667"/>
+          <TextBox x:Name="ImportPatternLabel" Cursor="Hand" IsReadOnly="True" Text="Pattern file..." Margin="10,264,73,0" VerticalAlignment="Top" MouseDoubleClick="ImportPatternLabel_DoubleClick" Background="#FFB6B6B6" Foreground="White" Height="42"/>
           <Button x:Name="ImportPatternButton" Content="Select pattern file" Margin="10,311,0,0" Click="ImportPatternButton_Click" Background="#FF818181" Foreground="White" Cursor="Hand" Height="38" VerticalAlignment="Top" HorizontalAlignment="Left" Width="270">
             <Button.Effect>
               <DropShadowEffect Opacity="0.7" ShadowDepth="3"/>
@@ -101,7 +101,7 @@
           <CheckBox x:Name="CountCheckBox" Content="Allow Multiple matches in model" Margin="10,405,0,0" Click="CountCheckBox_Click" Foreground="White" Cursor="Hand" Height="31" VerticalAlignment="Top" HorizontalAlignment="Left" Width="418"/>
           <Label x:Name="SimThresholdLabel" Content="w2v Similarity Threshold:" Margin="25,441,0,0" Foreground="White" Height="42" VerticalAlignment="Top" HorizontalAlignment="Left" Width="272"/>
           <TextBox x:Name="SimTresholdValue" Height="42" Margin="318,441,0,0" TextWrapping="Wrap" Text="0.8" VerticalAlignment="Top" FontSize="24" SpellCheck.IsEnabled="True" PreviewTextInput="CheckThresholdInput" RenderTransformOrigin="1.828,-0.713" HorizontalAlignment="Left" Width="110">
-            
+
             <TextBox.Effect>
               <DropShadowEffect Opacity="0.7" ShadowDepth="3"/>
             </TextBox.Effect>
@@ -126,7 +126,7 @@
             </Button.Effect>
           </Button>
           <!--<ListBox x:Name="ValidOccurencesView" HorizontalAlignment="Left" Height="433" Margin="591,89,0,0" VerticalAlignment="Top" Width="789" MouseDoubleClick="ListBox_DoubleClick" KeyDown="ValidOccurencesView_KeyDown" Grid.Column="1" FontSize="20"/>-->
-          <ListView x:Name="ValidOccurencesView" ItemsSource="{Binding ProcessTreeView}" Margin="0,68,34,0" Grid.Column="1" FontSize="20" MouseDoubleClick="ListView_DoubleClick" Background="#FFB6B6B6" Cursor="Hand" Height="438" VerticalAlignment="Top" HorizontalAlignment="Right" Width="804">
+          <ListView x:Name="ValidOccurencesView" ItemsSource="{Binding ProcessTreeView}" Margin="0,68,34,0" Grid.Column="1" FontSize="20" MouseDoubleClick="ListView_DoubleClick" Background="#FFB6B6B6" Cursor="Hand" HorizontalAlignment="Right" Width="804" Height="438" VerticalAlignment="Top">
             <ListView.Effect>
               <DropShadowEffect Opacity="0.7" ShadowDepth="3"/>
             </ListView.Effect>
@@ -137,24 +137,24 @@
               </GridView>
             </ListView.View>
           </ListView>
-          <Label x:Name="ResultDebug" Content="" HorizontalAlignment="Left" Margin="10,0,0,10" VerticalAlignment="Bottom" Height="71" Width="558" Grid.ColumnSpan="2" Foreground="White" FontSize="24"/>
-          <ProgressBar x:Name="TreeProgressBar" Margin="68,549,98,0" LargeChange="0" UseLayoutRounding="True" SmallChange="1" Value="-1" IsIndeterminate="False" Grid.Column="1" Background="#FFB6B6B6" Height="65" VerticalAlignment="Top">
+          <Label x:Name="ResultDebug" Content="" HorizontalAlignment="Left" Margin="10,646,0,0" VerticalAlignment="Top" Height="71" Width="558" Foreground="White" FontSize="24"/>
+          <ProgressBar x:Name="TreeProgressBar" Margin="68,549,98,0" LargeChange="0" UseLayoutRounding="True" SmallChange="1" Value="-1" IsIndeterminate="False" Grid.Column="1" Background="#FFB6B6B6" Height="68" VerticalAlignment="Top">
             <ProgressBar.Effect>
               <DropShadowEffect Opacity="0.7" ShadowDepth="3"/>
             </ProgressBar.Effect>
           </ProgressBar>
           <Label x:Name="label" Content="Only use models containing:" Margin="10,185,0,0" Foreground="White" Height="42" VerticalAlignment="Top" HorizontalAlignment="Left" Width="324"/>
-          <TextBox x:Name="FilterModelBox" Height="45" Margin="339,185,0,0" TextWrapping="Wrap" VerticalAlignment="Top" HorizontalAlignment="Left" Width="338"/>
+          <TextBox x:Name="FilterModelBox" Height="45" Margin="339,185,73,0" TextWrapping="Wrap" VerticalAlignment="Top"/>
           <Button x:Name="OpenVariationViewerButton" Content="View Variations" Margin="10,24,0,0" Foreground="White" FontSize="22" Background="#FF818181" Cursor="Hand" HorizontalAlignment="Left" Width="363" Height="37" VerticalAlignment="Top" Grid.Column="1" Click="OpenVariationViewerButton_Click" Visibility="Hidden">
             <Button.Effect>
               <DropShadowEffect Opacity="0.7" ShadowDepth="3"/>
             </Button.Effect>
           </Button>
-          
+
         </Grid>
       </TabItem>
       <TabItem Header="Word2Vec" Margin="30,0,-34,-2" FontSize="24" Background="#FF6A6A6A" Cursor="Hand" BorderBrush="Black">
-        <Grid Background="#FF6A6A6A" Margin="0,0,-2,0" UseLayoutRounding="False" Cursor="Arrow">
+        <Grid Background="#FF6A6A6A" Margin="0,0,2,0" UseLayoutRounding="False" Cursor="Arrow">
           <Grid.ColumnDefinitions>
             <ColumnDefinition Width="750*"/>
             <ColumnDefinition Width="838*"/>
@@ -177,8 +177,8 @@
               <DropShadowEffect Opacity="0.7" ShadowDepth="3"/>
             </TextBox.Effect>
           </TextBox>
-          <Label x:Name="ModelPathLabel" Content="Model not found..." HorizontalAlignment="Left" Margin="10,256,0,0" VerticalAlignment="Top" Width="674" Background="#FFB6B6B6" Foreground="White" FontSize="12" Height="26"/>
-          <Button x:Name="ChangeModelButton" Content="Select model" HorizontalAlignment="Left" Margin="10,303,0,0" VerticalAlignment="Top" Width="246" Height="54" Click="ChangeModelButton_Click" Foreground="White" Background="#FF818181">
+          <TextBox x:Name="ModelPathLabel" Cursor="Hand" Text="Model not found..." IsReadOnly="True" Margin="10,106,66,0" VerticalAlignment="Top" Background="#FFB6B6B6" Foreground="White" FontSize="22" Height="42" MouseDoubleClick="ModelPathLabel_DoubleClick"/>
+          <Button x:Name="ChangeModelButton" Content="Select model" HorizontalAlignment="Left" Margin="10,166,0,0" VerticalAlignment="Top" Width="246" Height="54" Click="ChangeModelButton_Click" Foreground="White" Background="#FF818181">
             <Button.Effect>
               <DropShadowEffect Opacity="0.7" ShadowDepth="3"/>
             </Button.Effect>
@@ -188,17 +188,12 @@
               <DropShadowEffect Opacity="0.7" ShadowDepth="3"/>
             </Button.Effect>
           </Button>
-          <Button x:Name="PlotModelButton" Content="Plot 2D model" HorizontalAlignment="Left" Margin="424,149,0,0" VerticalAlignment="Top" Width="260" Click="ShowModel_Click" Height="62" Foreground="White" Background="#FF818181" Cursor="Hand">
-            <Button.Effect>
-              <DropShadowEffect Opacity="0.7" ShadowDepth="3"/>
-            </Button.Effect>
-          </Button>
-          <TextBox x:Name="TermQueryTextBox" HorizontalAlignment="Left" Height="148" Margin="10,500,0,0" TextWrapping="Wrap" Text="Fill in term..." VerticalAlignment="Top" Width="276" Grid.ColumnSpan="2" Background="White" GotFocus="TermQueryTextBox_GotFocus" LostFocus="TermQueryTextBox_LostFocus">
+          <TextBox x:Name="TermQueryTextBox" HorizontalAlignment="Left" Height="148" Margin="10,271,0,0" TextWrapping="Wrap" Text="Fill in term..." VerticalAlignment="Top" Width="276" Background="White" GotFocus="TermQueryTextBox_GotFocus" LostFocus="TermQueryTextBox_LostFocus">
             <TextBox.Effect>
               <DropShadowEffect Opacity="0.7" ShadowDepth="3"/>
             </TextBox.Effect>
           </TextBox>
-          <Button x:Name="TermQueryButton" Content="Retrieve most similar terms" HorizontalAlignment="Left" Margin="324,521,0,0" VerticalAlignment="Top" Width="308" Height="88" FontSize="24" Click="TermQueryButton_Click" Foreground="White" Background="#FF818181">
+          <Button x:Name="TermQueryButton" Content="Retrieve similar terms" Margin="326,271,172,0" FontSize="24" Click="TermQueryButton_Click" Foreground="White" Background="#FF818181" Height="85" VerticalAlignment="Top">
             <Button.Effect>
               <DropShadowEffect Opacity="0.7" ShadowDepth="3"/>
             </Button.Effect>
@@ -208,7 +203,7 @@
               <DropShadowEffect Opacity="0.7" ShadowDepth="3"/>
             </Button.Effect>
           </Button>
-          <ListView x:Name="SimilarTermsList" ItemsSource="{Binding SimilarTermsList}" Height="420" Margin="0,68,34,0" VerticalAlignment="Top" Grid.Column="1" FontSize="20" Background="#FFB6B6B6" Cursor="Hand" HorizontalAlignment="Right" Width="804">
+          <ListView x:Name="SimilarTermsList" ItemsSource="{Binding SimilarTermsList}" Margin="0,68,34,62" Grid.Column="1" FontSize="20" Background="#FFB6B6B6" Cursor="Hand">
             <ListView.Effect>
               <DropShadowEffect Opacity="0.7" ShadowDepth="3"/>
             </ListView.Effect>
@@ -219,6 +214,11 @@
               </GridView>
             </ListView.View>
           </ListView>
+          <ProgressBar x:Name="TermProgressBar" Margin="10,600,172,62" LargeChange="0" UseLayoutRounding="True" SmallChange="1" Value="-1" IsIndeterminate="False" Background="#FFB6B6B6">
+            <ProgressBar.Effect>
+              <DropShadowEffect Opacity="0.7" ShadowDepth="3"/>
+            </ProgressBar.Effect>
+          </ProgressBar>
         </Grid>
       </TabItem>
     </TabControl>

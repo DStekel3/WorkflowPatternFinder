@@ -5,7 +5,7 @@ VisualStudioVersion = 15.0.27130.2036
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WorkflowPatternFinder", "WorkflowPatternFinder\WorkflowPatternFinder.csproj", "{2FBC0605-44BA-435B-8137-B4CCB6890FE7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WorkflowEventLogFixer", "WorkflowEventLogFixer\WorkflowEventLogFixer\WorkflowEventLogFixer\WorkflowEventLogFixer.csproj", "{66C01B7F-BC66-4664-9784-A48BC2205FD1}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WorkflowEventLogProcessor", "WorkflowEventLogProcessor\WorkflowEventLogProcessor\WorkflowEventLogProcessor\WorkflowEventLogProcessor.csproj", "{66C01B7F-BC66-4664-9784-A48BC2205FD1}"
 EndProject
 Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "Gensim", "Gensim\Gensim.pyproj", "{44EA4A09-4254-4601-ACB2-BE3E847D45C4}"
 EndProject

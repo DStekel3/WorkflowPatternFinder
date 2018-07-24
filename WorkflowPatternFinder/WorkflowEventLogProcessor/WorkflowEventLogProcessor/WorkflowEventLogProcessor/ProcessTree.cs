@@ -2,13 +2,13 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace WorkflowEventLogFixer
+namespace WorkflowEventLogProcessor
 {
   public class ProcessTree
   {
     private readonly string _filePath;
-    private readonly Guid _id = Guid.Empty;
-    private readonly Guid _rootId = Guid.Empty;
+    private readonly Guid _id;
+    private readonly Guid _rootId;
     private Node _root;
     private readonly List<Node> _nodes = new List<Node>();
 

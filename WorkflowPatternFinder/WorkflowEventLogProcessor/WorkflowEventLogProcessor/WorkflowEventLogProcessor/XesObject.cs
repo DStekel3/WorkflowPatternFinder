@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace WorkflowEventLogFixer
+namespace WorkflowEventLogProcessor
 {
   public class XesObject
   {
@@ -17,7 +17,7 @@ namespace WorkflowEventLogFixer
     public string LifeCycle { get; set; }
     public XesObject(Event csv)
     {
-      Trace = csv.InstanceID;
+      Trace = csv.InstanceId;
       Event = $"{csv.TaakOmschrijving}|{csv.ActieOmschrijving}";
       Timestamp = csv.Eind;
       LifeCycle = "complete";

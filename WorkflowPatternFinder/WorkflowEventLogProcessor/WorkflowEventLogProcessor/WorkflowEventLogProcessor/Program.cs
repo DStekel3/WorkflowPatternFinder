@@ -10,25 +10,25 @@ using System.Windows.Forms;
 using IronPython.Modules;
 using OfficeOpenXml;
 
-namespace WorkflowEventLogFixer
+namespace WorkflowEventLogProcessor
 {
   public static class Program
   {
     private static string _baseDirectory = "";
-    public static string _basePromPath = GetProMBasePath();
-    public static string _baseToolPath = GetToolBasePath();
+    private static readonly string BasePromPath = GetProMBasePath();
+    private static readonly string BaseToolPath = GetToolBasePath();
     private static string _baseCsvFileDirectory = Path.Combine(_baseDirectory, "csv");
     private static string _baseXesFileDirectory = Path.Combine(_baseDirectory, "xes");
     private static string _basePtmlFileDirectory = Path.Combine(_baseDirectory, "ptml");
     private static string _pythonExe = "";
     private static string _javaExe = "";
-    private static string _word2VecScriptFile = Path.Combine(_baseToolPath, @"WorkflowPatternFinder\WorkflowPatternFinder\Gensim\TrainWord2VecModel.py");
-    private static string _processTreeScriptFile = Path.Combine(_basePromPath, "ProcessTreeMiner.txt");
-    private static string _promCLI = Path.Combine(_basePromPath, "ProM_CLI.bat");
-    private static string _csvToXesBat = Path.Combine(_baseToolPath,
+    private static readonly string Word2VecScriptFile = Path.Combine(BaseToolPath, @"WorkflowPatternFinder\WorkflowPatternFinder\Gensim\TrainWord2VecModel.py");
+    private static string _processTreeScriptFile = Path.Combine(BasePromPath, "ProcessTreeMiner.txt");
+    private static string _promCli = Path.Combine(BasePromPath, "ProM_CLI.bat");
+    private static readonly string CsvToXesBat = Path.Combine(BaseToolPath,
       @"WorkflowPatternFinder\WorkflowPatternFinder\WorkflowEventLogFixer\WorkflowEventLogFixer\WorkflowEventLogFixer\CSVtoXES\CsvToXesDirectory.bat");
 
-    private static List<string> _modelQualityCache = new List<string>();
+    private static readonly List<string> ModelQualityCache = new List<string>();
 
     //convert each event log to:
     // 1. A csv-file, which is filtered on workflow instances.
@@ -88,23 +88,11 @@ namespace WorkflowEventLogFixer
         var workflowNameFile = Path.Combine(_baseDirectory, "workflownames.csv");
         WriteWorkflowNamesToFile(workflowNames, workflowNameFile);
 
-        //Apply word2vec throughout the workflow logs and give similar events similar names.
-        //ApplyWord2VecThroughGensimScript(_baseCsvFileDirectory);
-
-        //Console.WriteLine("Creating XES files...");
+        //Creating XES files
         ConvertCsvToXesFiles();
 
         // Create ptml files
         CreatePtmlFilesWithImi(noiseThreshold);
-
-        // Create pnml files
-        //CreatePnmlFiles();
-
-        // Create ptml files with Evolutionary Tree Miner
-        // CreatePtmlFilesWithETM();
-
-        // Compute quality dimensions
-        //MineProcessTreeQuality();
       }
     }
 
@@ -120,7 +108,7 @@ namespace WorkflowEventLogFixer
       _baseCsvFileDirectory = Path.Combine(_baseDirectory, "csv");
       _baseXesFileDirectory = Path.Combine(_baseDirectory, "xes");
       _basePtmlFileDirectory = Path.Combine(_baseDirectory, "ptml");
-      _modelQualityCache.Clear();
+      ModelQualityCache.Clear();
     }
 
     public static void RemakeProcessTrees(string importDir, string promPath, string noiseThreshold)
@@ -129,15 +117,6 @@ namespace WorkflowEventLogFixer
 
       // Create ptml files with the inductive miner (infrequent)
       CreatePtmlFilesWithImi(noiseThreshold);
-
-      // Create pnml files
-      //CreatePnmlFiles();
-
-      //Create ptml files with the evolutionary tree miner
-      //CreatePtmlFilesWithETM();
-
-      // Compute quality dimensions
-      //MineProcessTreeQuality();
     }
     
     public static bool CheckIfPythonAndJavaAreInstalled()
@@ -150,14 +129,14 @@ namespace WorkflowEventLogFixer
         UseShellExecute = false,
         CreateNoWindow = true
       };
-      Process cmd = new Process();
+      var cmd = new Process();
       cmd.StartInfo = info;
       cmd.Start();
       cmd.WaitForExit();
       var pythonPath = cmd.StandardOutput.ReadLine();
       cmd.Close();
 
-      if(File.Exists(pythonPath) && pythonPath.EndsWith(".exe"))
+      if(pythonPath != null && (File.Exists(pythonPath) && pythonPath.EndsWith(".exe")))
       {
         _pythonExe = pythonPath;
       }
@@ -172,7 +151,7 @@ namespace WorkflowEventLogFixer
       var javaPath = cmd.StandardOutput.ReadLine();
       cmd.Close();
 
-      if(File.Exists(javaPath) && javaPath.EndsWith(".exe"))
+      if(javaPath != null && (File.Exists(javaPath) && javaPath.EndsWith(".exe")))
       {
         _javaExe = javaPath;
       }
@@ -196,7 +175,7 @@ namespace WorkflowEventLogFixer
       {
         throw new Exception("Python executable not found.");
       }
-      if(!File.Exists(_word2VecScriptFile))
+      if(!File.Exists(Word2VecScriptFile))
       {
         throw new Exception("Word2Vec script not found.");
       }
@@ -229,7 +208,6 @@ namespace WorkflowEventLogFixer
     /// <summary>
     /// Calls inductive miner script which input xes-directory and outputs ptml files.
     /// </summary>
-    /// <param name="processTreeScriptFile"></param>
     private static void CreatePtmlFilesWithImi(string noiseThreshold)
     {
       UpdatePathsAndNoiseThresholdInProcessTreeScript(_processTreeScriptFile, _baseXesFileDirectory, _basePtmlFileDirectory, noiseThreshold);
@@ -237,8 +215,8 @@ namespace WorkflowEventLogFixer
       ProcessStartInfo startInfo = new ProcessStartInfo
       {
         CreateNoWindow = true,
-        WorkingDirectory = _basePromPath ?? throw new InvalidOperationException(),
-        FileName = _promCLI,
+        WorkingDirectory = BasePromPath ?? throw new InvalidOperationException(),
+        FileName = _promCli,
         Arguments = $"-f {Path.GetFileName(_processTreeScriptFile)}",
         WindowStyle = ProcessWindowStyle.Hidden
       };
@@ -250,7 +228,7 @@ namespace WorkflowEventLogFixer
     private static Dictionary<string, string> SplitExcelFileIntoSeparateWorkflowLogs(string file)
     {
       var events = GetEvents(file);
-      var groups = events.GroupBy(e => e.WorkflowID);
+      var groups = events.GroupBy(e => e.WorkflowId);
       Dictionary<string, string> workflowNames = new Dictionary<string, string>();
       foreach(var group in groups)
       {
@@ -294,15 +272,15 @@ namespace WorkflowEventLogFixer
 
           events.Add(new Event
           {
-            EventID = row[0],
+            EventId = row[0],
             Doorlooptijd = row[1],
-            WorkflowID = row[2],
+            WorkflowId = row[2],
             WorkflowOmschrijving = row[3],
-            InstanceID = row[4],
+            InstanceId = row[4],
             TypeDossierItem = row[5],
-            TaakID = row[6],
+            TaakId = row[6],
             TaakOmschrijving = row[7],
-            ActieID = row[8],
+            ActieId = row[8],
             ActieType = row[9],
             ActieOmschrijving = row[10],
             ActieBijschrift = row[11],
@@ -312,22 +290,22 @@ namespace WorkflowEventLogFixer
         }
 
         return events
-          .OrderBy(e => e.WorkflowID).ToList()
-          .OrderBy(e => e.InstanceID).ToList()
+          .OrderBy(e => e.WorkflowId).ToList()
+          .OrderBy(e => e.InstanceId).ToList()
           .OrderBy(e => e.Eind).ToList();
       }
     }
 
     private static void ConvertCsvToXesFiles()
     {
-      var jarFile = Path.Combine(_baseToolPath, @"WorkflowPatternFinder\WorkflowPatternFinder\WorkflowEventLogFixer\WorkflowEventLogFixer\WorkflowEventLogFixer\CSVtoXES\CSVtoXESDir.jar");
+      var jarFile = Path.Combine(BaseToolPath, @"WorkflowPatternFinder\WorkflowPatternFinder\WorkflowEventLogFixer\WorkflowEventLogFixer\WorkflowEventLogFixer\CSVtoXES\CSVtoXESDir.jar");
       var startInfo = new ProcessStartInfo
       {
         WindowStyle = ProcessWindowStyle.Hidden,
         UseShellExecute = false,
-        FileName = _csvToXesBat,
+        FileName = CsvToXesBat,
         Arguments = $"\"{_javaExe}\" \"{jarFile}\" \"{_baseCsvFileDirectory}\" \"{_baseXesFileDirectory}\"",
-        WorkingDirectory = Path.GetDirectoryName(_csvToXesBat) ?? throw new InvalidOperationException()
+        WorkingDirectory = Path.GetDirectoryName(CsvToXesBat) ?? throw new InvalidOperationException()
       };
 
       Process process = new Process { StartInfo = startInfo };
@@ -348,25 +326,25 @@ namespace WorkflowEventLogFixer
 
       foreach(Event currentEvent in events)
       {
-        if(!badInstances.Contains(currentEvent.InstanceID))
+        if(!badInstances.Contains(currentEvent.InstanceId))
         {
           if(!EventContainsNoise(currentEvent))
           {
-            if(currentEvent.InstanceID != currentInstance)
+            if(currentEvent.InstanceId != currentInstance)
             {
               totalEventLog.AddRange(dossierItemEvents);
-              currentInstance = currentEvent.InstanceID;
+              currentInstance = currentEvent.InstanceId;
               dossierItemEvents.Clear();
             }
 
-            if(!activityKeys.ContainsKey($"{currentEvent.TaakID}:{currentEvent.ActieID}"))
+            if(!activityKeys.ContainsKey($"{currentEvent.TaakId}:{currentEvent.ActieId}"))
             {
-              activityKeys.Add($"{currentEvent.TaakID}:{currentEvent.ActieID}", $"{currentEvent.TaakOmschrijving}:{currentEvent.ActieOmschrijving}");
+              activityKeys.Add($"{currentEvent.TaakId}:{currentEvent.ActieId}", $"{currentEvent.TaakOmschrijving}:{currentEvent.ActieOmschrijving}");
             }
 
-            if(activityKeys[$"{currentEvent.TaakID}:{currentEvent.ActieID}"] != $"{currentEvent.TaakOmschrijving}:{currentEvent.ActieOmschrijving}")
+            if(activityKeys[$"{currentEvent.TaakId}:{currentEvent.ActieId}"] != $"{currentEvent.TaakOmschrijving}:{currentEvent.ActieOmschrijving}")
             {
-              Console.WriteLine($"{currentEvent.WorkflowID}");
+              Console.WriteLine($"{currentEvent.WorkflowId}");
               dossierItemEvents.Clear();
               break;
             }
@@ -375,7 +353,7 @@ namespace WorkflowEventLogFixer
           }
           else
           {
-            badInstances.Add(currentEvent.InstanceID);
+            badInstances.Add(currentEvent.InstanceId);
           }
         }
       }
@@ -402,20 +380,20 @@ namespace WorkflowEventLogFixer
     public static void UpdateScriptFilePaths(string promBasePath)
     {
       _processTreeScriptFile = Path.Combine(promBasePath, PromCustomFileNames.GetProcessTreeMiner());
-      _promCLI = Path.Combine(promBasePath, PromCustomFileNames.GetCLI());
+      _promCli = Path.Combine(promBasePath, PromCustomFileNames.GetCli());
     }
 
     private static bool EventContainsNoise(Event currentEvent)
     {
-      if(!int.TryParse(currentEvent.InstanceID, out int a))
+      if(!int.TryParse(currentEvent.InstanceId, out int a))
       {
         return true;
       }
-      if(!int.TryParse(currentEvent.TaakID, out int b))
+      if(!int.TryParse(currentEvent.TaakId, out int b))
       {
         return true;
       }
-      if(!int.TryParse(currentEvent.ActieID, out int c))
+      if(!int.TryParse(currentEvent.ActieId, out int c))
       {
         return true;
       }
@@ -508,7 +486,7 @@ namespace WorkflowEventLogFixer
       ProcessStartInfo start = new ProcessStartInfo
       {
         FileName = _pythonExe,
-        Arguments = $"\"{_word2VecScriptFile}\" \"{csvDirectory}\"",
+        Arguments = $"\"{Word2VecScriptFile}\" \"{csvDirectory}\"",
         UseShellExecute = false,
         WindowStyle = ProcessWindowStyle.Maximized
       };
