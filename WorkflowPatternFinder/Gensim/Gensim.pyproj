@@ -12,7 +12,7 @@
     <Name>Gensim</Name>
     <RootNamespace>Gensim</RootNamespace>
     <IsWindowsApplication>False</IsWindowsApplication>
-    <InterpreterId>Global|PythonCore|3.4</InterpreterId>
+    <InterpreterId>Global|PythonCore|3.6</InterpreterId>
     <LaunchProvider>Standard Python launcher</LaunchProvider>
     <CommandLineArguments>"C:\Users\dst\Source\Repos\WorkflowPatternFinder\WorkflowPatternFinder\Gensim\datasets\sonar-320.bin" "C:\Thesis\Profit analyses\04-04-2018\ptml" "C:\Users\dst\Source\Repos\WorkflowPatternFinder\WorkflowPatternFinder\WorkflowPatternFinder\Example Patterns\accordeer1.ptml" "False" "0.8" "True" "max" ""</CommandLineArguments>
     <EnableNativeCodeDebugging>False</EnableNativeCodeDebugging>
@@ -58,7 +58,6 @@
     <Compile Include="Query.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="RenderPetriNet.py" />
     <Compile Include="RenderTree.py">
       <SubType>Code</SubType>
     </Compile>
@@ -74,6 +73,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="TrainWord2VecModel.py" />
+  </ItemGroup>
+  <ItemGroup>
+    <InterpreterReference Include="Global|PythonCore|3.6" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
   <!-- Uncomment the CoreCompile target to enable the Build command in
