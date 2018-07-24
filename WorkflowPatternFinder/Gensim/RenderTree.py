@@ -36,7 +36,6 @@ if len(sys.argv) == 5:
   myGraph = Digraph()
   root = tree.GetRoot()
   nodelist = [root]
-  number = 1
   while any(nodelist):
     currentNode = nodelist.pop(0)
     # print('get event: ',currentNode.GetEvent())
@@ -48,15 +47,14 @@ if len(sys.argv) == 5:
       if(specialWord != ""):
         pat = re.compile(specialWord, re.IGNORECASE)
         nodeLabel = "<" + pat.sub("<u>" + specialWord + "</u>", currentNode.GetEvent()).replace("\n", "<br/>") + ">"
-      myGraph.node(currentNode.GetId(), nodeLabel, style='filled', color = myColor, xlabel= str(number))
+      myGraph.node(currentNode.GetId(), nodeLabel, style='filled', color = myColor)
     else:
-      myGraph.node(currentNode.GetId(), nodeLabel, color = 'black', xlabel= str(number))
+      myGraph.node(currentNode.GetId(), nodeLabel, color = 'black')
     parent = currentNode.GetParent()
     if parent:
       myGraph.edge(parent.GetId(), currentNode.GetId())
     for child in currentNode.GetChildren():
       nodelist.append(child)
-    number += 1
     
   # try:
       # print(myGraph.source)
