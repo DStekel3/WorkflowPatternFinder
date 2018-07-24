@@ -29,7 +29,7 @@ The program basically consists of three tabs.
 
 Some files can be viewed in Notepad or a PDF viewer. A field where such actions are enabled contains the following codes:
 - <b>(PDF)</b> : Opens process tree in a PDF viewer when <b>double left-click</b> on process tree.
-- <b>(N)</b>   :   Opens file in Notepad(++) when <b>double right-click</b> file path or process tree.
+- <b>(F)</b>   :   Opens file in Notepad(++) when <b>double right-click</b> file path or process tree.
 - <b>(D)</b>   :   Opens directory in system explorer when <b>double left-click</b> on directory path.
 
 <h3>The first tab is used for the pre-processing phase.</h3>
@@ -38,21 +38,22 @@ Some files can be viewed in Notepad or a PDF viewer. A field where such actions 
 1. Select the directory which contains .xlsx files <b>(D)</b>.
 2. Select the directory where ProM is installed <b>(D)</b>.
 3. Specify a noise threshold (range: 0-1) for the Inductive Miner infrequent algorithm. This algorithm converts your data into process trees. This threshold is used for filtering out infrequent workflow events. For instance, if your threshold is 0.2, then the events that occur in less than 20% of the workflow traces will be removed.
-4. When the previous actions are completed, you can start the pre-processing phase here.
-5. Resulting process trees are shown in this table. Whenever the program already finds process trees after you execute step 1, this table also gets updated <b>(PDF + N)</b>.
+4. When the previous actions are completed, you can start the pre-processing phase by clicking on this button.
+5. Resulting process trees are shown in this table. Whenever the program already finds process trees after you execute step 1, this table also gets updated <b>(PDF + F)</b>.
 6. If you want to run the Inductive Miner again, use this button. This skips a lot of other pre-processing functions.
 
 <h3>The second tab is for finding a pattern in your processed process trees.</h3>
 
 ![Picture of Tab2](https://github.com/DStekel3/WorkflowPatternFinder/blob/master/Tab2_EDIT.png)
 1. Select a directory which contains process trees (.ptml files). This directory can be found within the (.xlsx) directory you have selected during the pre-processing phase <b>(D)</b>.
-2. Select a process tree file (.ptml) which you want to use as workflow pattern. Example patterns are given [here](https://github.com/DStekel3/WorkflowPatternFinder/tree/master/WorkflowPatternFinder/WorkflowPatternFinder/Example%20Patterns) <b>(PDF + N)</b>.
-3. Set a checkmark here if you want to search for induced matches only, otherwise leave it open to search for subsumed matches.
-4. Set a checkmark here if you want to retrieve possibly multiple matches within a tree, otherwise leave it open to return after one match is found.
-5. Set a similarity threshold (range: 0-1), used to determine whether terms match or not.
-6. Select a similarity variant. The max variant only considers the best match between terms, whereas the average variant considers the average over all matches between terms. 
-7. When the previous steps are completed, you can start searching for your given pattern (see step 2) in the given set of process trees  (see step 3).
-8. Found matches are shown in this table <b>(PDF + N)</b>.
+2. Use this textbox to filter which models you are interested in.
+3. Select a process tree file (.ptml) which you want to use as workflow pattern. Example patterns are given [here](https://github.com/DStekel3/WorkflowPatternFinder/tree/master/WorkflowPatternFinder/WorkflowPatternFinder/Example%20Patterns) <b>(PDF + F)</b>.
+4. Select if you want to apply induced matching or embedded matching.
+5. Set a checkmark here if you want to retrieve possibly multiple matches within a tree, otherwise leave it open to stop searching in a model when a match is found.
+6. Set a similarity threshold (range: 0-1), used to determine whether terms match or not.
+7. Select a similarity variant. The max variant only considers the best match between terms, whereas the average variant considers the average over all matches between terms. 
+8. When the previous steps are completed, you can start searching for your given pattern (see step 2) in the given set of process trees  (see step 3).
+9. Found matches are shown in this table <b>(PDF + F)</b>.
 
 
 <h3>The third tab is the place where you can experiment with word2vec models.</h3>
@@ -60,10 +61,9 @@ Some files can be viewed in Notepad or a PDF viewer. A field where such actions 
 ![Picture of Tab3](https://github.com/DStekel3/WorkflowPatternFinder/blob/master/Tab3_EDIT.png)
 
 1. Select a word2vec model (.bin file). These models should be put in the "datasets" directory [here](https://github.com/DStekel3/WorkflowPatternFinder/tree/master/WorkflowPatternFinder/Gensim/datasets). Because of their large size, I have not included the actual files in this repository.
-2. You can plot the selected model here.
-3. Type a word in this textbox...
-4. ... and press this button to get the most similar terms, given by the word2vec model but also by [mijnwoordenboek.nl/synoniemen](http://www.mijnwoordenboek.nl/synoniem.php).
-5. The resulting terms get displayed here.
+2. Type a term in this textbox...
+3. ... and press this button to get the most similar terms, given by the word2vec model but also by [mijnwoordenboek.nl/synoniemen](http://www.mijnwoordenboek.nl/synoniem.php).
+4. The resulting terms get displayed here.
 
 
 <h1>Creating Patterns</h1>
