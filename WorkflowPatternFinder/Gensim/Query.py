@@ -13,7 +13,6 @@ from nltk.corpus import alpino as alp
 from gensim.parsing.preprocessing import strip_short, strip_numeric, strip_punctuation
 import time
 import pickle
-import spacy
 
 class Query(object):
     
@@ -25,21 +24,6 @@ class Query(object):
         #training_corpus = alp.tagged_sents()
 
         curTime = time.time()
-        # PerceptronTagger (takes very long to train)
-        
-        #try:
-        #    f = open('tagger.pckl', 'rb')
-        #    self._tagger = pickle.load(f)
-        #    f.close()
-        #except:
-        #    self._tagger = PerceptronTagger(load=True)
-        #    self._tagger.train(list(training_corpus))
-        #    f = open('tagger.pckl', 'wb')
-        #    pickle.dump(self._tagger, f)
-        #    f.close()
-
-        # spaCy tokenizer, tagger
-        self._tagger = spacy.load('nl')        
 
     def LoadModel(self, path_to_model):
         # print('loading model')
@@ -65,12 +49,6 @@ class Query(object):
         self._antonyms[word] = antonyms
         return list(set(antonyms))
 
-    def WordsHaveSameType(self, patternWord, treeWord):
-        pTag = self._tagger(patternWord)
-        tTag = self._tagger(treeWord)
-        if [(w.text, w.pos_) for w in pTag][0][1] == [(w.text, w.pos_) for w in tTag][0][1]:
-          return True
-        return False
 
     def GetSentenceSimilarityMaxVariant(self, treeSentence, patternSentence):
         if self._model is None:
