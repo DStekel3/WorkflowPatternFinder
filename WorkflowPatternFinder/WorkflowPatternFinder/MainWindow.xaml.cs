@@ -532,7 +532,11 @@ namespace WorkflowPatternFinder
       DialogResult result = fbd.ShowDialog();
       if(result == System.Windows.Forms.DialogResult.OK)
       {
-        UpdateExcelDirectoryUI(fbd.SelectedPath);
+        var validDirectory = UpdateExcelDirectoryUI(fbd.SelectedPath);
+        if (validDirectory)
+        {
+          TryToUpdateUI();
+        }
       }
     }
 
@@ -588,7 +592,7 @@ namespace WorkflowPatternFinder
       }
     }
 
-    private void UpdateExcelDirectoryUI(string path)
+    private bool UpdateExcelDirectoryUI(string path)
     {
       if(Directory.EnumerateFiles(path).Any(s => s.EndsWith(".xlsx")))
       {
@@ -597,10 +601,12 @@ namespace WorkflowPatternFinder
         Program.InitializePaths(_importExcelDir);
         Settings.Default.DataFolder = path;
         Settings.Default.Save();
+        return true;
       }
       else
       {
         UpdateButtonText(ImportExcelDirectoryButton, _incorrectDir, _redColor, 3000);
+        return false;
       }
     }
 
