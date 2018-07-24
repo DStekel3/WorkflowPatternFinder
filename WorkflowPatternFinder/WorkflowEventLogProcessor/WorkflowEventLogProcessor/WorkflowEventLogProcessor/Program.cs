@@ -26,7 +26,7 @@ namespace WorkflowEventLogProcessor
     private static string _processTreeScriptFile = Path.Combine(BasePromPath, "ProcessTreeMiner.txt");
     private static string _promCli = Path.Combine(BasePromPath, "ProM_CLI.bat");
     private static readonly string CsvToXesBat = Path.Combine(BaseToolPath,
-      @"WorkflowPatternFinder\WorkflowPatternFinder\WorkflowEventLogFixer\WorkflowEventLogFixer\WorkflowEventLogFixer\CSVtoXES\CsvToXesDirectory.bat");
+      @"WorkflowPatternFinder\WorkflowPatternFinder\WorkflowEventLogProcessor\WorkflowEventLogProcessor\WorkflowEventLogProcessor\CSVtoXES\CsvToXesDirectory.bat");
 
     private static readonly List<string> ModelQualityCache = new List<string>();
 
@@ -298,7 +298,7 @@ namespace WorkflowEventLogProcessor
 
     private static void ConvertCsvToXesFiles()
     {
-      var jarFile = Path.Combine(BaseToolPath, @"WorkflowPatternFinder\WorkflowPatternFinder\WorkflowEventLogFixer\WorkflowEventLogFixer\WorkflowEventLogFixer\CSVtoXES\CSVtoXESDir.jar");
+      var jarFile = Path.Combine(BaseToolPath, @"WorkflowPatternFinder\WorkflowPatternFinder\WorkflowEventLogProcessor\WorkflowEventLogProcessor\WorkflowEventLogProcessor\CSVtoXES\CSVtoXESDir.jar");
       var startInfo = new ProcessStartInfo
       {
         WindowStyle = ProcessWindowStyle.Hidden,
