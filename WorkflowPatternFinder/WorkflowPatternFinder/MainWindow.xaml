@@ -85,7 +85,7 @@
             </Button.Effect>
           </Button>
           <Label x:Name="PatternMatchingLabel" Content="Type of Matching:" Margin="25,358,0,0" Foreground="White" Height="42" VerticalAlignment="Top" HorizontalAlignment="Left" Width="272"/>
-          <ComboBox x:Name="PatternMatchingComboBox" Margin="318,362,0,0" VerticalAlignment="Top" SelectionChanged="PatternMatchingComboBox_OnSelectionChanged" SelectedIndex="0" Foreground="Black" BorderBrush="White" Height="38" HorizontalAlignment="Left" Width="136">
+          <ComboBox x:Name="PatternMatchingComboBox" Margin="318,362,0,0" VerticalAlignment="Top" SelectionChanged="PatternMatchingComboBox_OnSelectionChanged" SelectedIndex="0" Foreground="Black" BorderBrush="White" Height="38" HorizontalAlignment="Left" Width="156">
             <ComboBox.Background>
               <LinearGradientBrush EndPoint="0,1" StartPoint="0,0">
                 <GradientStop Color="#FFF0F0F0" Offset="0"/>
