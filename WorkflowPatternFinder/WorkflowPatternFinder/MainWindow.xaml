@@ -72,7 +72,7 @@
             <ColumnDefinition Width="750*"/>
             <ColumnDefinition Width="838*"/>
           </Grid.ColumnDefinitions>
-          <TextBox x:Name="ImportTreeLabel" Cursor="Hand" Text="Tree directory..." IsReadOnly="True" HorizontalScrollBarVisibility="Auto" Margin="10,68,73,0" VerticalAlignment="Top" MouseDoubleClick="ImportTreeLabel_DoubleClick" Background="#FFB6B6B6" Foreground="White" Height="42"/>
+          <TextBox x:Name="ImportTreeLabel" Cursor="Hand" Text="Tree directory..." IsReadOnly="True" Margin="10,68,73,0" VerticalAlignment="Top" MouseDoubleClick="ImportTreeLabel_DoubleClick" Background="#FFB6B6B6" Foreground="White" Height="42"/>
           <Button x:Name="ImportTreeButton" Content="Import process trees" Margin="10,115,0,0" Click="ImportTreeButton_Click" RenderTransformOrigin="0.615,0.6" Background="#FF818181" Foreground="White" Cursor="Hand" Height="40" VerticalAlignment="Top" HorizontalAlignment="Left" Width="270">
             <Button.Effect>
               <DropShadowEffect Opacity="0.7" ShadowDepth="3"/>

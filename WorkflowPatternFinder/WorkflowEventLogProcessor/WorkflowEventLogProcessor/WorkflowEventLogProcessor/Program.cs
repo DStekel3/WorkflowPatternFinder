@@ -59,7 +59,7 @@ namespace WorkflowEventLogProcessor
       return Path.Combine(GetToolBasePath(), @"WorkflowPatternFinder\WorkflowPatternFinder\Gensim\datasets\");
     }
 
-    public static void PreProcessingPhase(string importDir, string promScript, string noiseThreshold)
+    public static void PreProcessingPhase(string importDir, string promScript, string noiseThreshold, bool completePreprocessing)
     {
       InitializePaths(importDir, promScript);
 
@@ -69,27 +69,31 @@ namespace WorkflowEventLogProcessor
       {
         CheckExistanceOfScriptFiles();
 
-        var files = Directory.EnumerateFiles(_baseDirectory).Where(c => c.EndsWith(".xlsx")).ToList();
-
-        var workflowNames = new Dictionary<string, string>();
-
-        for(int t = 0; t < files.Count; t++)
+        // The all pre-processing steps. (Creating csv- and xes-files)
+        if (completePreprocessing)
         {
-          var file = files[t];
-          Console.WriteLine($"Busy with {Path.GetFileNameWithoutExtension(file)}...({t + 1}/{files.Count})");
-          var workflowNamesFound = SplitExcelFileIntoSeparateWorkflowLogs(file);
-          foreach(var name in workflowNamesFound)
+          var files = Directory.EnumerateFiles(_baseDirectory).Where(c => c.EndsWith(".xlsx")).ToList();
+
+          var workflowNames = new Dictionary<string, string>();
+
+          for (int t = 0; t < files.Count; t++)
           {
-            workflowNames.Add(name.Key, name.Value);
+            var file = files[t];
+            Console.WriteLine($"Busy with {Path.GetFileNameWithoutExtension(file)}...({t + 1}/{files.Count})");
+            var workflowNamesFound = SplitExcelFileIntoSeparateWorkflowLogs(file);
+            foreach (var name in workflowNamesFound)
+            {
+              workflowNames.Add(name.Key, name.Value);
+            }
           }
+
+          // Write workflow descriptions to a separate file. This way, we can find the name of a workflow model by reading within this file.
+          var workflowNameFile = Path.Combine(_baseDirectory, "workflownames.csv");
+          WriteWorkflowNamesToFile(workflowNames, workflowNameFile);
+
+          //Creating XES files
+          ConvertCsvToXesFiles();
         }
-
-        // Write workflow descriptions to a separate file. This way, we can find the name of a workflow model by reading within this file.
-        var workflowNameFile = Path.Combine(_baseDirectory, "workflownames.csv");
-        WriteWorkflowNamesToFile(workflowNames, workflowNameFile);
-
-        //Creating XES files
-        ConvertCsvToXesFiles();
 
         // Create ptml files
         CreatePtmlFilesWithImi(noiseThreshold);
@@ -109,14 +113,6 @@ namespace WorkflowEventLogProcessor
       _baseXesFileDirectory = Path.Combine(_baseDirectory, "xes");
       _basePtmlFileDirectory = Path.Combine(_baseDirectory, "ptml");
       ModelQualityCache.Clear();
-    }
-
-    public static void RemakeProcessTrees(string importDir, string promPath, string noiseThreshold)
-    {
-      InitializePaths(importDir, promPath);
-
-      // Create ptml files with the inductive miner (infrequent)
-      CreatePtmlFilesWithImi(noiseThreshold);
     }
     
     public static bool CheckIfPythonAndJavaAreInstalled()
@@ -174,10 +170,6 @@ namespace WorkflowEventLogProcessor
       if(!File.Exists(_pythonExe))
       {
         throw new Exception("Python executable not found.");
-      }
-      if(!File.Exists(Word2VecScriptFile))
-      {
-        throw new Exception("Word2Vec script not found.");
       }
       if(!File.Exists(_processTreeScriptFile))
       {
