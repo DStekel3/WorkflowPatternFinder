@@ -137,8 +137,8 @@ class PatternDiscovery(object):
                   match = self.GetInducedMatch(tc,pc)
                   score = self.GetPatternMatchScore(match)
                   if(match and score > bestMatch[1]):
-                    bestMatch = (match, score[1])
-                    if score[1] >= 1:
+                    bestMatch = (match, score)
+                    if score >= 1:
                       break
           if bestMatch[0] != None:
               matches.extend(bestMatch[0])
