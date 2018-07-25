@@ -60,7 +60,7 @@ if len(sys.argv) == 9:
         spamreader = csv.reader(csvfile, delimiter=';')
         for row in spamreader:
           summary = "-".join(row)
-          if bool(re.match(regexPattern, str(summary))):
+          if bool(re.match(regexPattern, str(summary), re.IGNORECASE)):
             filteredTreeNames.append(row[0])
       allTreePaths = [f for f in allTreePaths if os.path.splitext(basename(f))[0] in filteredTreeNames]
 
@@ -86,6 +86,8 @@ if len(sys.argv) == 9:
     print("Results coming up!")
     # Print an overview of the matches found as a one-liner.
     numOfMatches = sum([len(i[1].split('-')) for i in validTrees])
+    if(numOfMatches == 0):
+      sys.exit()
     totalScore = sum([float(s) for sublist in [i[1].split('-') for i in validTrees] for s in sublist])
     avgScore = totalScore/numOfMatches
     print(str(numOfMatches)+"/"+str(len(validTrees))+"/"+str(len(allTreePaths))+"/"+str(avgScore))

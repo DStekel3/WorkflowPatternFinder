@@ -153,7 +153,6 @@ namespace WorkflowPatternFinder
     private void StartTreeButton_Click(object sender, RoutedEventArgs e)
     {
       ClearValidOccurencesView();
-
       // update the python .exe path
       if(string.IsNullOrEmpty(SubTreeFinder.PythonExe))
       {
@@ -258,7 +257,12 @@ namespace WorkflowPatternFinder
             }
             var resultingOutput = lines.SkipWhile(c => !c.StartsWith("Results coming up!")).Skip(1).ToList();
             var overviewOneLiner = resultingOutput.First().Split('/');
-
+            if (overviewOneLiner.Length == 1)
+            {
+              // you have no results
+              _matchRatio = null;
+              return;
+            }
             _matchRatio = new Tuple<string, string, string>(overviewOneLiner[0], overviewOneLiner[1], overviewOneLiner[2]);
             double.TryParse(overviewOneLiner[3], NumberStyles.Any, CultureInfo.InvariantCulture, out _avgScore);
             try
@@ -498,15 +502,23 @@ namespace WorkflowPatternFinder
 
     private void FinishGensimScriptTask(Exception ex)
     {
-      foreach(var pattern in _foundPatterns.OrderByDescending(c => c.Scores.Average()).OrderByDescending(c => c.Scores.Count))
+      foreach(var pattern in _foundPatterns.OrderByDescending(c => c.Scores.Average()).ThenByDescending(c => c.Scores.Count))
       {
         var path = pattern.TreePath;
         var roundedScores = pattern.Scores.Select(s => Math.Round(s, 3)).ToList();
         var scoreBinding = pattern.Scores.Count == 1 ? roundedScores.First().ToString(CultureInfo.InvariantCulture) : $"{pattern.Scores.Count} ({string.Join(";", roundedScores)})";
 
-        ValidOccurencesView.Items.Add(new ValidOccurencesViewObject(path) { SimilarityScore = scoreBinding.Replace(',' , '.') });
+        ValidOccurencesView.Items.Add(new ValidOccurencesViewObject(path) { SimilarityScore = scoreBinding.Replace(',', '.') });
       }
-      ResultDebug.Content = $"Found {_matchRatio.Item1} matches in {_matchRatio.Item2} out of {_matchRatio.Item3} models.\nThe average overall score is {Math.Round(_avgScore, 3).ToString(CultureInfo.InvariantCulture)}.";
+      if (_matchRatio != null)
+      {
+        ResultDebug.Content =
+          $"Found {_matchRatio.Item1} matches in {_matchRatio.Item2} out of {_matchRatio.Item3} models.\nThe average overall score is {Math.Round(_avgScore, 3).ToString(CultureInfo.InvariantCulture)}.";
+      }
+      else
+      {
+        ResultDebug.Content = "Found no matches.";
+      }
       UpdateButtonText(TreeStartButton, "Done!", _greenColor);
       ChangeEnabledTreeButtons(true);
       TreeProgressBar.IsIndeterminate = false;
