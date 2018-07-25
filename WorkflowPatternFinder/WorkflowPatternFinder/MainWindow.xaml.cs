@@ -63,6 +63,7 @@ namespace WorkflowPatternFinder
     private List<string> _similarTermsOutputCache;
     private Color _redColor = Color.FromArgb(255, 255, 50, 50);
     private Color _greenColor = Color.FromArgb(255, 0, 255, 0);
+    private bool _completePreprocessing = true;
 
     public MainWindow()
     {
@@ -436,6 +437,12 @@ namespace WorkflowPatternFinder
 
     private void PreProcessingButton_Click(object sender, RoutedEventArgs e)
     {
+      _completePreprocessing = true;
+      PreprocessingPhase();
+    }
+
+    void PreprocessingPhase()
+    {
       ChangeEnabledPreProcessingButtons(false);
       _importExcelDir = ImportExcelDirectoryLabel.Text;
       _promBasePath = PromLabel.Text;
@@ -454,7 +461,7 @@ namespace WorkflowPatternFinder
 
     void StartPreprocessing()
     {
-      Program.PreProcessingPhase(_importExcelDir, _promBasePath, _noiseThreshold);
+      Program.PreProcessingPhase(_importExcelDir, _promBasePath, _noiseThreshold, _completePreprocessing);
     }
 
     private void StartPreprocessingTask(Func<Task> task, Action completedTask = null)
@@ -533,7 +540,7 @@ namespace WorkflowPatternFinder
       if(result == System.Windows.Forms.DialogResult.OK)
       {
         var validDirectory = UpdateExcelDirectoryUI(fbd.SelectedPath);
-        if (validDirectory)
+        if(validDirectory)
         {
           TryToUpdateUI();
         }
@@ -814,17 +821,8 @@ namespace WorkflowPatternFinder
 
     private void RemakeProcessTreesButton_Click(object sender, RoutedEventArgs e)
     {
-      PreProgress.IsIndeterminate = true;
-      ChangeEnabledPreProcessingButtons(false);
-      _importExcelDir = ImportExcelDirectoryLabel.Text;
-      _promBasePath = PromLabel.Text;
-      var noiseThreshold = InductiveMinerNoiseThresholdTextBox.Text;
-      if(Directory.Exists(_importExcelDir) && Directory.Exists(_promBasePath))
-      {
-        Program.RemakeProcessTrees(_importExcelDir, _promBasePath, noiseThreshold);
-      }
-      ChangeEnabledPreProcessingButtons(true);
-      PreProgress.IsIndeterminate = false;
+      _completePreprocessing = false;
+      PreprocessingPhase();
     }
 
     private void TermQueryButton_Click(object sender, RoutedEventArgs e)
@@ -920,7 +918,6 @@ namespace WorkflowPatternFinder
           {
             if(!string.IsNullOrEmpty(line))
             {
-              Debug.WriteLine(line);
               var lineSplit = line.Split();
               var term = string.Join(" ", lineSplit.TakeWhile(x => !x.isnumeric()).ToList());
               var score = lineSplit.LastOrDefault();
