@@ -504,7 +504,7 @@ namespace WorkflowPatternFinder
         var roundedScores = pattern.Scores.Select(s => Math.Round(s, 3)).ToList();
         var scoreBinding = pattern.Scores.Count == 1 ? roundedScores.First().ToString(CultureInfo.InvariantCulture) : $"{pattern.Scores.Count} ({string.Join(";", roundedScores)})";
 
-        ValidOccurencesView.Items.Add(new ValidOccurencesViewObject(path) { SimilarityScore = scoreBinding.Replace(',' , '.') });
+        ValidOccurencesView.Items.Add(new ValidOccurencesViewObject(path) { SimilarityScore = scoreBinding.Replace(',', '.') });
       }
       ResultDebug.Content = $"Found {_matchRatio.Item1} matches in {_matchRatio.Item2} out of {_matchRatio.Item3} models.\nThe average overall score is {Math.Round(_avgScore, 3).ToString(CultureInfo.InvariantCulture)}.";
       UpdateButtonText(TreeStartButton, "Done!", _greenColor);
