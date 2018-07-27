@@ -26,13 +26,17 @@ if len(args) == 3:
   similarTerms = query.GetMostSimilarTerms(myTerm)
 
   parser = XmlParser()
-  synonyms = query.FindSynonyms(myTerm)
-  antonyms = query.FindAntonyms(myTerm)
+  terms = strip_punctuation(myTerm.lower()).split()
+  synonyms = []
+  antonyms = []
+  for term in terms:
+    synonyms.extend(query.FindSynonyms(term))
+    antonyms.extend(query.FindAntonyms(term))
   
-  if any(similarTerms):
-    similarTerms = list(filter(lambda x: x[0] not in antonyms, similarTerms))
+    if any(similarTerms):
+      similarTerms = list(filter(lambda x: x[0] not in antonyms, similarTerms))
 
-  filteredTerms = similarTerms.copy()
+    filteredTerms = similarTerms.copy()
 
   print("Similar terms:")
   for synonym in synonyms:

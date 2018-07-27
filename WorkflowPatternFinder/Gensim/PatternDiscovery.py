@@ -41,10 +41,12 @@ class PatternDiscovery(object):
         links = matchedNodes
         allMatches.extend(links)
         theirScores.append(score)
-        for treeId in [a[0] for a in links]:
-          treeNode = T.GetNode(treeId)
-          if treeNode.GetType() == "ManualTask":
-            T.RemoveNode(treeNode)
+        print(links)
+        removeNodes = [T.GetNode(a[0]) for a in links if T.GetNode(a[0]).GetType() == "ManualTask"]
+        if not any(removeNodes):
+          removeNodes = [T.GetNode(a[0]) for a in links]
+        for treeNode in removeNodes:
+          T.RemoveNode(treeNode)
     return (allMatches, theirScores)
 
   def GetMatchPostOrder(self, T, P, isInduced=True):
@@ -71,10 +73,10 @@ class PatternDiscovery(object):
 
   def GetPatternMatchScore(self, matches):
     if any(matches):
-      return sum([i[2] for i in matches])/len(matches)
+      return sum([i[2] for i in matches]) / len(matches)
     return 0
 
-  def GetInducedMatch(self, t, p, allMatches = []):
+  def GetInducedMatch(self, t, p, allMatches=[]):
     # search for a node similar as pNode
     if p.GetType() in self._orderedTypes:
       return self.GetInducedOr(t, p, allMatches)
@@ -82,7 +84,7 @@ class PatternDiscovery(object):
       return self.GetInducedUn(t, p, allMatches)
     return []
 
-  def GetEmbeddedMatch(self, t, p, allMatches = []):
+  def GetEmbeddedMatch(self, t, p, allMatches=[]):
     rootMatch = self.AreSimilar(t,p)
     if rootMatch and not self.IsAscendantOfMatches(t, allMatches):
       # first try to find an induced match

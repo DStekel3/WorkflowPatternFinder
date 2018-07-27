@@ -7,6 +7,7 @@ import gensim
 from gensim import models
 from gensim.models import *
 import nltk
+from nltk.corpus import stopwords
 from SynoniemenDotNet import XmlParser
 from nltk.tag import UnigramTagger, BigramTagger, PerceptronTagger
 from nltk.corpus import alpino as alp
@@ -21,6 +22,7 @@ class Query(object):
         self._synonyms = {}
         self._antonyms = {}
         self._xmlParser = XmlParser()
+        self._stoplist = stopwords.words('dutch')
         #training_corpus = alp.tagged_sents()
 
         curTime = time.time()
@@ -50,12 +52,21 @@ class Query(object):
         return list(set(antonyms))
 
 
+    def RemoveStopwords(self, listOfWords):
+        return [w for w in listOfWords if w[0] not in self._stoplist]
+
+    def NormalizeSentence(self, sentence):
+        s = strip_numeric(strip_punctuation(sentence.lower())).split()
+        return [w for w in s if w not in self._stoplist]
+
     def GetSentenceSimilarityMaxVariant(self, treeSentence, patternSentence):
         if self._model is None:
             raise ValueError('The model is not loaded yet.')
         result = (0.0, '')
-        filteredPatternSentence = strip_numeric(strip_punctuation(patternSentence.lower())).split()        
-        filteredTreeSentence = strip_numeric(strip_punctuation(treeSentence.lower())).split()
+        filteredPatternSentence = self.NormalizeSentence(patternSentence)
+        filteredTreeSentence = self.NormalizeSentence(treeSentence)
+        #filteredPatternSentence = strip_numeric(strip_punctuation(patternSentence.lower())).split()
+        #filteredTreeSentence = strip_numeric(strip_punctuation(treeSentence.lower())).split()
 
         for patternWord in filteredPatternSentence:
             if patternWord not in self._synonyms:
@@ -87,8 +98,11 @@ class Query(object):
             raise ValueError('The model is not loaded yet.')
 
         result = (0.0, '')
-        filteredPatternSentence = strip_numeric(strip_punctuation(patternSentence.lower())).split()        
-        filteredTreeSentence = strip_numeric(strip_punctuation(treeSentence.lower())).split()
+        filteredPatternSentence = self.NormalizeSentence(patternSentence)
+        print("from " + patternSentence + " to "+ filteredPatternSentence)
+        print("from " + treeSentence+ " to "+ filteredTreeSentence)
+
+        filteredTreeSentence = self.NormalizeSentence(treeSentence)
 
         for patternWord in filteredPatternSentence:
             if patternWord not in self._synonyms:
@@ -120,8 +134,10 @@ class Query(object):
         result = (0.0, '')
         scores = []
         bestWord = ""
-        for patternWord in patternSentence.lower().split():
-            for treeWord in treeSentence.lower().split():
+        filteredPatternSentence = self.NormalizeSentence(patternSentence)
+        filteredTreeSentence = self.NormalizeSentence(treeSentence)
+        for patternWord in filteredPatternSentence:
+            for treeWord in filteredTreeSentence:
                 if treeWord in self._model.wv.vocab and patternWord in self._model.wv.vocab:
                     score = self._model.wv.similarity(patternWord, treeWord)
                     if len(scores) == 0 or score > max(scores):
@@ -140,14 +156,14 @@ class Query(object):
         raise ValueError('The model is not loaded yet.')
         return []
       else:
-        terms = strip_punctuation(term.lower()).split()
+        words = self.NormalizeSentence(term)
         myWords = []
-        for word in terms:
+        for word in words:
           if word in self._model.wv.vocab:
             myWords.append(word)
         if any(myWords):
           similarTerms = self._model.wv.most_similar(positive=myWords, topn=300)
-          return similarTerms
+          return self.RemoveStopwords(similarTerms)
         return []
         
         
