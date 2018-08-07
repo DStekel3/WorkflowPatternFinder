@@ -34,7 +34,7 @@ Some files can be viewed in Notepad or a PDF viewer. A field where such actions 
 - <b>(F)</b>   :   Opens file in Notepad(++) when <b>double right-click</b> file path or process tree.
 - <b>(D)</b>   :   Opens directory in system explorer when <b>double left-click</b> on directory path.
 
-<h3>The first tab is used for the pre-processing phase.</h3>
+<h3>Tab 1 is used for the pre-processing phase.</h3>
 
 ![Picture of Tab1](https://github.com/DStekel3/WorkflowPatternFinder/blob/master/Tab1_EDIT.png)
 1. Select the directory which contains .xlsx files <b>(D)</b>.
@@ -44,7 +44,7 @@ Some files can be viewed in Notepad or a PDF viewer. A field where such actions 
 5. Resulting process trees are shown in this table. Whenever the program already finds process trees after you execute step 1, this table also gets updated <b>(PDF + F)</b>.
 6. If you want to run the Inductive Miner again, use this button. This skips a lot of other pre-processing functions.
 
-<h3>The second tab is for finding a pattern in your processed process trees.</h3>
+<h3>Tab 2 is for finding a pattern in your processed process trees.</h3>
 
 ![Picture of Tab2](https://github.com/DStekel3/WorkflowPatternFinder/blob/master/Tab2_EDIT.png)
 1. Select a directory which contains process trees (.ptml files). This directory can be found within the (.xlsx) directory you have selected during the pre-processing phase <b>(D)</b>.
@@ -58,7 +58,7 @@ Some files can be viewed in Notepad or a PDF viewer. A field where such actions 
 9. Found matches are shown in this table <b>(PDF + F)</b>.
 
 
-<h3>Third tab: select a word2vec model used in tab 2, but you can also experiment here.</h3>
+<h3>Tab 3: select a word2vec model used in tab 2, but you can also experiment here.</h3>
 
 ![Picture of Tab3](https://github.com/DStekel3/WorkflowPatternFinder/blob/master/Tab3_EDIT.png)
 
@@ -67,10 +67,16 @@ Some files can be viewed in Notepad or a PDF viewer. A field where such actions 
 3. ... and press this button to get the most similar terms, given by the word2vec model but also by [mijnwoordenboek.nl/synoniemen](http://www.mijnwoordenboek.nl/synoniem.php).
 4. The resulting terms get displayed here.
 
+<h3> Tab 4 is for training a word2vec model based on your own data: </h3>
+
+![Picture of Tab4](https://github.com/DStekel3/WorkflowPatternFinder/blob/master/Tab4.png)
+
+1. Select a folder which contains .txt files. Each .txt file needs to have sentences. Each sentence is supposed to be on a seperate line.
+2. Set values for the window size and min count of Word2Vec. The window size is the window which Word2Vec uses to determine which surrounding words are context words of a given target word. For example in "Who let the dogs out" and using a window size of 1, 'the' and 'out' are trained as the context words of 'dog'. The min count is the minimum number of times that a word needs to be used in your dataset, otherwise this word will not be included in the training process.
 
 <h1>Creating Patterns</h1>
-For process tree patterns, you need to define a process tree yourself. 
-An example is given below, and is called the 'Approval' pattern ('accordeer patroon' in dutch). 
+You also need to define a workflow pattern yourself.
+An example is given below and is called the approval pattern ('accordeer patroon' in dutch). 
 
 ![figure_accordeerpatroon](https://github.com/DStekel3/WorkflowPatternFinder/blob/master/accordeerpatroon.png)
 
