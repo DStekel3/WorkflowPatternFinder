@@ -58,11 +58,11 @@ Some files can be viewed in Notepad or a PDF viewer. A field where such actions 
 9. Found matches are shown in this table <b>(PDF + F)</b>.
 
 
-<h3>The third tab is the place where you can experiment with word2vec models.</h3>
+<h3>Third tab: select a word2vec model used in tab 2, but you can also experiment here.</h3>
 
 ![Picture of Tab3](https://github.com/DStekel3/WorkflowPatternFinder/blob/master/Tab3_EDIT.png)
 
-1. Select a word2vec model (.bin file). These models should be put in the "datasets" directory [here](https://github.com/DStekel3/WorkflowPatternFinder/tree/master/WorkflowPatternFinder/Gensim/datasets). Because of their large size, I have not included the actual files in this repository.
+1. Select a word2vec model (.bin file). Such models can be put in the "datasets" directory [here](https://github.com/DStekel3/WorkflowPatternFinder/tree/master/WorkflowPatternFinder/Gensim/datasets). Because of their large size, I have not included the actual files in this repository.
 2. Type a term in this textbox...
 3. ... and press this button to get the most similar terms, given by the word2vec model but also by [mijnwoordenboek.nl/synoniemen](http://www.mijnwoordenboek.nl/synoniem.php).
 4. The resulting terms get displayed here.
