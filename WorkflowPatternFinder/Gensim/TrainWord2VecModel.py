@@ -32,8 +32,8 @@ if len(args) >= 2:
       print(args[1]+ " is not a directory!")
 
 if len(args) >= 4:
-        _window = int(args[2])
-        _min_count = int(args[3])
+        _min_count = int(args[2])
+        _window = int(args[3])
 
 pathlist = Path(directory).glob('*.txt')
 
