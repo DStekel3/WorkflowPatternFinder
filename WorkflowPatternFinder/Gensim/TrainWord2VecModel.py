@@ -14,8 +14,7 @@ from gensim.parsing.preprocessing import stem # applies stemming to text. This f
 
 directory = r"C:\Thesis\Profit analyses\txt"
 _window = 2
-_min_count = 5
-_epochs = 5
+_min_count = 1
 
 args = sys.argv
 print("# of args: "+str(len(args)))
