@@ -19,7 +19,7 @@ Requirements:
 - Python 3.4 or higher (https://www.python.org/downloads/) with the following modules:
     1. gensim         (```pip install gensim```)
     2. nltk           (```pip install nltk```)
-        - also execute command ```nltk.download("stopwords")
+        - also execute command ```nltk.download("stopwords")```
     3. enums          (```pip install enums```)
     4. graphviz       (```pip install graphviz```)
     5. BeautifulSoup4 (```pip install bs4```)
