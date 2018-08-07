@@ -4,7 +4,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>44ea4a09-4254-4601-acb2-be3e847d45c4</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>Gensim.py</StartupFile>
+    <StartupFile>TrainWord2VecModel.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
@@ -14,7 +14,7 @@
     <IsWindowsApplication>False</IsWindowsApplication>
     <InterpreterId>Global|PythonCore|3.6</InterpreterId>
     <LaunchProvider>Standard Python launcher</LaunchProvider>
-    <CommandLineArguments>"C:\Users\dst\Source\Repos\WorkflowPatternFinder\WorkflowPatternFinder\Gensim\datasets\sonar-320.bin" "C:\Thesis\Profit analyses\04-04-2018\ptml" "C:\Users\dst\Source\Repos\WorkflowPatternFinder\WorkflowPatternFinder\WorkflowPatternFinder\Example Patterns\accordeer1.ptml" "False" "0.8" "True" "max" ""</CommandLineArguments>
+    <CommandLineArguments>"C:\Thesis\Profit analyses\txt" "1" "1" "2"</CommandLineArguments>
     <EnableNativeCodeDebugging>False</EnableNativeCodeDebugging>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">

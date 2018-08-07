@@ -52,8 +52,8 @@ class ProcessTree(object):
           number += 1
 
     def RemoveNode(self, node):
-        if node.GetType() != "ManualTask":
-          throw("Removing this node is not allowed!")
+        #if node.GetType() != "ManualTask":
+        #  throw("Removing this node is not allowed!")
         if not node.IsRoot():
             parent = node.GetParent()
             parent.RemoveChild(node)

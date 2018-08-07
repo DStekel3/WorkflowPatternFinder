@@ -20,8 +20,10 @@ using IronPython.Runtime.Operations;
 using System.Globalization;
 using System.Text;
 using System.Threading;
+using System.Windows.Controls.Primitives;
 using WorkflowPatternFinder.Properties;
 using ComboBox = System.Windows.Controls.ComboBox;
+using MessageBox = System.Windows.MessageBox;
 using TextBox = System.Windows.Controls.TextBox;
 
 namespace WorkflowPatternFinder
@@ -44,6 +46,7 @@ namespace WorkflowPatternFinder
     private readonly string _helpText = "Fill in term...";
     private readonly string _excelDirectoryText = "Select a directory that contains workflow logs in .xlsx format.";
     private const string _importTreeFolderText = "Select a directory that contains .ptml files.";
+    private const string _importTxtFolderText = "Select a directory that contains .txt files.";
     private readonly List<PatternObject> _foundPatterns = new List<PatternObject>();
     private Window _tFinder;
     private readonly Dictionary<string, ModelMatches> _modelMatches = new Dictionary<string, ModelMatches>();
@@ -257,7 +260,7 @@ namespace WorkflowPatternFinder
             }
             var resultingOutput = lines.SkipWhile(c => !c.StartsWith("Results coming up!")).Skip(1).ToList();
             var overviewOneLiner = resultingOutput.First().Split('/');
-            if (overviewOneLiner.Length == 1)
+            if(overviewOneLiner.Length == 1)
             {
               // you have no results
               _matchRatio = null;
@@ -510,7 +513,7 @@ namespace WorkflowPatternFinder
 
         ValidOccurencesView.Items.Add(new ValidOccurencesViewObject(path) { SimilarityScore = scoreBinding.Replace(',', '.') });
       }
-      if (_matchRatio != null)
+      if(_matchRatio != null)
       {
         ResultDebug.Content =
           $"Found {_matchRatio.Item1} matches in {_matchRatio.Item2} out of {_matchRatio.Item3} models.\nThe average overall score is {Math.Round(_avgScore, 3).ToString(CultureInfo.InvariantCulture)}.";
@@ -790,7 +793,7 @@ namespace WorkflowPatternFinder
         }
         else
         {
-          UpdateButtonText(TrainModelButton, _incorrectFile, _redColor, 3000);
+          UpdateButtonText(ChangeModelButton, _incorrectFile, _redColor, 3000);
         }
       }
     }
@@ -1008,6 +1011,62 @@ namespace WorkflowPatternFinder
     private void ModelPathLabel_DoubleClick(object sender, MouseButtonEventArgs e)
     {
       var selectedFile = ModelPathLabel.Text;
+      OpenDirectoryInExplorer(selectedFile);
+    }
+
+    private void Word2VecButton_Click(object sender, RoutedEventArgs e)
+    {
+      try
+      {
+        var txtDirPath = TxtDirectoryPath.Text;
+        var minCount = int.Parse(MinCountTextBox.Text);
+        var windowSize = int.Parse(WindowSizeTextBox.Text);
+
+        var scriptPath = Path.Combine(Program.GetToolBasePath(), @"WorkflowPatternFinder\WorkflowPatternFinder\Gensim\TrainWord2VecModel.py");
+
+        ProcessStartInfo start = new ProcessStartInfo
+        {
+          FileName = Program.GetPythonExe(),
+          Arguments = $"\"{scriptPath}\" \"{txtDirPath}\" \"{minCount}\" \"{windowSize}\"",
+          CreateNoWindow = false,
+          WindowStyle = ProcessWindowStyle.Normal
+        };
+
+        void Ths() => Process.Start(start);
+        Thread th = new Thread(Ths);
+        th.Start();
+
+        Activate();
+      }
+      catch(Exception ex)
+      {
+        MessageBox.Show(ex.Message);
+      }
+    }
+
+
+    private void TxtDirectoryButton_Click(object sender, RoutedEventArgs e)
+    {
+      FolderBrowserDialog fbd = new FolderBrowserDialog();
+      fbd.Description = _importTxtFolderText;
+      fbd.SelectedPath = Settings.Default.TreeFolder;
+      DialogResult result = fbd.ShowDialog();
+      if(result == System.Windows.Forms.DialogResult.OK)
+      {
+        if(Directory.EnumerateFiles(fbd.SelectedPath).Any(file => file.EndsWith(".txt")))
+        {
+          TxtDirectoryPath.Text = fbd.SelectedPath;
+        }
+        else
+        {
+          UpdateButtonText(TxtDirectoryButton, _incorrectDir, _redColor, 3000);
+        }
+      }
+    }
+
+    private void TxtDirectoryLabel_DoubleClick(object sender, MouseButtonEventArgs e)
+    {
+      var selectedFile = TxtDirectoryPath.Text;
       OpenDirectoryInExplorer(selectedFile);
     }
   }

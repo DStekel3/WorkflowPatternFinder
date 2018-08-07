@@ -183,11 +183,6 @@
               <DropShadowEffect Opacity="0.7" ShadowDepth="3"/>
             </Button.Effect>
           </Button>
-          <Button x:Name="TrainModelButton" Content="Train model" HorizontalAlignment="Left" Margin="0,391,0,0" VerticalAlignment="Top" Width="271" RenderTransformOrigin="0.547,1.5" Height="58" Grid.Column="1" Foreground="White" Background="#FF818181" IsEnabled="False" Visibility="Hidden">
-            <Button.Effect>
-              <DropShadowEffect Opacity="0.7" ShadowDepth="3"/>
-            </Button.Effect>
-          </Button>
           <TextBox x:Name="TermQueryTextBox" HorizontalAlignment="Left" Height="148" Margin="10,271,0,0" TextWrapping="Wrap" Text="Fill in term..." VerticalAlignment="Top" Width="276" Background="White" GotFocus="TermQueryTextBox_GotFocus" LostFocus="TermQueryTextBox_LostFocus">
             <TextBox.Effect>
               <DropShadowEffect Opacity="0.7" ShadowDepth="3"/>
@@ -219,6 +214,63 @@
               <DropShadowEffect Opacity="0.7" ShadowDepth="3"/>
             </ProgressBar.Effect>
           </ProgressBar>
+        </Grid>
+      </TabItem>
+      <TabItem Header="Train Model" Margin="39,0,-43,-2" FontSize="24" Background="#FF6A6A6A" Cursor="Hand" BorderBrush="Black">
+        <Grid Background="#FF6A6A6A" Margin="0,0,2,0" UseLayoutRounding="False" Cursor="Arrow">
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="750*"/>
+            <ColumnDefinition Width="838*"/>
+          </Grid.ColumnDefinitions>
+          <Label x:Name="WindowSizeLabell" Content="Window size (context):" HorizontalAlignment="Left" Margin="10,59,0,0" VerticalAlignment="Top" Foreground="White" IsEnabled="False" Visibility="Hidden" Height="42" Width="248"/>
+          <TextBox x:Name="WindowSizeValuel" HorizontalAlignment="Left" Height="46" Margin="87,55,0,0" TextWrapping="Wrap" Text="2" VerticalAlignment="Top" Width="96" FontSize="36" SpellCheck.IsEnabled="True" PreviewTextInput="CheckIfInputIsDigit" RenderTransformOrigin="1.828,-0.713" Grid.Column="1" IsEnabled="False" AllowDrop="False" Visibility="Hidden">
+            <TextBox.Effect>
+              <DropShadowEffect Opacity="0.7" ShadowDepth="3"/>
+            </TextBox.Effect>
+          </TextBox>
+          <Label x:Name="MinCountLabell" Content="Minimum count:" HorizontalAlignment="Left" Margin="10,124,0,0" VerticalAlignment="Top" Foreground="White" IsEnabled="False" Visibility="Hidden" Height="42" Width="184"/>
+          <TextBox x:Name="MinCountValuel" HorizontalAlignment="Left" Height="52" Margin="87,115,0,0" TextWrapping="Wrap" Text="5" VerticalAlignment="Top" Width="95" FontSize="36" SpellCheck.IsEnabled="True" PreviewTextInput="CheckIfInputIsDigit" RenderTransformOrigin="1.828,-0.713" Grid.Column="1" IsEnabled="False" AllowDrop="False" Visibility="Hidden">
+            <TextBox.Effect>
+              <DropShadowEffect Opacity="0.7" ShadowDepth="3"/>
+            </TextBox.Effect>
+          </TextBox>
+          <Label x:Name="NumberOfEpochsLabell" Content="Number of epochs:" HorizontalAlignment="Left" Margin="10,190,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.482,0.976" Width="215" Foreground="White" IsEnabled="False" Visibility="Hidden" Height="42"/>
+          <TextBox x:Name="NumberOfEpochsValuel" HorizontalAlignment="Left" Height="48" Margin="88,190,0,0" TextWrapping="Wrap" Text="5" VerticalAlignment="Top" Width="95" FontSize="36" SpellCheck.IsEnabled="True" PreviewTextInput="CheckIfInputIsDigit" RenderTransformOrigin="1.828,-0.713" Grid.Column="1" IsEnabled="False" AllowDrop="False" Visibility="Hidden">
+            <TextBox.Effect>
+              <DropShadowEffect Opacity="0.7" ShadowDepth="3"/>
+            </TextBox.Effect>
+          </TextBox>
+          <TextBox x:Name="TxtDirectoryPath" Cursor="Hand" Text="Path to folder..." IsReadOnly="True" Margin="10,106,66,0" VerticalAlignment="Top" Background="#FFB6B6B6" Foreground="White" FontSize="22" Height="42" MouseDoubleClick="TxtDirectoryLabel_DoubleClick"/>
+          <Button x:Name="TxtDirectoryButton" Content="Select folder" HorizontalAlignment="Left" Margin="10,158,0,0" VerticalAlignment="Top" Width="246" Height="54" Foreground="White" Background="#FF818181" Click="TxtDirectoryButton_Click">
+            <Button.Effect>
+              <DropShadowEffect Opacity="0.7" ShadowDepth="3"/>
+            </Button.Effect>
+          </Button>
+          <Button x:Name="Word2VecButton" Content="Create &#xD;&#xA;Word2Vec &#xD;&#xA;Model&#xD;&#xA;" Margin="238,440,290,0" FontSize="36" Foreground="White" Background="#FF818181" Height="170" VerticalAlignment="Top" HorizontalAlignment="Center" Width="220" Click="Word2VecButton_Click">
+            <Button.Effect>
+              <DropShadowEffect Opacity="0.7" ShadowDepth="3"/>
+            </Button.Effect>
+          </Button>
+          <Button x:Name="SentenceQueryButtonl" Content="Retrieve Sentences" Grid.Column="1" HorizontalAlignment="Left" Margin="152,590,0,0" VerticalAlignment="Top" Width="315" Height="58" FontSize="24" Click="SentenceQueryButton_Click" Background="#FF818181" Foreground="White" Visibility="Hidden" IsEnabled="False">
+            <Button.Effect>
+              <DropShadowEffect Opacity="0.7" ShadowDepth="3"/>
+            </Button.Effect>
+          </Button>
+          <Label x:Name="SimThresholdLabel_Copy" Content="Window size" Margin="10,236,0,0" Foreground="White" Height="42" VerticalAlignment="Top" HorizontalAlignment="Left" Width="272"/>
+          <Label x:Name="SimThresholdLabel_Copy1" Content="Minimum Count" Margin="10,305,0,0" Foreground="White" Height="42" VerticalAlignment="Top" HorizontalAlignment="Left" Width="272"/>
+          <TextBox x:Name="WindowSizeTextBox" HorizontalAlignment="Left" Height="59" Margin="265,229,0,0" TextWrapping="Wrap" Text="2" VerticalAlignment="Top" Width="100" FontSize="36" SpellCheck.IsEnabled="True" RenderTransformOrigin="1.828,-0.713">
+            <TextBox.Effect>
+              <DropShadowEffect Opacity="0.7" ShadowDepth="3"/>
+            </TextBox.Effect>
+          </TextBox>
+          <TextBox x:Name="MinCountTextBox" HorizontalAlignment="Left" Height="59" Margin="265,297,0,0" TextWrapping="Wrap" Text="5" VerticalAlignment="Top" Width="100" FontSize="36" SpellCheck.IsEnabled="True" RenderTransformOrigin="1.828,-0.713">
+            <TextBox.Effect>
+              <DropShadowEffect Opacity="0.7" ShadowDepth="3"/>
+            </TextBox.Effect>
+          </TextBox>
+          <Label x:Name="SimThresholdLabel_Copy3" Content="Size of window of context words compared to the target word. (default=2)" Margin="438,238,0,0" Foreground="White" Height="42" VerticalAlignment="Top" HorizontalAlignment="Left" Width="822" Grid.ColumnSpan="2"/>
+          <Label x:Name="SimThresholdLabel_Copy4" Content="Minimum count of a given word in the dataset to be included in the model. (default=5)" Margin="438,302,0,0" Foreground="White" Height="42" VerticalAlignment="Top" HorizontalAlignment="Left" Width="978" Grid.ColumnSpan="2"/>
+          <Label x:Name="SimThresholdLabel_Copy6" Content="Results in a Word2Vec model in the parent directory of the selected folder." Margin="518,504,0,0" Foreground="White" Height="42" VerticalAlignment="Top" HorizontalAlignment="Left" Width="822" Grid.ColumnSpan="2"/>
         </Grid>
       </TabItem>
     </TabControl>
