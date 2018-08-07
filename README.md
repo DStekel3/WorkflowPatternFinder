@@ -97,4 +97,3 @@ Finally, save it as a .ptml file.
 <h1>References:</h1>
 
 1. [Dutch word embeddings datasets](https://github.com/clips/dutchembeddings).
-More will follow....
